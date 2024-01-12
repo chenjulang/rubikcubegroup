@@ -173,7 +173,7 @@ section face_turns
     ⟨⟨1, cycle [4, 5, 6, 7]⟩, ⟨1, cycle [4, 5, 6, 7]⟩⟩
   def R : rubiks_cube_overgroup :=
     ⟨⟨wr 1 1 ∘ wr 6 2 ∘ wr 5 1 ∘ wr 2 2 $ 1, cycle [1, 6, 5, 2]⟩, ⟨1, cycle [1, 9, 5, 10]⟩⟩
-  def L : rubiks_cube_overgroup :=  
+  def L : rubiks_cube_overgroup :=
     ⟨⟨wr 0 2 ∘ wr 3 1 ∘ wr 4 2 ∘ wr 7 1 $ 1, cycle [0, 3, 4, 7]⟩, ⟨1, cycle [3, 11, 7, 8]⟩⟩
   def F : rubiks_cube_overgroup :=
     ⟨⟨wr 2 1 ∘ wr 5 2 ∘ wr 4 1 ∘ wr 3 2 $ 1, cycle [2, 5, 4, 3]⟩, ⟨wr 2 1 ∘ wr 10 1 ∘ wr 4 1 ∘ wr 11 1 $ 1, cycle [2, 10, 4, 11]⟩⟩
@@ -308,7 +308,7 @@ namespace rubiks_cube
       },
       rw swap_apply_of_ne_of_ne; assumption,
     end
-    
+
     lemma list_swap_nth_le {l : list α} {i j k h₁ h₂ h₃ h₄} : (list.swap l i j h₁ h₂).nth_le k h₃ = l.nth_le (swap i j k) h₄ :=
     begin
       revert i j k,

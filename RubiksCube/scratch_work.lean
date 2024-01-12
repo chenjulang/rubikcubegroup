@@ -20,7 +20,7 @@ def idenPerm : Perm (Fin 12) := {
 def v : Vector (Fin 5) 3 := ⟨[4,0,1], (by rfl)⟩
 def v2 : Vector (Fin 3) 3 := ⟨[2,0,1], (by rfl)⟩
 
-#eval v + v
+-- #eval v + v
 
 def move_right : (Fin 3) → (Fin 3) := fun x => x + 1
 def moveRightPerm : Perm (Fin 3) := {
