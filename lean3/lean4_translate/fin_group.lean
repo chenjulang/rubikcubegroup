@@ -1,88 +1,114 @@
-import data.fin
+import Mathlib.Data.Fin.Basic
+import Mathlib.Tactic.Ring
+import Mathlib.Tactic.Zify
 
-open fin nat
+#align_import main
 
-def fin' := fin
+open Fin Nat
 
-variables {n : ℕ} (a b c : fin' n.succ)
+def Fin' :=
+  Fin
+#align fin' Fin'
 
-instance : has_one (fin' n.succ) := ⟨(0 : fin n.succ)⟩
-instance : has_mul (fin' n.succ) := ⟨((+) : fin n.succ → fin n.succ → fin n.succ)⟩
+variable {n : ℕ} (a b c : Fin' n.succ)
 
-include a
-private def inv : fin' n.succ :=
-begin
-  cases a,
-  cases a_val,
-  {
-    exact 1,
-  },
-  {
-    exact (n - a_val : fin n.succ),
-  },
-end
-omit a
+instance : One (Fin' n.succ) :=
+  ⟨(0 : Fin n.succ)⟩
 
-instance : has_inv (fin' n.succ) := ⟨inv⟩
+instance : Mul (Fin' n.succ) :=
+  ⟨((· + ·) : Fin n.succ → Fin n.succ → Fin n.succ)⟩
 
-private lemma mul_assoc : a * b * c = a * (b * c) :=
-begin
-  apply eq_of_veq,
-  simp [(*), fin.add_def, add_assoc],
-end
+private def inv : Fin' n.succ where
+  val := sorry
+  isLt := sorry
+  -- cases a
+  -- cases a_val
+  -- · exact 1
+  -- · exact (n - a_val : Fin n.succ)
 
-private lemma one_mul : 1 * a = a :=
-begin
-  apply eq_of_veq,
-  simp [has_one.one, (*), fin.add_def, mod_eq_of_lt a.is_lt],
-end
+instance : Inv (Fin' n.succ) where
+  inv := sorry
+  -- ⟨inv⟩
 
-private lemma mul_one : a * 1 = a :=
-begin
-  apply eq_of_veq,
-  simp [has_one.one, (*), fin.add_def, mod_eq_of_lt a.is_lt],
-end
+#print mul_assoc /-
+private theorem mul_assoc : a * b * c = a * (b * c) :=
+  by
+  apply eq_of_veq
+  simp [(· * ·), Fin.add_def, add_assoc]
+-/
 
-private lemma mul_left_inv : a⁻¹ * a = 1 :=
-begin
-  apply eq_of_veq,
-  cases a,
-  cases a_val,
-  {
-    simp only [has_one.one, (*), has_inv.inv, inv, fin.add_def],
-    simp,
-  },
-  {
-    simp only [(*), has_inv.inv, inv, fin.add_def, fin.sub_def],
-    rw [coe_val_of_lt, coe_val_of_lt]; try { simp [lt_of_succ_lt a_property], },
-    have : (n - a_val + a_val.succ) = n.succ,
-    {
-      rw add_succ,
-      congr,
-      apply nat.sub_add_cancel,
-      apply le_of_lt,
-      apply lt_of_succ_lt_succ,
-      apply a_property,
-    },
-    rw this,
-    apply mod_self,
-  },
-end
+#print one_mul /-
+private theorem one_mul : 1 * a = a := by
+  apply eq_of_veq
+  simp [One.one, (· * ·), Fin.add_def, mod_eq_of_lt a.is_lt]
+-/
 
-private lemma mul_comm : a * b = b * a :=
-begin
-  apply eq_of_veq,
-  simp [(*), fin.add_def, add_comm],
-end
+#print mul_one /-
+private theorem mul_one : a * 1 = a := by
+  apply eq_of_veq
+  simp [One.one, (· * ·), Fin.add_def, mod_eq_of_lt a.is_lt]
+-/
 
-instance : comm_group (fin' n.succ) :=
-{
-  mul := (*),
-  mul_assoc := mul_assoc,
-  one := 0,
-  one_mul := one_mul,
-  mul_one := mul_one,
-  inv := inv,
-  mul_left_inv := mul_left_inv,
-  mul_comm := mul_comm,
-}
+#print mul_left_inv /-
+private theorem mul_left_inv : a⁻¹ * a = 1 :=
+  by
+  apply eq_of_veq
+  cases a
+  cases a_val
+  · simp only [One.one, (· * ·), Inv.inv, inv, Fin.add_def]
+    simp
+  · simp only [(· * ·), Inv.inv, inv, Fin.add_def, Fin.sub_def]
+    rw [coe_val_of_lt, coe_val_of_lt] <;> try simp [lt_of_succ_lt a_property]
+    have : a_val ≤ n.succ := by
+      have := nat.succ_lt_succ_iff.mp a_property
+      apply le_of_lt
+      apply lt_trans this
+      apply n.lt_succ_self
+    zify [this]
+    trans ((n.succ : ℤ) + ((a_val.succ : ℤ) - (a_val : ℤ) + (n : ℤ))) % (n.succ : ℤ)
+    · congr 1; ring
+    rw [← Int.emod_add_emod, Int.emod_self, zero_add]
+    push_cast
+    simp only [add_tsub_cancel_left]
+    rw [add_comm]
+    norm_cast
+    apply mod_self
+    -- ???
+    apply n.lt_succ_self
+-/
+
+#print mul_comm /-
+private theorem mul_comm : a * b = b * a :=
+  by
+  apply eq_of_veq
+  simp [(· * ·), Fin.add_def, add_comm]
+-/
+
+instance : CommGroup (Fin' n.succ) where
+  mul := _
+  mul_assoc := _
+  one := _
+  one_mul := _
+  mul_one := _
+  npow := _
+  npow_zero := _
+  npow_succ := _
+  inv := _
+  div := _
+  div_eq_mul_inv := _
+  zpow := _
+  zpow_zero' := _
+  zpow_succ' := _
+  zpow_neg' := _
+  mul_left_inv := _
+  mul_comm := _
+
+--  where
+  -- mul := (· * ·)
+  -- mul_assoc := mul_assoc
+  -- one := 0
+  -- one_mul := one_mul
+  -- mul_one := mul_one
+  -- inv := inv
+  -- hMul_left_inv := mul_left_inv
+  -- mul_comm := mul_comm
