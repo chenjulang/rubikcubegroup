@@ -57,6 +57,8 @@ def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :
     | .mk permute2 orient2 => {
       permute := permute2 * permute1 -- 这里*是代表“复合函数映射”吗？
       orient := (orient1 ∘ permute2.invFun) + orient2 -- 这里+法就不懂了，做了什么？
+      -- + 在这里表示函数的加法操作，即将两个函数的结果进行相加。这里的相加操作是指对 Fin ↑p 中的元素应用两个函数，并将结果相加。
+      -- 为什么呢不会超出范围吗???
         -- ：Fin ↑p → Fin ↑o
     }
   -- -- 两种写法都可以
@@ -68,12 +70,16 @@ def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :
 -- instance: Mul (PieceState p o) := mul
 --? How can I define multiplication, one, and inverses as implicit components of the PieceState type?
 
-lemma ps_mul_assoc {p o : ℕ+} : ∀ (a b c : PieceState p o), ps_mul (ps_mul a b) c = ps_mul a (ps_mul b  c) := by
+lemma ps_mul_assoc {p o : ℕ+} :
+∀ (a b c : PieceState p o),
+  ps_mul (ps_mul a b) c
+  = ps_mul a (ps_mul b  c)
+  := by
   intro a b c
   simp [ps_mul]
   apply And.intro
-  { simp [Perm.mul_def, Equiv.trans_assoc] }
-  { sorry }
+  · simp [Perm.mul_def, Equiv.trans_assoc]
+  · sorry
 
 lemma ps_one_mul {p o : ℕ+} : ∀ (a : PieceState p o), ps_mul {permute := 1, orient := 0} a = a := by
   intro a
