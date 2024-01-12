@@ -1,0 +1,13 @@
+# Goals
+- Evaluate the size of the Rubik's Cube group
+- Prove that a single corner twist is impossible
+- Prove that a single edge flip is impossible
+- Prove lemmas about conjugates (setup moves for Old Pochmann), perhaps using some normal subgroup?
+- Define an Old Pochmann-style algorithm for solving any valid scramble
+    - Prove that the algorithm always terminates
+    - Prove that the algorithm in fact solves the cube
+- Prove move-based & permutation/orientation-based group definitions to be equivalent
+- Extending to other puzzles
+    - 2x2
+    - 5x5
+- Prove that repeating the same sequence of moves eventually returns to solved state
