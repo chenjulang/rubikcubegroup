@@ -6,80 +6,33 @@ open Equiv Perm
 
 section RubiksSuperGroup
 
-#check (List.drop 2) -- :List α → List α //或 List ?m.2 → List ?m.2
-#check List.reverse -- :List α → List α
-#check (List.reverse ∘ List.drop 2)  -- :List ?m.26 → List ?m.26
-#eval (List.reverse ∘ List.drop 2) [3, 2, 4, 1]
--- List α → List α 主动喂了 List α后得到 List α
--- 再将 List α被动喂给“List α → List α”， 得到List α
--- 所以主动喂了一个参数List α，得到List α，因此复合函数类型为List ?m.26 → List ?m.26
+instance (n : Nat) : Repr (Perm (Fin n)) :=
+  ⟨reprPrec ∘ Equiv.toFun⟩
 
-#check Equiv.toFun --在这里infoview查看≃
-#check Perm
-#check  Equiv.toFun -- : α ≃ β → α → β
--- 这里的α，β被LEAN推断成了(Fin n)类型，所以可以改写成：
--- (Fin n)≃(Fin n) → (Fin n) → (Fin n)
--- ≃就是Equiv的简称，perm是Equiv两个参数相同的一个结果：Equiv α α，因此可以继续改写成Perm
--- Perm (Fin n) → (Fin n) → (Fin n)
-#check reprPrec -- : α → ℕ → Lean.Format
--- 比如Equiv.toFun主动喂了一个Perm (Fin n)，得到(Fin n) → (Fin n)
--- (Fin n) → (Fin n)被动喂给“α → ℕ → Lean.Format”中的α，
--- 因此得到ℕ → Lean.Format
--- 因此两个函数的复合类型是：Perm (Fin n) → ℕ → Lean.Format
+instance (n : Nat) : DecidableEq (Perm (Fin n)) :=
+  λ a b => mk.injEq a.toFun a.invFun _ _ b.toFun b.invFun _ _ ▸ inferInstance
 
-instance (n : Nat) : Repr (Perm (Fin n)) where -- 是不是用来打印什么东西的呢？
-  reprPrec := reprPrec ∘ Equiv.toFun  -- :Perm (Fin n) → ℕ → Lean.Format
-  -- ⟨reprPrec ∘ Equiv.toFun⟩
--- reprPrec自然就有的？，那这个instance用来做什么用的呢，原来是为了合理的定义PieceState用的。
--- 必须有一个描述性的例子？
-
-
-instance (n : Nat) : DecidableEq (Perm (Fin n)) := -- 两个“一一映射”是相等的，的证明
-  λ a b => --todo
-  -- ▸ 是一个运算符，它将前面的表达式的结果应用于后面的表达式。
-    mk.injEq a.toFun a.invFun _ _ b.toFun b.invFun _ _ ▸ inferInstance
--- 如果等式证明成立（即 a.toFun = b.toFun）那么判定结果将是 isTrue
--- 不深入说这个，因为我也不太了解。
-
-/-- This PieceState structure is used to represent the entire state of
- both corner pieces and edge pieces.描述角块和边块状态的-/
---  pieces即块，orientations即方向
+/- This PieceState structure is used to represent the entire state of both corner pieces and edge pieces.-/
 structure PieceState (pieces orientations: ℕ+) where
-  permute : Perm (Fin pieces) -- 一个有限集合的一个双射
-  orient : Fin pieces → Fin orientations -- 有限集合到有限集合的映射
-  deriving Repr, DecidableEq -- 能合理定义的条件，能描述，能判断2个对象是否相等
--- 为什么能用两个映射来表示状态呢???
-
+  permute : Perm (Fin pieces)
+  orient : Fin pieces → Fin orientations
+  deriving Repr, DecidableEq
 
 def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
-  fun
-  | .mk permute1 orient1 => fun
-    | .mk permute2 orient2 => {
-      permute := permute2 * permute1 -- 这里*是代表“复合函数映射”吗？
-      orient := (orient1 ∘ permute2.invFun) + orient2 -- 这里+法就不懂了，做了什么？
-      -- + 在这里表示函数的加法操作，即将两个函数的结果进行相加。这里的相加操作是指对 Fin ↑p 中的元素应用两个函数，并将结果相加。
-      -- 为什么呢不会超出范围吗???
-        -- ：Fin ↑p → Fin ↑o
-    }
-  -- -- 两种写法都可以
-  -- fun a b => {
-  --   permute := b.permute * a.permute
-  --   orient := (a.orient ∘ b.permute.invFun) + b.orient
-  -- }
+  fun a b => {
+    permute := b.permute * a.permute
+    orient := (a.orient ∘ b.permute.invFun) + b.orient
+  }
 
 -- instance: Mul (PieceState p o) := mul
 --? How can I define multiplication, one, and inverses as implicit components of the PieceState type?
 
-lemma ps_mul_assoc {p o : ℕ+} :
-∀ (a b c : PieceState p o),
-  ps_mul (ps_mul a b) c
-  = ps_mul a (ps_mul b  c)
-  := by
+lemma ps_mul_assoc {p o : ℕ+} : ∀ (a b c : PieceState p o), ps_mul (ps_mul a b) c = ps_mul a (ps_mul b  c) := by
   intro a b c
   simp [ps_mul]
   apply And.intro
-  · simp [Perm.mul_def, Equiv.trans_assoc]
-  · sorry
+  { simp [Perm.mul_def, Equiv.trans_assoc] }
+  { sorry }
 
 lemma ps_one_mul {p o : ℕ+} : ∀ (a : PieceState p o), ps_mul {permute := 1, orient := 0} a = a := by
   intro a

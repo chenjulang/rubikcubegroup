@@ -2,11 +2,6 @@ import Lake
 open Lake DSL
 
 def extraArgs := #["-DautoImplicit=false", "-Dlinter.unusedVariables=false"]
-def moreServerArgs := #[
-  "-Dpp.unicode.fun=true", -- pretty-prints `fun a ↦ b`
-  "-DautoImplicit=false",
-  "-DrelaxedAutoImplicit=false"
-]
 
 package «rubiks-cube» where
   -- Settings applied to both builds and interactive editing
