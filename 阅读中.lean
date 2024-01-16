@@ -78,10 +78,33 @@
 24.对于群G，commutator subgroup of G:是一个G的子群，里面的元素是所有的commutator [g,h]，这样的commutator由G中的任意两个元素g,h生成。
     具体定义是：{[g, h] | g, h belong to G}
     有趣的事实：当commutator subgroup足够大时，基本上和魔方群是相差无几的。也就是说，任意魔方状态基本都通过一组commutator可以达到。
-25.
+25.对于群G，derived series：是一个序列的子群：... ⊂ (G‘)‘ ⊂ G’ ⊂ G
+    以此前提，对于群G，可以定义solvable 可解群：derived series代表的序列中，有一个群是只有一个元素的，该元素是恒等变换。
+26.对于群G，g、h是G中的元素，conjugate of g by h 共轭:是一个G中的元素，记为g^h, g^h = h−1 ∗ g ∗ h
+27.对于群G，g1、g2是G中的元素, two elements g1,g2 are conjugate: 是一种关系，
+    需要满足：如果存在一个元素 h ∈ G，使得 g2= g1^h
+    判断是否共轭也有一个柯西定理
+28.对于群G，在等价关系“conjugation”下的 等价类的集合 G∗：是一个由等价类组成的集合，元素是一个个等价类???, 记为G∗。
+    以此前提，对于群G，可以定义一个多项式generating polynomial  of the order function on  G  ：
+     是一个多项式，变量是t，p G (t) = ∑c∈G∗ t^order(c)
+29.对于群G，g是G中的一个元素，the conjugacy class of g in G :是一个集合，里面的元素由任意h通过conjugate运算得到，
+    因为conjugate这个关系是等价关系来的，等价关系可以理解成等价类，由于某种原因???可以把群G分成若干个类，所以每一个conjugate的计算结果可以代表一个等价类。
+    具体定义为：记为 Cl(g) 或 ClG (g)，Cl(g) = ClG (g)  = {h−1 ∗ g ∗ h | h ∈ G}
+30.对于群G，X是一个群G的子集，G acts on X on the right:G和X的一个关系，需要满足：(这个定义的实际例子我觉得是G的元素分别作用在边块X1和角块X2上，所以要研究这样的作用在子集上的映射)
+    1.属于 G 的每个 g元素，对应产生一个函数φ：X → X
+    2.群 G 的恒等式 1 定义了 X → X 上的恒等式函数。
+    3. 如果 g、h 属于 G，则复合φgh：X → X满足：φgh(x) = φh(φg(x))
+  同样类似可以定义G acts on X on the left，唯一不同之处是第3点：
+    3.如果 g、h 属于 G，则复合φgh：X → X满足：φgh(x) = φg(φh(x))
+  以此为前提，可以定义某个action is transitive：action φ的一个可选性质。
+    需要满足：如果对于属于 X 的每对 x、y 都有一个 g ∈ G，该g对应的动作φ满足 y = φ（x），称该g对应的动作φ为transitive的。
+31.对于群G，满足G acts on X的关系,  orbit:是一个X的子集，其中元素这样生成的，对于某个特定的X中的元素x，
+    任意取一个G中的元素g，g对应的action φ作用在x上得到的所有结果，这个结果组成的集合就是orbit。
+    具体定义：G ∗ x = {φg(x) | g ∈ G} ， 记为G ∗ x
+32.
 
 
-进度：P103/329
+进度：P113/329
 
 
 
