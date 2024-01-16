@@ -98,13 +98,21 @@
     3.如果 g、h 属于 G，则复合φgh：X → X满足：φgh(x) = φg(φh(x))
   以此为前提，可以定义某个action is transitive：action φ的一个可选性质。
     需要满足：如果对于属于 X 的每对 x、y 都有一个 g ∈ G，该g对应的动作φ满足 y = φ（x），称该g对应的动作φ为transitive的。
-31.对于群G，满足G acts on X的关系,  orbit:是一个X的子集，其中元素这样生成的，对于某个特定的X中的元素x，
+31.对于群G，设满足G acts on X的关系,  orbit:是一个X的子集，其中元素这样生成的，对于某个特定的X中的元素x，
     任意取一个G中的元素g，g对应的action φ作用在x上得到的所有结果，这个结果组成的集合就是orbit。
     具体定义：G ∗ x = {φg(x) | g ∈ G} ， 记为G ∗ x
-32.
+    对于魔方群G，这样的集合orbit其实可以分成两个集合V，E，这两个集合V，E仍然满足定义G ∗ x = {φg(x) | g ∈ G}，也就是仍然满足
+        X中的元素经过φg映射后，仍然在X集合里面。
+32.对于群G，集合X，设满足G acts on X的关系，x是X中的一个元素，stablizer：是一个G中元素的集合G2，G2里面的任意元素g，
+    g需要满足条件是：φg作用在x后，结果仍然是x。
+    具体定义：stabG (x) = Gx = {g ∈ G | φg (x) = x} ， 记为stabG (x) 或 Gx
+33.对于群G，集合X这时取为G本身，即X=G，假设满足G acts on X的关系，G acts on X的关系中函数φ给出了固定的定义是 g ∗ x ∗ g−1
+     ，centralizer of x in G：是一个G中元素的集合G2，首先我们知道stabG (x) = {g ∈ G | g ∗ x = x ∗ g}，这个集合
+     stabG (x)就是我们的结果G2，记为CG(x)，CG(x)=stabG (x)。
+34.
 
 
-进度：P113/329
+进度：P115/329
 
 
 
