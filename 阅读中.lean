@@ -5,7 +5,6 @@
 |定理不一定要详细证明，但是名词一定要彻底理解，这样证明就只是一种技巧 ｜写记录的时候先写个总概括--ok
 
 实在不懂的找gpt举例子：
-1.
 关键定理自我理解记录：
 1.P (f ) :是一个矩阵，其中 f 是一个排列，举例；
     写成f=（2，1，3）， P(f)就是
@@ -37,7 +36,7 @@
 11.魔方群：是一个置换群G，也叫做由Sx中的元素“生成”的置换群。
     X： 是魔方的 54 个面的集合，
     Sx：是一个排列的集合，让 R、L、U、D、F、B ∈ Sx 表示魔方的基本动作， R、L、U、D、F、B都是一个个排列
-    置换群G = 〈R、L、U、D、F、B〉 ⊂ Sx 就称作魔方群（每一个状态，是由某一组操作来代表的）
+    置换群G = <R、L、U、D、F、B> ⊂ Sx 就称作魔方群（每一个状态，是由某一组操作来代表的）
 12.对于群G，群G的order，符号|G|表示： 群元素的数量。 魔方群的|G| = 2^27*3^14*5^3*7^2*11
 13.对于群的元素g，g的order，符号ord(g)表示：使得g^m=1 的最小的m（如果m存在的话）.
     魔方群中最大order为元素m = RU2D−1BD−1，其order为1260
@@ -98,21 +97,36 @@
     3.如果 g、h 属于 G，则复合φgh：X → X满足：φgh(x) = φg(φh(x))
   以此为前提，可以定义某个action is transitive：action φ的一个可选性质。
     需要满足：如果对于属于 X 的每对 x、y 都有一个 g ∈ G，该g对应的动作φ满足 y = φ（x），称该g对应的动作φ为transitive的。
-31.对于群G，设满足G acts on X的关系,  orbit:是一个X的子集，其中元素这样生成的，对于某个特定的X中的元素x，
+31.对于群G，设满足G acts on X的关系,  the orbit of x∈X under G
+    :是一个X的子集，其中元素这样生成的，对于某个特定的X中的元素x，
     任意取一个G中的元素g，g对应的action φ作用在x上得到的所有结果，这个结果组成的集合就是orbit。
     具体定义：G ∗ x = {φg(x) | g ∈ G} ， 记为G ∗ x
-    对于魔方群G，这样的集合orbit其实可以分成两个集合V，E，这两个集合V，E仍然满足定义G ∗ x = {φg(x) | g ∈ G}，也就是仍然满足
-        X中的元素经过φg映射后，仍然在X集合里面。
+    对于魔方群G，X指的是魔方上的绝对位置，位置当作元素，这样的集合orbit其实可以分成两个集合V，E，两个块的绝对位置的集合
+        这两个集合V，E仍然分别满足定义G ∗ x = {φg(x) | g ∈ G}，
+        也就是仍然满足V，E中的元素经过φg映射后，仍然分别在V,E集合里面。
 32.对于群G，集合X，设满足G acts on X的关系，x是X中的一个元素，stablizer：是一个G中元素的集合G2，G2里面的任意元素g，
     g需要满足条件是：φg作用在x后，结果仍然是x。
     具体定义：stabG (x) = Gx = {g ∈ G | φg (x) = x} ， 记为stabG (x) 或 Gx
 33.对于群G，集合X这时取为G本身，即X=G，假设满足G acts on X的关系，G acts on X的关系中函数φ给出了固定的定义是 g ∗ x ∗ g−1
      ，centralizer of x in G：是一个G中元素的集合G2，首先我们知道stabG (x) = {g ∈ G | g ∗ x = x ∗ g}，这个集合
      stabG (x)就是我们的结果G2，记为CG(x)，CG(x)=stabG (x)。
-34.
+34.对于魔方群G，g是G的元素，H集合={1,D,D^2,D^3} left coset of H:是一个作用左乘结果的集合，g左乘H中全体元素的结果，
+    这些结果的集合就是left coset of H。
+35.subset ： 子集合
+36.对于群G，H是G的子群，g是G的元素， left coset of H in G: 是一个G的子集， 形式是这样的g * H，换句话说，就是
+    选定g元素后，g左乘H中全体元素得到的结果，这些结果的集合就是 left coset of H in G。
+    全体的 left coset of H in G集合（每个不同之处在于g的选取），再拼成的一个大集合，记为G/H。
+    类似的，全体的 left coset of H in G集合（每个不同之处在于g的选取），再拼成的一个大集合，记为G\H。左右斜杠不同
+37.对于群G，H是G的子群，拉格朗日定理：描述left coset of H in G集合的元素数量，直接可以用G的数量，H的数量计算出来。
+38.对于群G，H是G的子群，C是一个G的子集a left coset of H in G, g是G中的元素
+     coset representative of C：是群G中的一个元素g，g满足：C= g * H。 其实就是left coset of H in G定义中选取的某个g元素。
+    全体 coset representatives，也可以称作全体coset representatives of G/H ：是一个G的子集，里面的元素比如有m个的话：x1,x2,...,xm , 这m个元素需要满足：
+        G/H = {x1*H,x2*H,...,xm*H} , 还需要满足：x1*H , x2*H ,..., xm*H 这m个G的子集是互不相交的。
+39.定理5.11.2: 全体coset representatives of G/H 可以构造出完整的群G。G = U(s∈S) s*H , 即一个并集，“每一个集合”是
+    全体 coset representatives 某一项xk，xk右乘集合H得到的所有结果，这些所有结果的集合就是上面并集里的“每一个集合”。
 
 
-进度：P115/329
+进度：P167/329
 
 
 
