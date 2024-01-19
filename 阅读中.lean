@@ -112,7 +112,7 @@
      ，centralizer of x in G：是一个G中元素的集合G2，首先我们知道stabG (x) = {g ∈ G | g ∗ x = x ∗ g}，这个集合
      stabG (x)就是我们的结果G2，记为CG(x)，CG(x)=stabG (x)。
 34.对于魔方群G，g是G的元素，H集合={1,D,D^2,D^3} left coset of H:是一个作用左乘结果的集合，g左乘H中全体元素的结果，
-    这些结果的集合就是left coset of H。
+    这些结果的集合就是left coset of H , 记为gH。
 35.subset ： 子集合
 36.对于群G，H是G的子群，g是G的元素， left coset of H in G: 是一个G的子集， 形式是这样的g * H，换句话说，就是
     选定g元素后，g左乘H中全体元素得到的结果，这些结果的集合就是 left coset of H in G。
@@ -164,10 +164,34 @@
     以此为前提，可以定义outer:automorphism的一种可选性质 , 不是inner的automorphism，就称作automorphism具备性质outer。
 49.引理9.3.2，an inner automorphism must ‘preserve the cycle structure’ 内自同构“保持循环结构” ：对于内自同构的映射f,
     引理描述了一组不相交的循环（比如(1,2,4,3)这样是一个循环，是一个映射）的乘积A，经过f映射后，得到的结果仍然是不相交的循环的乘积B。
-50.
+50.对于群G1,群G2,映射f:G1→G2，f满足homomorphism ,e₂是G2的单位元, the kernal of f 核:是群G1的一个子集，
+    具体定义： kernal(f) = {g ∈ G1 | f(g) = e₂ } 换句话说，g需要满足：经过f映射后，结果是G2中的单位元。
+51.对于群G1,群G2,映射f，f满足homomorphism，引理9.4.2:描述1.单射与kernal的互推关系，
+    2.对于G1中任意元素x，对于kernal(f)中的任意元素g, 则=> , (x^-1·g·x)也是kernal(f)中的元素
+52.对于群G，H是群G的子群， normal:子群H的一个可选性质，需要满足：g是G中任意的元素， (g^-1)·H·g=H
+    （注意：这里 (g^-1)·H写法是left coset of H的意思，((g^-1)·H)·g同样类似的理解成right coset of ((g^-1)·H)）
+    换句话说，就是对于任意g∈ G, 任意h∈ H , (g^-1)·H·g 集合 = H集合。
+    换句话说，往元素的角度来看，就是任意g∈ G, 任意h∈ H， (g^-1)·h·g ∈ H
+    ，称作H is a normal subgroup of G, 记为H◃G
+53.trivial group: 只包含单位元e的群，通常称作平凡群。
+54.对于群G1,群G2,映射f，f满足homomorphism， 引理9.4.3:描述了kernal(f) is a normal subgroup of G1。
+55.sgn:是一个Sn到正负1集合的映射，Sn → {+1,-1},具体定义： Sn中元素s排列是even时，结果为1；s排列是odd时，结果为-1
+56.An:是一个Sn的子集，具体定义就是ker(sgn)， An = ker(sgn) ⊂ Sn
+57.9.4.2节内容与“不能用根式求解5次或更高次的多项式”有莫大关系，但是没有深入讲。
+57.对于An，n满足n>=5，H是An的一个子群，满足H◃An, 引理9.4.1：H只能是这两个集合：H={1} or H=An。 换句话说，H不能是非平凡的。
+58.对于排列群Sn,H是Sn的子群，H由某个集合I里面元素生成，集合I满足：I里面元素是的Sn中的全体的3循环的元素(换句话说，就是比如元素g^3=g,这样的全体g构成了I集合),
+    命题9.4.1: 如果前面这些假设成立，则=>,sgn是Sn→{+1,-1}的映射，H=An 换句话说，H=An=ker(sgn) ⊂ Sn ,H集合就是An。
+    （和“3循环”有莫大的联系，魔方群定义的重要关键定理。）
+59.
 
 
-进度：P176/329 下一个里程碑218开始研究可解的魔方状态 224魔方第二基本定理已经可以开始做lean了 后面还有平方群的定理 跳过14章太难了 多种魔方解法
+进度：P181/329
+185魔方第一基本定理
+下一个里程碑218开始研究可解的魔方状态
+224魔方第二基本定理已经可以开始做lean了
+后面还有平方群的定理233-250
+跳过14章太难了 --no
+290有我们想要证明的52步算法，多种魔方解法284-
 
 
 
