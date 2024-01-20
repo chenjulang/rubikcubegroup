@@ -114,14 +114,15 @@
 34.对于魔方群G，g是G的元素，H集合={1,D,D^2,D^3} left coset of H:是一个作用左乘结果的集合，g左乘H中全体元素的结果，
     这些结果的集合就是left coset of H , 记为gH。
 35.subset ： 子集合
-36.对于群G，H是G的子群，g是G的元素， left coset of H in G: 是一个G的子集， 形式是这样的g * H，换句话说，就是
+36.对于群G，H是G的子群，g是G的元素， left coset of H in G: 是一个G的子集， 形式是这样的g*H,或写成gH，换句话说，就是
     选定g元素后，g左乘H中全体元素得到的结果，这些结果的集合就是 left coset of H in G。
     全体的 left coset of H in G集合（每个不同之处在于g的选取），再拼成的一个大集合，记为G/H。
     类似的，全体的 left coset of H in G集合（每个不同之处在于g的选取），再拼成的一个大集合，记为G\H。左右斜杠不同
 37.对于群G，H是G的子群，拉格朗日定理：描述left coset of H in G集合的元素数量，直接可以用G的数量，H的数量计算出来。
 38.对于群G，H是G的子群，C是一个G的子集a left coset of H in G, g是G中的元素
      coset representative of C：是群G中的一个元素g，g满足：C= g * H。 其实就是left coset of H in G定义中选取的某个g元素。
-    全体 coset representatives，也可以称作全体coset representatives of G/H ：是一个G的子集，里面的元素比如有m个的话：x1,x2,...,xm , 这m个元素需要满足：
+    全体 coset representatives，也可以称作全体coset representatives of G/H ：是一个G的子集，
+        里面的元素比如有m个的话：x1,x2,...,xm , 这m个元素需要满足：
         G/H = {x1*H,x2*H,...,xm*H} , 还需要满足：x1*H , x2*H ,..., xm*H 这m个G的子集是互不相交的。
 39.定理5.11.2: 全体coset representatives of G/H 可以构造出完整的群G。G = U(s∈S) s*H , 即一个并集，“每一个集合”是
     全体 coset representatives 某一项xk，xk右乘集合H得到的所有结果，这些所有结果的集合就是上面并集里的“每一个集合”。
@@ -182,10 +183,18 @@
 58.对于排列群Sn,H是Sn的子群，H由某个集合I里面元素生成，集合I满足：I里面元素是的Sn中的全体的3循环的元素(换句话说，就是比如元素g^3=g,这样的全体g构成了I集合),
     命题9.4.1: 如果前面这些假设成立，则=>,sgn是Sn→{+1,-1}的映射，H=An 换句话说，H=An=ker(sgn) ⊂ Sn ,H集合就是An。
     （和“3循环”有莫大的联系，魔方群定义的重要关键定理。）
-59.
+59.对于群G，群H，满足H◃G， quotient group of G by H: the coset space G/H with 二元运算定义为 aH·bH:=(ab)H,
+    (aH)^-1 = a^-1H。换句话说，是一个自定义的空间A(也是一个集合)，A里面的元素是gH这样的集合，其中g是G的元素，对于任意两个A中的元素，
+    比如aH,bH, 是两个集合来的，他们之间定义第一个运算·为 aH·bH:=(ab)H。
+    可以证明这样的A集合，加上自定义的这个运算·，A是满足可选性质“A是一个群”的，此处没证明。
+    A群的单位元就是trivial coset H, 也就是e为G的单位元，eH这个元素（实际上是一个集合）。
+    A群记为 the quotient group of G by H 商群, 也可以记为"G mod H",也可以记为“factor group”
+60.对于群G， abelianiation of G:是一个商群quotient group of G by G'商群, 记为Gab = G/G', 其中G' = [G,G]。
+61.
 
 
-进度：P181/329
+
+进度：P182/329
 185魔方第一基本定理
 下一个里程碑218开始研究可解的魔方状态
 224魔方第二基本定理已经可以开始做lean了
