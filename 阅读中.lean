@@ -75,6 +75,7 @@
 23.关于魔方群的只改变魔方本身有限块的位置的定理：如果 x、y 是魔方的基本移动，与共享边的面相关联，则
     1.[x， y]^2 正好置换 3 个边块，不改变任何角块;
     2.[x， y]^3 正好置换 2 个角块，不置换任何边块。
+24.1. subgroup：子群
 24.对于群G，commutator subgroup of G:是一个G的子群，里面的元素是所有的commutator [g,h]，这样的commutator由G中的任意两个元素g,h生成。
     具体定义是：{[g, h] | g, h belong to G}
     有趣的事实：当commutator subgroup足够大时，基本上和魔方群是相差无几的。也就是说，任意魔方状态基本都通过一组commutator可以达到。
@@ -136,7 +137,7 @@
 42.对于群G1，群G2 , G1 embeds(or injects) into G2：是G1和G2之间的一种关系，需要满足：能找到一个映射f:G1→ G2, 映射f是单射的。
     也就是相同结果推相同原像。
 43.对于群G1,群G2,映射f:G1→G2，f满足homomorphism，  isomorphism 同构:f的一种可选性质，f需要满足：映射f是双射的。
-    以此为前提，ismorphic:G1和G2的一种关系，满足f是isomorphism的， 记为G1≃G2。
+    以此为前提，isomorphic:G1和G2的一种关系，满足f是isomorphism的， 记为G1≃G2。
     以此为前提，如果G1=G2，automorphism 自同构：f的一种可选性质，描述G1和G2的一种关系。
 44.引理9.2.1:描述了G acts on X ↔ 存在同态的映射f， f满足：是一个这样类型的映射G→S×(这个集合指的是X中的元素的所有排列的集合，
     每一个排列可以用一个向量来表示)， 然后具体定义是将G中的任意元素g，映射到φg
@@ -169,7 +170,7 @@
     具体定义： kernal(f) = {g ∈ G1 | f(g) = e₂ } 换句话说，g需要满足：经过f映射后，结果是G2中的单位元。
 51.对于群G1,群G2,映射f，f满足homomorphism，引理9.4.2:描述1.单射与kernal的互推关系，
     2.对于G1中任意元素x，对于kernal(f)中的任意元素g, 则=> , (x^-1·g·x)也是kernal(f)中的元素
-52.对于群G，H是群G的子群， normal:子群H的一个可选性质，需要满足：g是G中任意的元素， (g^-1)·H·g=H
+52.对于群G，H是群G的子群， normal 正态or正定:子群H的一个可选性质，需要满足：g是G中任意的元素， (g^-1)·H·g=H
     （注意：这里 (g^-1)·H写法是left coset of H的意思，((g^-1)·H)·g同样类似的理解成right coset of ((g^-1)·H)）
     换句话说，就是对于任意g∈ G, 任意h∈ H , (g^-1)·H·g 集合 = H集合。
     换句话说，往元素的角度来看，就是任意g∈ G, 任意h∈ H， (g^-1)·h·g ∈ H
@@ -190,11 +191,29 @@
     A群的单位元就是trivial coset H, 也就是e为G的单位元，eH这个元素（实际上是一个集合）。
     A群记为 the quotient group of G by H 商群, 也可以记为"G mod H",也可以记为“factor group”
 60.对于群G， abelianiation of G:是一个商群quotient group of G by G'商群, 记为Gab = G/G', 其中G' = [G,G]。
-61.
+61.对于群G，proper subgroup：是一个G的子群A的一个可选性质，A需要满足：不是整个群，即不是G本身。
+62.对于群G，a simple group:是群G的一个可选性质，群G需要满足：
+    {任意群G的子群H，H满足H◃G 且 H不等于G本身 ，则=>, H等于{1},{1}恰巧可以称为trivial subgroup }
+63.对于群G1,群G2,映射f:G1→G2，f满足homomorphism，定理9.5.1 First isomorphism theory 第一同构定理 :
+    满足前面的假设条件的话，则=>,G1/ker(f) is isomorphic to(同构于) f(G1), 这里f(G1)指的是G1全体元素通过映射f后得到的结果元素的全体。
+64.对于群G，群H，N都是群G的子群，N满足：N是normal正定的，定理9.5.2 Second isomorphism theory 第二同构定理 ：
+    满足前面的假设条件的话，则=>,有两个结论：
+    1. (H ∩ N)这个交集A满足：A is normal in H
+    2. 存在一个isomorphism同构f，f满足：
+        H/(H∩N) ≃ NH/N
+        这里NH指的是一个集合B，B满足：B中的任意个元素，是这样生成的：由N中任意元素和H中任意元素通过G中的第一运算*，组合计算出来的。
+        NH举例：
+            假设我们有一个群 G，其中的元素由整数模 6 的剩余类表示。我们定义两个子群：
+            H = {0, 2, 4}，包含模 6 余数为 0、2 和 4 的整数。
+            N = {0, 3}，包含模 6 余数为 0 和 3 的整数。
+            现在我们来找到 H⋅K。
+            首先，我们按照群运算（加法）将 H 和 N 的元素进行组合：
+            H + N = {0 + 0, 0 + 3, 2 + 0, 2 + 3, 4 + 0, 4 + 3} = {0, 3, 2, 5, 4, 1}
+            所以知道HN = NH = {0, 3, 2, 5, 4, 1} = {0, 1, 2, 3, 4, 5}
+65.
 
 
-
-进度：P182/329
+进度：P183/329
 185魔方第一基本定理
 下一个里程碑218开始研究可解的魔方状态
 224魔方第二基本定理已经可以开始做lean了
