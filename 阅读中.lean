@@ -1121,7 +1121,7 @@ v(gh) := v(g) + ρ(g)^(-1)·v(h)
                             h9:(U' R R)^4 U U D R R U L L U' R R U L L D' ：棱{1,2,3,4,9,10,11,12}轨道 与 全体角块 的同时2循环：角1↔4, 棱2↔10
                             h10:(U' R R)^4 U U D R R U L L U' R R U L L D' R R U D' (U U F F L L)^4 (U U F F)^3 L L (U U F F)^3 L L D U' R R (U U F F)^3
                             ：棱{5,6,7,8}轨道 与 全体角块 的同时2循环
-                                等价操作：
+                                等价操作：L' L' U B' B' U' U' R' R' U' R' R' U F' F' D L R F' F' U' U' L' R U'
                                 :角1↔4, 棱5↔6
                         }
                 }
