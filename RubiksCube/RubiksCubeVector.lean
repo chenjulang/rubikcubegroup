@@ -19,8 +19,19 @@ section RubiksSuperGroup
   : Perm (Fin n) → Vector α n → Vector α n
   :=
     fun p v => {
-      val := (Vector.ofFn (fun i => v.get (p.invFun i))).toList
-      property := by simp
+    -- 举例:
+      -- p:一个重排列(1=>2,2=>3,3=>1,4=>4,5=>5,6=>6,7=>7,8=>8)
+      -- v:一个向量(a1,a2,a3,a4,a5,a6,a7,a8)
+      -- 给出列表
+      val := by
+        exact (Vector.ofFn (fun i => v.get (p.invFun i))).toList
+        -- 举例：
+          -- Vector.ofFn (fun i => v.get (p.invFun i)) 就是 ：(a1,a2,a3,a4,a5,a6,a7,a8).get (3,1,2,4,5,6,7,8)
+                -- 也就是 (a3,a1,a2,a4,a5,a6,a7,a8)
+          -- (Vector.ofFn (fun i => v.get (p.invFun i))).toList 就是 [a3,a1,a2,a4,a5,a6,a7,a8]
+      -- 检查长度
+      property := by simp only [invFun_as_coe, Vector.toList_ofFn, List.length_ofFn]
+        -- simp
     }
 
   /-- 魔方全体块的某一个状态 -/
@@ -38,14 +49,30 @@ section RubiksSuperGroup
       permute := b.permute * a.permute -- 这里 “*” 应该是指排列之间的复合运算
   --todo--
       orient := Vector.map₂ Fin.add (permuteVector b.permute a.orient) b.orient
+        --Vector.map₂ ： (f : α → β → φ) : Vector α n → Vector β n → Vector φ n
+        --Fin.add:                              Fin n → Fin n → Fin n  --应该是一个求和模n的计算函数
+        --(permuteVector b.permute a.orient) :  Vector (Fin ↑o) ↑p
+        -- b.orient:                            Vector (Fin ↑orientations) ↑pieces
+        --分析：Vector.map₂ 中的f具体就是Fin.add；
+          -- Vector α n中的α具体就是(Fin ↑o)
+          -- β就是(Fin ↑orientations)
+          -- φ就是???
+        --换句话说：
+
     }
 
-  lemma ps_mul_assoc {p o : ℕ+} : ∀ (a b c : PieceState p o), ps_mul (ps_mul a b) c = ps_mul a (ps_mul b  c) := by
+  lemma ps_mul_assoc {p o : ℕ+}
+  : ∀ (a b c : PieceState p o),
+  ps_mul (ps_mul a b) c = ps_mul a (ps_mul b  c)
+  := by
     intro a b c
     simp [ps_mul]
     apply And.intro
     { simp [Perm.mul_def, Equiv.trans_assoc] }
-    { simp [permuteVector]
+    {
+      -- refine (Vector.ext ?right.x).symm
+      -- simp only [Vector.get_map₂]
+      simp [permuteVector]
       sorry }
 
   lemma ps_one_mul {p o : ℕ+} : ∀ (a : PieceState p o), ps_mul {permute := 1, orient := Vector.replicate p 0} a = a := by
