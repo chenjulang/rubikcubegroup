@@ -15,6 +15,7 @@ section RubiksSuperGroup
   instance (n m : Nat) : Repr (Vector (Fin n) m) :=
     ⟨reprPrec ∘ Vector.toList⟩
 
+  /-- 重新排列一个向量-/
   def permuteVector {α : Type} {n : ℕ}
   : Perm (Fin n) → Vector α n → Vector α n
   :=
@@ -35,8 +36,11 @@ section RubiksSuperGroup
     }
 
   /-- 魔方全体块的某一个状态 -/
+  -- 我感觉是分开角块和棱块两个 PieceState
   structure PieceState (pieces orientations: ℕ+) where
-    permute : Perm (Fin pieces) -- 比如这里pieces取8
+    --代表全体方块的位置：
+    permute : Perm (Fin pieces) -- 比如这里pieces取20
+    --代表全体方块的方向：
     orient : Vector (Fin orientations) pieces -- 比如这里orientations取3
     deriving Repr
     --比如上面这样取的话，就是全体角块的位置状态+方向数状态的总和。
@@ -46,18 +50,29 @@ section RubiksSuperGroup
   : PieceState p o → PieceState p o → PieceState p o
   :=
     fun a b => {
+    --举例：
+      -- a: {
+      --  permute: Perm (Fin 20) := (1=>2,2=>3,3=>1,4,5,6,7,8,9,...,20) -- 有20项
+      --  orient : Vector (Fin 3) 20 := (0,0,...,0) -- 有20项
+      --}
+      -- b: {
+      --  permute: Perm (Fin 20) := (1,2,3,4=>5,5=>6,6=>4,7,8,9,...,20) -- 有20项
+      --  orient : Vector (Fin 3) 20 := (0,0,...,0) -- 有20项
+      --}
       permute := b.permute * a.permute -- 这里 “*” 应该是指排列之间的复合运算
   --todo--
       orient := Vector.map₂ Fin.add (permuteVector b.permute a.orient) b.orient
         --Vector.map₂ ： (f : α → β → φ) : Vector α n → Vector β n → Vector φ n
+        --
         --Fin.add:                              Fin n → Fin n → Fin n  --应该是一个求和模n的计算函数
         --(permuteVector b.permute a.orient) :  Vector (Fin ↑o) ↑p
         -- b.orient:                            Vector (Fin ↑orientations) ↑pieces
-        --分析：Vector.map₂ 中的f具体就是Fin.add；
-          -- Vector α n中的α具体就是(Fin ↑o)
-          -- β就是(Fin ↑orientations)
-          -- φ就是???
-        --换句话说：
+        --
+        --举例：
+        -- (permuteVector b.permute a.orient) = (permuteVector (1,2,3,4=>5,5=>6,6=>4,7,8,9,...,20) (0,0,...,0))
+            -- = (0,0,...,0) -- 20项
+        -- Vector.map₂ Fin.add (permuteVector b.permute a.orient) b.orient = 应该就是2个向量加起来mod 3的结果
+            -- = (0,0,...,0) +
 
     }
 
