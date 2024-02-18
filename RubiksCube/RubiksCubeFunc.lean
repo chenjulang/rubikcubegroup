@@ -32,7 +32,7 @@ lemma ps_mul_assoc {p o : ℕ+} : ∀ (a b c : PieceState p o), ps_mul (ps_mul a
   simp [ps_mul]
   apply And.intro
   { simp [Perm.mul_def, Equiv.trans_assoc] }
-  { sorry }
+  { sorry}
 
 lemma ps_one_mul {p o : ℕ+} : ∀ (a : PieceState p o), ps_mul {permute := 1, orient := 0} a = a := by
   intro a

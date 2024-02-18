@@ -6,51 +6,51 @@ open Equiv Perm
 
 section ValidityChecks
 
--- lemma RValid : R ∈ ValidCube :=
---   by
---     simp [R, ValidCube]
---     apply And.intro
---     { apply Eq.refl }
---     { apply Eq.refl }
+  -- lemma RValid : R ∈ ValidCube :=
+  --   by
+  --     simp [R, ValidCube]
+  --     apply And.intro
+  --     { apply Eq.refl }
+  --     { apply Eq.refl }
 
-lemma ft_valid : ∀x : RubiksSuperType, FaceTurn x → x ∈ ValidCube :=
-  by
-    intro x hx
-    cases hx with
-    | _ =>
-      simp [ValidCube, U, D, R, L, F, B, U2, D2, R2, L2, F2, B2, U', D', R', L', F', B']
-      repeat' apply And.intro
-      all_goals apply Eq.refl
+  lemma ft_valid : ∀x : RubiksSuperType, FaceTurn x → x ∈ ValidCube :=
+    by
+      intro x hx
+      cases hx with
+      | _ =>
+        simp [ValidCube, U, D, R, L, F, B, U2, D2, R2, L2, F2, B2, U', D', R', L', F', B']
+        repeat' apply And.intro
+        all_goals apply Eq.refl
 
-lemma TPermValid : TPerm ∈ ValidCube :=
-  by
-    simp [TPerm]
-    repeat apply RubiksGroup.mul_mem'
-    all_goals apply ft_valid
-    { apply FaceTurn.R }
-    { apply FaceTurn.U }
-    { apply FaceTurn.R' }
-    { apply FaceTurn.U' }
-    { apply FaceTurn.R' }
-    { apply FaceTurn.F }
-    { apply FaceTurn.R2 }
-    { apply FaceTurn.U' }
-    { apply FaceTurn.R' }
-    { apply FaceTurn.U' }
-    { apply FaceTurn.R }
-    { apply FaceTurn.U }
-    { apply FaceTurn.R' }
-    { apply FaceTurn.F' }
+  lemma TPermValid : TPerm ∈ ValidCube :=
+    by
+      simp [TPerm]
+      repeat apply RubiksGroup.mul_mem'
+      all_goals apply ft_valid
+      { apply FaceTurn.R }
+      { apply FaceTurn.U }
+      { apply FaceTurn.R' }
+      { apply FaceTurn.U' }
+      { apply FaceTurn.R' }
+      { apply FaceTurn.F }
+      { apply FaceTurn.R2 }
+      { apply FaceTurn.U' }
+      { apply FaceTurn.R' }
+      { apply FaceTurn.U' }
+      { apply FaceTurn.R }
+      { apply FaceTurn.U }
+      { apply FaceTurn.R' }
+      { apply FaceTurn.F' }
 
-lemma CornerTwistInvalid : CornerTwist ∉ ValidCube :=
-  by
-    simp [CornerTwist, ValidCube, zeroOrient, Vector.toList, Vector.replicate, Vector.set, List.set]
-    exact (bne_iff_ne 3 1).mp (by rfl)
+  lemma CornerTwistInvalid : CornerTwist ∉ ValidCube :=
+    by
+      simp [CornerTwist, ValidCube, zeroOrient, Vector.toList, Vector.replicate, Vector.set, List.set]
+      exact (bne_iff_ne 3 1).mp (by rfl)
 
-lemma EdgeFlipInvalid : EdgeFlip ∉ ValidCube :=
-  by
-    simp [EdgeFlip, ValidCube, zeroOrient, Vector.toList, Vector.replicate, Vector.set, List.set]
-    exact (bne_iff_ne 2 1).mp (by rfl)
+  lemma EdgeFlipInvalid : EdgeFlip ∉ ValidCube :=
+    by
+      simp [EdgeFlip, ValidCube, zeroOrient, Vector.toList, Vector.replicate, Vector.set, List.set]
+      exact (bne_iff_ne 2 1).mp (by rfl)
 
 end ValidityChecks
 

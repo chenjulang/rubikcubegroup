@@ -15,7 +15,7 @@ section RubiksSuperGroup
   instance (n m : Nat) : Repr (Vector (Fin n) m) :=
     ⟨reprPrec ∘ Vector.toList⟩
 
-  /-- 重新排列一个向量-/
+  /-- 用排列的逆操作重新排列一个向量-/
   def permuteVector {α : Type} {n : ℕ}
   : Perm (Fin n) → Vector α n → Vector α n
   :=
@@ -35,60 +35,102 @@ section RubiksSuperGroup
         -- simp
     }
 
-  /-- 魔方全体块的某一个状态 -/
-  -- 我感觉是分开角块和棱块两个 PieceState
+  /-- 魔方全体块的某一个状态,感觉是分开角块和棱块两种 PieceState。
+  可以这样理解，一个PieceState结构，就是某一个群H中的角块或棱块状态。
+  首先permute描述了块的位置，orient描述了各位置上的方向数（逆时针转一次算+1）。-/
   structure PieceState (pieces orientations: ℕ+) where
     --代表全体方块的位置：
-    permute : Perm (Fin pieces) -- 比如这里pieces取20
+    permute : Perm (Fin pieces) -- 比如这里pieces取8
     --代表全体方块的方向：
     orient : Vector (Fin orientations) pieces -- 比如这里orientations取3
     deriving Repr
     --比如上面这样取的话，就是全体角块的位置状态+方向数状态的总和。
 
   --魔方状态的复合函数：
+  -- 这个定义很重要，其实是可以按需定义的，
+  /-- 程序中的复合ab，是这样理解的：先作用b，再作用a。
+  而我们手写证明中复合ab,是这样理解的：先作用a，再作用b。-/
   def ps_mul {p o : ℕ+}
   : PieceState p o → PieceState p o → PieceState p o
   :=
     fun a b => {
-    --举例：
+    --举例：a是F,b是R
       -- a: {
-      --  permute: Perm (Fin 20) := (1=>2,2=>3,3=>1,4,5,6,7,8,9,...,20) -- 有20项
-      --  orient : Vector (Fin 3) 20 := (0,0,...,0) -- 有20项
+      --  permute: Perm (Fin 8) := (1=>2,2=>6,3,4,5=>1,6=>5,7,8) -- 有8项
+      --  orient : Vector (Fin 3) 8 := (1,2,0,0,2,1,0,0) -- 有8项
       --}
       -- b: {
-      --  permute: Perm (Fin 20) := (1,2,3,4=>5,5=>6,6=>4,7,8,9,...,20) -- 有20项
-      --  orient : Vector (Fin 3) 20 := (0,0,...,0) -- 有20项
+      --  permute: Perm (Fin 8) := (1,2=>3,3=>7,4,5,6=>2,7=>6,8) -- 有8项
+      --  orient : Vector (Fin 3) 8 := (0,1,2,0,0,2,1,0) -- 有8项
       --}
       permute := b.permute * a.permute -- 这里 “*” 应该是指排列之间的复合运算
-  --todo--
       orient := Vector.map₂ Fin.add (permuteVector b.permute a.orient) b.orient
-        --Vector.map₂ ： (f : α → β → φ) : Vector α n → Vector β n → Vector φ n
-        --
-        --Fin.add:                              Fin n → Fin n → Fin n  --应该是一个求和模n的计算函数
-        --(permuteVector b.permute a.orient) :  Vector (Fin ↑o) ↑p
-        -- b.orient:                            Vector (Fin ↑orientations) ↑pieces
-        --
-        --举例：
-        -- (permuteVector b.permute a.orient) = (permuteVector (1,2,3,4=>5,5=>6,6=>4,7,8,9,...,20) (0,0,...,0))
-            -- = (0,0,...,0) -- 20项
-        -- Vector.map₂ Fin.add (permuteVector b.permute a.orient) b.orient = 应该就是2个向量加起来mod 3的结果
-            -- = (0,0,...,0) +
-
+        --1.分析类型：
+          --Vector.map₂ ： (f : α → β → φ) : Vector α n → Vector β n → Vector φ n
+          --
+          --Fin.add:                              Fin n → Fin n → Fin n  --应该是一个求和模n的计算函数
+          --(permuteVector b.permute a.orient) :  Vector (Fin ↑o) ↑p
+          -- b.orient:                            Vector (Fin ↑orientations) ↑pieces
+          --
+        --2.举例：
+          -- 所以
+          -- (permuteVector b.permute a.orient) = (permuteVector (1,2=>3,3=>7,4,5,6=>2,7=>6,8) (1,2,0,0,2,1,0,0) )
+              -- = (1,1,2,0,2,0,0,0) -- 8项
+          --  b.orient = (0,1,2,0,0,2,1,0)
+          -- 所以 orient := Vector.map₂ Fin.add (permuteVector b.permute a.orient) b.orient = 应该就是2个向量加起来每个分量mod 3的结果
+              -- = (1,1,2,0,2,0,0,0) + (0,1,2,0,0,2,1,0) 【mod 3】
+              -- = (1,2,1,0,2,2,1,0)
+        --3.对比一下手写的证明：v(gh) := v(g) + ρ(g)^(-1)·v(h)
+              -- v(RF) = v(R) + ρ(R)^(-1)·v(F) = (0,1,2,0,0,2,1,0) +  (1,2=>3,3=>7,4,5,6=>2,7=>6,8)^(-1)·(1,2,0,0,2,1,0,0)
+          -- 实际上，上面程序做的是 v(ab) = ρ(b))^(-1)·v(a) + v(b) , 其实可以ps_mul理解成，
+          -- 先对魔方操作第二个参数b的操作，然后再操作第一个参数a的操作，得到的最终效果。
+          -- 因此程序中的复合ab，是这样理解的：先作用b，再作用a。
+          -- 而我们手写证明中复合ab,是这样理解的：先作用a，再作用b。
+          --实际上只是定义不一样，得到的相对结论是一样的。
     }
 
   lemma ps_mul_assoc {p o : ℕ+}
   : ∀ (a b c : PieceState p o),
-  ps_mul (ps_mul a b) c = ps_mul a (ps_mul b  c)
+  ps_mul (ps_mul c b) a = ps_mul c (ps_mul b a)
+  --举例：a是F,b是R，c是B
+  -- a: {
+  --  permute: Perm (Fin 8) := (1=>2,2=>6,3,4,5=>1,6=>5,7,8) -- 有8项
+  --  orient : Vector (Fin 3) 8 := (1,2,0,0,2,1,0,0) -- 有8项
+  --}
+  -- b: {
+  --  permute: Perm (Fin 8) := (1,2=>3,3=>7,4,5,6=>2,7=>6,8) -- 有8项
+  --  orient : Vector (Fin 3) 8 := (0,1,2,0,0,2,1,0) -- 有8项
+  --}
+  -- c: {
+  --  permute: Perm (Fin 8) := (1,2,3=>4,4=>8,5,6,7=>3,8=>7) -- 有8项
+  --  orient : Vector (Fin 3) 8 := (0,0,1,2,0,0,1,2) -- 有8项
+  --}
+  -- 读法是从右开始看：ba是先作用a，再作用b
+  --引理实际说的是：(ba)c = a(cb) -- 也就是1·F·R·B = 1·F·R·B
   := by
     intro a b c
     simp [ps_mul]
     apply And.intro
-    { simp [Perm.mul_def, Equiv.trans_assoc] }
     {
-      -- refine (Vector.ext ?right.x).symm
-      -- simp only [Vector.get_map₂]
-      simp [permuteVector]
-      sorry }
+      --???todo
+      simp only [Perm.mul_def]
+      simp only [Equiv.trans_assoc]
+    }
+    {
+      simp only [permuteVector]
+      simp only [invFun_as_coe, Vector.toList_ofFn, Vector.get_map₂]
+      obtain ⟨a_p, a_o⟩ := a
+      obtain ⟨a_o_List, a_o_lengthPro⟩ := a_o
+      -- obtain ⟨a1⟩ := a_o_List ???
+
+
+
+      --todo--
+      sorry
+
+    }
+
+  #check Vector.map₂
 
   lemma ps_one_mul {p o : ℕ+} : ∀ (a : PieceState p o), ps_mul {permute := 1, orient := Vector.replicate p 0} a = a := by
     intro a
