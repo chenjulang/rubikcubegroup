@@ -19,20 +19,28 @@ structure PieceState (pieces orientations: ℕ+) where
   deriving Repr, DecidableEq
 
 def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
-  fun a b => {
-    permute := b.permute * a.permute
-    orient := (a.orient ∘ b.permute.invFun) + b.orient
+  fun a2 a1 => {
+    permute := a1.permute * a2.permute
+    orient := (a2.orient ∘ a1.permute.invFun) + a1.orient
   }
 
 -- instance: Mul (PieceState p o) := mul
 --? How can I define multiplication, one, and inverses as implicit components of the PieceState type?
 
-lemma ps_mul_assoc {p o : ℕ+} : ∀ (a b c : PieceState p o), ps_mul (ps_mul a b) c = ps_mul a (ps_mul b  c) := by
+lemma ps_mul_assoc {p o : ℕ+} :
+∀ (a b c : PieceState p o),
+ps_mul c (ps_mul b a) = ps_mul (ps_mul c b) a := by
   intro a b c
   simp [ps_mul]
   apply And.intro
-  { simp [Perm.mul_def, Equiv.trans_assoc] }
-  { sorry}
+  · simp [Perm.mul_def]
+    simp [Equiv.trans_assoc]
+  · rw [← add_assoc]
+    simp only [add_left_inj]
+    exact rfl
+  done
+
+
 
 lemma ps_one_mul {p o : ℕ+} : ∀ (a : PieceState p o), ps_mul {permute := 1, orient := 0} a = a := by
   intro a
