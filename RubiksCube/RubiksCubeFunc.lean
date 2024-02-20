@@ -179,6 +179,8 @@ end RubiksSuperGroup
 
 /- Creates an orientation function given a list of input-output pairs
 (with 0 for anything left unspecified). -/
+  -- 应该是为了方便定义每个操作的方向数增加量,然后定义的这两个东西：
+
 def Orient
 (p o : ℕ+)
 (pairs : List ((Fin p) × (Fin o)))
@@ -223,38 +225,76 @@ section FACE_TURNS
 
   /- These two functions (from kendfrey's repository) create a cycle permutation,
   which is useful for defining the rotation of any given face, as seen directly below. -/
-  --todo--
+  -- 应该是为了方便定义每个操作的排列permute,然后定义的这两个东西：
+
   def cycleImpl {α : Type*} [DecidableEq α]
   : α → List α → Perm α
-    | _, [] => 1
-    | a, (x :: xs) => swap a x * cycleImpl x xs
+    | _, [] => 1 -- “_”指的是第一个元素。可以写成a吗???
+    | a, (x :: xs) => (swap a x) * (cycleImpl x xs) -- “a”指的是第一个元素
+    --
 
   def cyclePieces {α : Type*} [DecidableEq α]
   : List α → Perm α
     | [] => 1
     | (x :: xs) => cycleImpl x xs
 
-  -- #eval List.map (cycle [0, 1, 2, 3] : Perm (Fin 12)) (List.range 12)
-  -- #eval List.map (cycle [0, 5, 8] : Perm (Fin 12)) (List.range 12)
+  -- 举例：cyclePieces [0, 1, 2, 3]
+  -- 进入cyclePieces， 则x即0，xs即[1,2,3] ， 然后是cycleImpl 0 [1,2,3]
+  -- 进入cycleImpl，则a即0，x即1，xs即[2,3], 总结果是(0,1) * (cycleImpl 1 [2,3])
+  -- 进入cycleImpl，则a即1，x即2，xs即[3], cycleImpl 1 [2,3]结果是(1,2) * (cycleImpl 2 [3])
+  -- 进入cycleImpl，则a即2，x即3，xs即[], cycleImpl 2 [3]结果是(2,3) * (cycleImpl 3 [])
+  -- 进入cycleImpl，则_即3，[]即[],cycleImpl 3 []结果是1，也就是不变。
+  -- 总结：(0,1) * (cycleImpl 1 [2,3])
+  --      = (0,1) * ((1,2) * (cycleImpl 2 [3]))
+  --      = (0,1) * ((1,2) * ((2,3) * (cycleImpl 3 [])))
+  --      = (0,1) * ((1,2) * ((2,3) * e))
+  -- permute的乘法是从右往左算吗？***
+  --      = (0,1) * (2,3,1)
+  --      = (2,3,0,1)
+  --      = (0,1,2,3)
+
+  -- #eval (cyclePieces [0, 1, 2, 3] : Perm (Fin 12)) -- 其实就是4循环(0,1,2,3)
+  -- #eval List.map (cyclePieces [0, 1, 2, 3] : Perm (Fin 12)) (List.range 12)
+  -- #eval (cyclePieces [0, 5, 8] : Perm (Fin 12)) -- 其实就是3循环(0,5,8)
+  -- #eval List.map (cyclePieces [0, 5, 8] : Perm (Fin 12)) (List.range 12)
+
+  -- #eval Orient 8 3 [(1, 1), (6, 2), (5, 1), (2, 2)] -- ![0, 1, 2, 0, 0, 1, 2, 0] 换句话说，只有1，2，5，6是非零值
+
+  --todo
+  --重新附个图
+  --检查一下这些orient是否正确
+  --而且方向数的点怎么定义的也要根据下面想一下
 
   def U : RubiksSuperType :=
-    ⟨{permute := cyclePieces [0, 1, 2, 3], orient := 0},
-    {permute := cyclePieces [0, 1, 2, 3], orient := 0}⟩
+    ⟨
+      {permute := cyclePieces [0, 1, 2, 3], orient := 0}, -- 第一是角块
+      {permute := cyclePieces [0, 1, 2, 3], orient := 0}  -- 第二是棱块
+    ⟩
   def D : RubiksSuperType :=
-    ⟨{permute := cyclePieces [4, 5, 6, 7], orient := 0},
-    {permute := cyclePieces [4, 5, 6, 7], orient := 0}⟩
+    ⟨
+      {permute := cyclePieces [4, 5, 6, 7], orient := 0},
+      {permute := cyclePieces [4, 5, 6, 7], orient := 0}
+    ⟩
   def R : RubiksSuperType :=
-    ⟨{permute := cyclePieces [1, 6, 5, 2], orient := Orient 8 3 [(1, 1), (6, 2), (5, 1), (2, 2)]},
-    {permute := cyclePieces [1, 9, 5, 10], orient := 0}⟩
+    ⟨
+      {permute := cyclePieces [1, 6, 5, 2], orient := Orient 8 3 [(1, 1), (6, 2), (5, 1), (2, 2)]},
+      {permute := cyclePieces [1, 9, 5, 10], orient := 0}
+    ⟩
   def L : RubiksSuperType :=
-    ⟨{permute := cyclePieces [0, 3, 4, 7], orient := Orient 8 3 [(0, 2), (3, 1), (4, 2), (7, 1)]},
-    {permute := cyclePieces [3, 11, 7, 8], orient := 0}⟩
+    ⟨
+      {permute := cyclePieces [0, 3, 4, 7], orient := Orient 8 3 [(0, 2), (3, 1), (4, 2), (7, 1)]},
+      {permute := cyclePieces [3, 11, 7, 8], orient := 0}
+    ⟩
   def F : RubiksSuperType :=
-    ⟨{permute := cyclePieces [2, 5, 4, 3], orient := Orient 8 3 [(2, 1), (5, 2), (4, 1), (3, 2)]},
-    {permute := cyclePieces [2, 10, 4, 11], orient := Orient 12 2 [(2, 1), (10, 1), (4, 1), (11, 1)]}⟩
+    ⟨
+      {permute := cyclePieces [2, 5, 4, 3], orient := Orient 8 3 [(2, 1), (5, 2), (4, 1), (3, 2)]},
+      {permute := cyclePieces [2, 10, 4, 11], orient := Orient 12 2 [(2, 1), (10, 1), (4, 1), (11, 1)]}
+    ⟩
   def B : RubiksSuperType :=
-    ⟨{permute := cyclePieces [0, 7, 6, 1], orient := Orient 8 3 [(0, 1), (7, 2), (6, 1), (1, 2)]},
-    {permute := cyclePieces [0, 8, 6, 9], orient := Orient 12 2 [(0, 1), (8, 1), (6, 1), (9, 1)]}⟩
+    ⟨
+      {permute := cyclePieces [0, 7, 6, 1], orient := Orient 8 3 [(0, 1), (7, 2), (6, 1), (1, 2)]},
+      {permute := cyclePieces [0, 8, 6, 9], orient := Orient 12 2 [(0, 1), (8, 1), (6, 1), (9, 1)]}
+    ⟩
   def U2 := U^2
   def D2 := D^2
   def R2 := R^2
@@ -270,7 +310,8 @@ section FACE_TURNS
 
   -- #check Multiplicative.coeToFun
 
-  inductive FaceTurn : RubiksSuperType → Prop where
+  inductive FaceTurn
+  : RubiksSuperType → Prop where
     | U : FaceTurn U
     | D : FaceTurn D
     | R : FaceTurn R
@@ -293,42 +334,69 @@ section FACE_TURNS
   instance : ToString RubiksSuperType where
     toString : RubiksSuperType → String :=
     fun c =>
-    if c = Solved then "Solved"
-    else if c = U then "U"
-    else if c = D then "D"
-    else if c = R then "R"
-    else if c = L then "L"
-    else if c = F then "F"
-    else if c = B then "B"
-    else if c = U2 then "U2"
-    else if c = D2 then "D2"
-    else if c = R2 then "R2"
-    else if c = L2 then "L2"
-    else if c = F2 then "F2"
-    else if c = B2 then "B2"
-    else if c = U' then "U'"
-    else if c = D' then "D'"
-    else if c = R' then "R'"
-    else if c = L' then "L'"
-    else if c = F' then "F'"
-    else if c = B' then "B'"
-    else s!"{repr c}"
+      if c = Solved then "Solved"
+      else if c = U then "U"
+      else if c = D then "D"
+      else if c = R then "R"
+      else if c = L then "L"
+      else if c = F then "F"
+      else if c = B then "B"
+      else if c = U2 then "U2"
+      else if c = D2 then "D2"
+      else if c = R2 then "R2"
+      else if c = L2 then "L2"
+      else if c = F2 then "F2"
+      else if c = B2 then "B2"
+      else if c = U' then "U'"
+      else if c = D' then "D'"
+      else if c = R' then "R'"
+      else if c = L' then "L'"
+      else if c = F' then "F'"
+      else if c = B' then "B'"
+      else s!"{repr c}"
 
   -- instance : Multiplicative.coeToFun RubiksSuperType := {coe := fun (a : RubiksSuperType) => fun (b : RubiksSuperType) => a * b }
   --? How do I get the line above to work?
 
 end FACE_TURNS
 
-def TPerm : RubiksSuperType := R * U * R' * U' * R' * F * R2 * U' * R' * U' * R * U * R' * F'
-def AlteredYPerm : RubiksSuperType := R * U' * R' * U' * R * U * R' * F' * R * U * R' * U' * R' * F * R
 
-def CornerTwist : RubiksSuperType := ({permute := 1, orient := (fun | 0 => 1 | _ => 0) }, {permute := 1, orient := 0})
-def EdgeFlip : RubiksSuperType := ({permute := 1, orient := 0}, {permute := 1, orient := (fun | 0 => 1 | _ => 0)})
+def TPerm : RubiksSuperType -- 这个*是在哪里定义的呢？，看定义就知道，因为RubiksSuperType是笛卡尔积CornerType × EdgeType，其乘法就是两个分量分别乘积
+  := R * U * R' * U' * R' * F * R2 * U' * R' * U' * R * U * R' * F'
+def AlteredYPerm : RubiksSuperType
+  := R * U' * R' * U' * R * U * R' * F' * R * U * R' * U' * R' * F * R
+
+
+def CornerTwist : RubiksSuperType  -- 应该是形容两个不可能的魔方状态：只旋转一次角块，还有只旋转一次棱块
+  := (
+      {permute := 1, orient := (fun | 0 => 1 | _ => 0) }, -- 这种是归纳定义的向量写法，只有0位置为1，其余为0。
+      {permute := 1, orient := 0}
+     )
+def EdgeFlip : RubiksSuperType
+  := (
+      {permute := 1, orient := 0},
+      {permute := 1, orient := (fun | 0 => 1 | _ => 0)}
+     )
+
+
 
 section RubiksGroup
 
+  --todo
+  -- 魔方第二基本定理直接就定义了～～～其实也不全是，只是两个定义，两个定义需要互推。（要推生成集）
   -- def ValidCube : Set RubiksSuperType := {c | Perm.sign c.fst.permute = Perm.sign c.snd.permute ∧ Fin.foldl 8 (fun acc n => acc + c.fst.orient n) 0 = 0 ∧ Fin.foldl 12 (fun acc n => acc + c.snd.orient n) 0 = 0}
-  def ValidCube : Set RubiksSuperType := {c | Perm.sign c.fst.permute = Perm.sign c.snd.permute ∧ Finset.sum ({0,1,2,3,4,5,6,7} : Finset (Fin 8)) c.fst.orient = 0 ∧ Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11} : Finset (Fin 12)) c.snd.orient = 0}
+  def ValidCube :
+  Set RubiksSuperType
+  :=
+  -- 这样的一个集合：所有满足后面这些条件的c
+  {
+    c |
+    Perm.sign c.fst.permute = Perm.sign c.snd.permute
+    ∧
+    Finset.sum ({0,1,2,3,4,5,6,7} : Finset (Fin 8)) c.fst.orient = 0
+    ∧
+    Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11} : Finset (Fin 12)) c.snd.orient = 0
+  }
 
   lemma mul_mem' {a b : RubiksSuperType} : a ∈ ValidCube → b ∈ ValidCube → a * b ∈ ValidCube := by
     intro hav hbv
