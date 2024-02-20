@@ -18,8 +18,13 @@ structure PieceState (pieces orientations: ℕ+) where
   orient : Fin pieces → Fin orientations
   deriving Repr, DecidableEq
 
+-- def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
+--   fun a2 a1 => {
+--     permute := a1.permute * a2.permute
+--     orient := (a2.orient ∘ a1.permute.invFun) + a1.orient
+--   }
 def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
-  fun a2 a1 => {
+  fun a1 a2 => {
     permute := a1.permute * a2.permute
     orient := (a2.orient ∘ a1.permute.invFun) + a1.orient
   }
@@ -29,7 +34,7 @@ def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :
 
 lemma ps_mul_assoc {p o : ℕ+} :
 ∀ (a b c : PieceState p o),
-ps_mul c (ps_mul b a) = ps_mul (ps_mul c b) a := by
+ps_mul a (ps_mul b c) = ps_mul (ps_mul a b) c := by
   intro a b c
   simp [ps_mul]
   apply And.intro
@@ -40,25 +45,70 @@ ps_mul c (ps_mul b a) = ps_mul (ps_mul c b) a := by
     exact rfl
   done
 
-
-
-lemma ps_one_mul {p o : ℕ+} : ∀ (a : PieceState p o), ps_mul {permute := 1, orient := 0} a = a := by
+lemma ps_one_mul {p o : ℕ+} :
+∀ (a : PieceState p o),
+ps_mul {permute := 1, orient := 0} a  =  a
+:= by
   intro a
-  simp [ps_mul]
+  simp only [ps_mul]
+  simp only [one_mul, invFun_as_coe, one_symm, coe_one, Function.comp.right_id, add_zero]
+  done
 
-lemma ps_mul_one {p o : ℕ+} : ∀ (a : PieceState p o), ps_mul a {permute := 1, orient := 0} = a := by
+@[simp]
+lemma ps_mul_one {p o : ℕ+} :
+∀ (a : PieceState p o),
+ps_mul a {permute := 1, orient := 0} = a := by
   intro a
-  simp [ps_mul]
+  simp only [ps_mul]
+  simp only [mul_one, invFun_as_coe, Pi.zero_comp, zero_add]
+  done
 
-def ps_inv {p o : ℕ+} : PieceState p o → PieceState p o :=
+--todo--
+
+def ps_inv {p o : ℕ+}
+: PieceState p o → PieceState p o
+:=
   fun ps =>
-  { permute := ps.permute⁻¹
-    orient := fun x => - ps.orient (ps.permute⁻¹ x) }
+  {
+    permute := ps.permute⁻¹
+    -- 0 1 2
+    -- 举例:如果原方向增加量orient为(1,2,...)，那么逆操作应该是(-1,-2,...) , 也就是(+2,+1,...)
+    -- 比如 a:F {
+    --  permute: Perm (Fin 8) := (1=>2,2=>6,3,4,5=>1,6=>5,7,8) -- 有8项
+    --  orient : Vector (Fin 3) 8 := (2,1,0,0,1,2,0,0) -- 有8项
+    --}
+    -- 那么 -a:F' {
+    --  permute: Perm (Fin 8) := (1<=2,2<=6,3,4,5<=1,6<=5,7,8) -- 有8项
+    --  orient : Vector (Fin 3) 8 := (2,1,0,0,1,2,0,0) -- 有8项
+    --}
+    --todo -- 定义应该找位置2还是找位置5???
+    -- 关键是经过a操作增量后，再经过a'增量，应该为0
+    -- 也就是需要满足 ps_mul a a' = {orient:0}
+    -- a'.orient ∘ a.permute.invFun + a.orient = 0
+    -- 因此 a'.orient ∘ a.permute.invFun = -a.orient
+    --  a'.orient = (-a.orient) ∘ a.permute
+    -- orient := fun x => - ps.orient (ps.permute⁻¹ x)
+    orient := (-ps.orient) ∘ ps.permute
+  }
 
-lemma ps_mul_left_inv {p o : ℕ+} : ∀ (a : PieceState p o), ps_mul (ps_inv a) a = {permute := 1, orient := 0} := by
+lemma ps_mul_left_inv {p o : ℕ+} :
+∀ (a : PieceState p o),
+ps_mul (ps_inv a) a = {permute := 1, orient := 0}
+-- 比如 a:F {
+--  permute: Perm (Fin 8) := (1=>2,2=>6,3,4,5=>1,6=>5,7,8) -- 有8项
+--  orient : Vector (Fin 3) 8 := (2,1,0,0,1,2,0,0) -- 有8项
+--}
+-- 那么 -a:F' {
+--  permute: Perm (Fin 8) := (1<=2,2<=6,3,4,5<=1,6<=5,7,8) -- 有8项
+--  orient : Vector (Fin 3) 8 := (2,1,0,0,1,2,0,0) -- 有8项
+--}
+:= by
   intro a
-  simp [ps_inv, ps_mul]
-  sorry
+  simp only [ps_inv]
+  simp only [ps_mul]
+  simp only [mul_left_inv]
+  simp only [invFun_as_coe, PieceState.mk.injEq, true_and]
+  exact neg_eq_iff_add_eq_zero.mp rfl
 
 /- This sets up a group structure for all Rubik's cube positions (including invalid ones that couldn't be reached from a solved state without removing pieces from the cube, twisting corners, etc.). -/
 instance PieceGroup (pieces orientations: ℕ+) :
