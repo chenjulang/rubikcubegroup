@@ -12,11 +12,13 @@ section RubiksSuperGroup
   instance (n : Nat) : DecidableEq (Perm (Fin n)) :=
     λ a b => mk.injEq a.toFun a.invFun _ _ b.toFun b.invFun _ _ ▸ inferInstance
 
+
   /- This PieceState structure is used to represent the entire state of both corner pieces and edge pieces.-/
   structure PieceState (pieces orientations: ℕ+) where
     permute : Perm (Fin pieces)
     orient : Fin pieces → Fin orientations
     deriving Repr, DecidableEq
+
 
   -- def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
   --   fun a2 a1 => {
@@ -28,19 +30,19 @@ section RubiksSuperGroup
       permute := a1.permute * a2.permute
       orient := (a2.orient ∘ a1.permute.invFun) + a1.orient
     }
-
-  -- variable (P1 : ℕ+)
-  -- variable (O1 : ℕ+)
-  -- instance : Mul (PieceState p o)  := ps_mul
-  --? How can I define multiplication, one, and inverses as implicit components of the PieceState type?
-  -- instance instMul {p o: ℕ+}: Mul (PieceState p o) where
-  --   mul := by
-  --     ps_mul
+ -- 将上面替换成下面的等价写法，好处：1.可以到处写*，lean系统会自动匹配到这个*的类型用法。
+  instance {p o : ℕ+} : Mul (PieceState p o) where
+    mul a1 a2 := {
+      permute := a1.permute * a2.permute
+      orient := (a2.orient ∘ a1.permute.invFun) + a1.orient
+    }
 
 
+  @[simp]
+  theorem permute_mul {p o : ℕ+} (a1 a2 : PieceState p o)
+  : (a1 * a2).permute = a1.permute * a2.permute
+  := rfl
 
-  -- @[simp]
-  -- lemma PieceState.mul_def {p o : ℕ+} (a b : PieceState p o) : a * b = ps_mul a b := by rfl
 
   -- @[simp]
   -- lemma ps_mul_assoc {p o : ℕ+} :
@@ -56,10 +58,11 @@ section RubiksSuperGroup
   --     exact rfl
   --   done
 
+
   @[simp]
   lemma ps_mul_assoc {p o : ℕ+} :
   ∀ (a b c : PieceState p o),
-  -- ps_mul a (ps_mul b c) = ps_mul (ps_mul a b) c
+  -- ps_mul a (ps_mul b c) = ps_mul (ps_mul a b) c -- 一样的，换个位置。
   ps_mul (ps_mul a b) c = ps_mul a (ps_mul b c)
   := by
     intro a b c
@@ -73,7 +76,6 @@ section RubiksSuperGroup
     done
 
 
-
   @[simp]
   lemma ps_one_mul {p o : ℕ+} :
   ∀ (a : PieceState p o),
@@ -84,6 +86,7 @@ section RubiksSuperGroup
     simp only [one_mul, invFun_as_coe, one_symm, coe_one, Function.comp.right_id, add_zero]
     done
 
+
   @[simp]
   lemma ps_mul_one {p o : ℕ+} :
   ∀ (a : PieceState p o),
@@ -93,7 +96,6 @@ section RubiksSuperGroup
     simp only [mul_one, invFun_as_coe, Pi.zero_comp, zero_add]
     done
 
-  --todo--
 
   def ps_inv {p o : ℕ+}
   : PieceState p o → PieceState p o
@@ -111,7 +113,7 @@ section RubiksSuperGroup
       --  permute: Perm (Fin 8) := (1<=2,2<=6,3,4,5<=1,6<=5,7,8) -- 有8项
       --  orient : Vector (Fin 3) 8 := (2,1,0,0,1,2,0,0) -- 有8项
       --}
-      --todo -- 定义应该找位置2还是找位置5???
+      --
       -- 关键是经过a操作增量后，再经过a'增量，应该为0
       -- 也就是需要满足 ps_mul a a' = {orient:0}
       -- a'.orient ∘ a.permute.invFun + a.orient = 0
@@ -146,17 +148,15 @@ section RubiksSuperGroup
   twisting corners, etc.). -/
   instance PieceGroup (p o: ℕ+) :
   Group (PieceState p o) := {
-    mul := by
-      exact ps_mul
-    mul_assoc :=
-      -- sorry
-      ps_mul_assoc
+    mul := ps_mul
+    mul_assoc := ps_mul_assoc
     one := {permute := 1, orient := 0}
     one_mul := ps_one_mul
     mul_one := ps_mul_one
     inv := ps_inv
     mul_left_inv := ps_mul_left_inv
   }
+
 
   @[simp]
   lemma PieceState.mul_def {p o : ℕ+} (a b : PieceState p o) : a * b = ps_mul a b := by rfl
@@ -166,30 +166,71 @@ section RubiksSuperGroup
   abbrev CornerType := PieceState 8 3
   abbrev EdgeType := PieceState 12 2
 
-  instance Rubiks2x2Group : Group CornerType := PieceGroup 8 3
+  instance Rubiks2x2Group :
+  Group CornerType
+  := PieceGroup 8 3
 
   abbrev RubiksSuperType := CornerType × EdgeType
-  instance RubiksSuperGroup : Group RubiksSuperType := Prod.instGroup
+  instance RubiksSuperGroup -- 就是手写证明中的群H
+  : Group RubiksSuperType
+  := Prod.instGroup --???
 
 end RubiksSuperGroup
 
-/- Creates an orientation function given a list of input-output pairs (with 0 for anything left unspecified). -/
-def Orient (p o : ℕ+) (pairs : List ((Fin p) × (Fin o))) : Fin p → Fin o :=
+/- Creates an orientation function given a list of input-output pairs
+(with 0 for anything left unspecified). -/
+def Orient
+(p o : ℕ+)
+(pairs : List ((Fin p) × (Fin o)))
+: Fin p → Fin o :=
   fun i =>
     match pairs.lookup i with
     | some x => x
     | none => 0
+-- 举例说明：
+  -- 当我们给定以下参数时：
+  -- p = 3
+  -- o = 2
+  -- pairs = [(0, 1), (1, 0), (2, 1)]
+  -- 我们可以调用函数 Orient 并传入这些参数：
 
-def Solved : RubiksSuperType := 1
+  -- result = Orient 3 2 [(0, 1), (1, 0), (2, 1)]
+  -- 函数将返回一个从 (Fin 3) 到 (Fin 2) 的映射，我们可以通过传递不同的 (Fin 3) 的值来查看结果。
+
+  -- 例如，当我们传递 0 作为输入时：
+
+  -- output = result 0
+  -- 函数将在 pairs 中查找键为 0 的元素，并返回匹配的结果。在我们的例子中，pairs 包含 (0, 1)，因此函数将返回 (Fin 2) 类型的值 1。
+
+  -- 同样地，当我们传递 1 或 2 作为输入时，函数将返回相应的结果 (Fin 2) 类型的值 0 和 1。
+
+  -- 所以，根据我们给定的参数，调用 result 函数并传递不同的输入值，我们可以得到以下结果：
+
+  -- result 0 = 1
+  -- result 1 = 0
+  -- result 2 = 1
+  -- 这是根据 pairs 中的映射关系得到的结果。
+#eval Orient 3 2 [(0, 1), (1, 0), (2, 1)] -- ![1, 0, 1]
+-- 换句话说，首先需要我们提供一组这样的数组：每一项形式为(Fin p)×(Fin o)，也就是都是2个分量的向量。
+-- 函数结果得到一个数组，有3项，每一项结果x满足：0 <= x < 2 。
+-- 得到的数组的每一项值是这样决定的：如果索引能遍历找每一项的第一个分量，找到相同的值，则返回第二个分量，反之返回0。
+
+def Solved
+: RubiksSuperType
+:= 1
 
 section FACE_TURNS
 
-  /- These two functions (from kendfrey's repository) create a cycle permutation, which is useful for defining the rotation of any given face, as seen directly below. -/
-  def cycleImpl {α : Type*} [DecidableEq α] : α → List α → Perm α
+  /- These two functions (from kendfrey's repository) create a cycle permutation,
+  which is useful for defining the rotation of any given face, as seen directly below. -/
+  --todo--
+  def cycleImpl {α : Type*} [DecidableEq α]
+  : α → List α → Perm α
     | _, [] => 1
     | a, (x :: xs) => swap a x * cycleImpl x xs
 
-  def cyclePieces {α : Type*} [DecidableEq α] : List α → Perm α
+  def cyclePieces {α : Type*} [DecidableEq α]
+  : List α → Perm α
     | [] => 1
     | (x :: xs) => cycleImpl x xs
 
