@@ -6,142 +6,231 @@ open Equiv Perm
 
 section RubiksSuperGroup
 
-#check (List.drop 2) -- :List α → List α //或 List ?m.2 → List ?m.2
-#check List.reverse -- :List α → List α
-#check (List.reverse ∘ List.drop 2)  -- :List ?m.26 → List ?m.26
-#eval (List.reverse ∘ List.drop 2) [3, 2, 4, 1]
--- List α → List α 主动喂了 List α后得到 List α
--- 再将 List α被动喂给“List α → List α”， 得到List α
--- 所以主动喂了一个参数List α，得到List α，因此复合函数类型为List ?m.26 → List ?m.26
+  instance (n : Nat) : Repr (Perm (Fin n)) :=
+    ⟨reprPrec ∘ Equiv.toFun⟩
 
-#check Equiv.toFun --在这里infoview查看≃
-#check Perm
-#check  Equiv.toFun -- : α ≃ β → α → β
--- 这里的α，β被LEAN推断成了(Fin n)类型，所以可以改写成：
--- (Fin n)≃(Fin n) → (Fin n) → (Fin n)
--- ≃就是Equiv的简称，perm是Equiv两个参数相同的一个结果：Equiv α α，因此可以继续改写成Perm
--- Perm (Fin n) → (Fin n) → (Fin n)
-#check reprPrec -- : α → ℕ → Lean.Format
--- 比如Equiv.toFun主动喂了一个Perm (Fin n)，得到(Fin n) → (Fin n)
--- (Fin n) → (Fin n)被动喂给“α → ℕ → Lean.Format”中的α，
--- 因此得到ℕ → Lean.Format
--- 因此两个函数的复合类型是：Perm (Fin n) → ℕ → Lean.Format
-
-instance (n : Nat) : Repr (Perm (Fin n)) where -- 是不是用来打印什么东西的呢？
-  reprPrec := reprPrec ∘ Equiv.toFun  -- :Perm (Fin n) → ℕ → Lean.Format
-  -- ⟨reprPrec ∘ Equiv.toFun⟩
--- reprPrec自然就有的？，那这个instance用来做什么用的呢，原来是为了合理的定义PieceState用的。
--- 必须有一个描述性的例子？
+  instance (n : Nat) : DecidableEq (Perm (Fin n)) :=
+    λ a b => mk.injEq a.toFun a.invFun _ _ b.toFun b.invFun _ _ ▸ inferInstance
 
 
-instance (n : Nat) : DecidableEq (Perm (Fin n)) := -- 两个“一一映射”是相等的，的证明
-  λ a b => --todo
-  -- ▸ 是一个运算符，它将前面的表达式的结果应用于后面的表达式。
-    mk.injEq a.toFun a.invFun _ _ b.toFun b.invFun _ _ ▸ inferInstance
--- 如果等式证明成立（即 a.toFun = b.toFun）那么判定结果将是 isTrue
--- 不深入说这个，因为我也不太了解。
-
-/-- This PieceState structure is used to represent the entire state of
- both corner pieces and edge pieces.描述角块和边块状态的-/
---  pieces即块，orientations即方向
-structure PieceState (pieces orientations: ℕ+) where
-  permute : Perm (Fin pieces) -- 一个有限集合的一个双射
-  orient : Fin pieces → Fin orientations -- 有限集合到有限集合的映射
-  deriving Repr, DecidableEq -- 能合理定义的条件，能描述，能判断2个对象是否相等
--- 为什么能用两个映射来表示状态呢???
+  /- This PieceState structure is used to represent the entire state of both corner pieces and edge pieces.-/
+  structure PieceState (pieces orientations: ℕ+) where
+    permute : Perm (Fin pieces)
+    orient : Fin pieces → Fin orientations
+    deriving Repr, DecidableEq
 
 
-def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
-  fun
-  | .mk permute1 orient1 => fun
-    | .mk permute2 orient2 => {
-      permute := permute2 * permute1 -- 这里*是代表“复合函数映射”吗？
-      orient := (orient1 ∘ permute2.invFun) + orient2 -- 这里+法就不懂了，做了什么？
-      -- + 在这里表示函数的加法操作，即将两个函数的结果进行相加。这里的相加操作是指对 Fin ↑p 中的元素应用两个函数，并将结果相加。
-      -- 为什么呢不会超出范围吗???
-        -- ：Fin ↑p → Fin ↑o
+  -- def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
+  --   fun a2 a1 => {
+  --     permute := a1.permute * a2.permute
+  --     orient := (a2.orient ∘ a1.permute.invFun) + a1.orient
+  --   }
+  def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
+    fun a1 a2 => {
+      permute := a1.permute * a2.permute
+      orient := (a2.orient ∘ a1.permute.invFun) + a1.orient
     }
-  -- -- 两种写法都可以
-  -- fun a b => {
-  --   permute := b.permute * a.permute
-  --   orient := (a.orient ∘ b.permute.invFun) + b.orient
-  -- }
+ -- 将上面替换成下面的等价写法，好处：1.可以到处写*，lean系统会自动匹配到这个*的类型用法。
+  instance {p o : ℕ+} : Mul (PieceState p o) where
+    mul a1 a2 := {
+      permute := a1.permute * a2.permute
+      orient := (a2.orient ∘ a1.permute.invFun) + a1.orient
+    }
 
--- instance: Mul (PieceState p o) := mul
---? How can I define multiplication, one, and inverses as implicit components of the PieceState type?
 
-lemma ps_mul_assoc {p o : ℕ+} :
-∀ (a b c : PieceState p o),
-  ps_mul (ps_mul a b) c
-  = ps_mul a (ps_mul b  c)
+  @[simp]
+  theorem permute_mul {p o : ℕ+} (a1 a2 : PieceState p o)
+  : (a1 * a2).permute = a1.permute * a2.permute
+  := rfl
+
+
+  -- @[simp]
+  -- lemma ps_mul_assoc {p o : ℕ+} :
+  -- ∀ (a b c : PieceState p o),
+  -- ps_mul a (ps_mul b c) = ps_mul (ps_mul a b) c := by
+  --   intro a b c
+  --   simp [ps_mul]
+  --   apply And.intro
+  --   · simp [Perm.mul_def]
+  --     simp [Equiv.trans_assoc]
+  --   · rw [← add_assoc]
+  --     simp only [add_left_inj]
+  --     exact rfl
+  --   done
+
+
+  @[simp]
+  lemma ps_mul_assoc {p o : ℕ+} :
+  ∀ (a b c : PieceState p o),
+  -- ps_mul a (ps_mul b c) = ps_mul (ps_mul a b) c -- 一样的，换个位置。
+  ps_mul (ps_mul a b) c = ps_mul a (ps_mul b c)
   := by
-  intro a b c
-  simp [ps_mul]
-  apply And.intro
-  · simp [Perm.mul_def, Equiv.trans_assoc]
-  · sorry
+    intro a b c
+    simp [ps_mul]
+    apply And.intro
+    · simp [Perm.mul_def]
+      simp [Equiv.trans_assoc]
+    · rw [← add_assoc]
+      simp only [add_left_inj]
+      exact rfl
+    done
 
-lemma ps_one_mul {p o : ℕ+} : ∀ (a : PieceState p o), ps_mul {permute := 1, orient := 0} a = a := by
-  intro a
-  simp [ps_mul]
 
-lemma ps_mul_one {p o : ℕ+} : ∀ (a : PieceState p o), ps_mul a {permute := 1, orient := 0} = a := by
-  intro a
-  simp [ps_mul]
+  @[simp]
+  lemma ps_one_mul {p o : ℕ+} :
+  ∀ (a : PieceState p o),
+  ps_mul {permute := 1, orient := 0} a  =  a
+  := by
+    intro a
+    simp only [ps_mul]
+    simp only [one_mul, invFun_as_coe, one_symm, coe_one, Function.comp.right_id, add_zero]
+    done
 
-def ps_inv {p o : ℕ+} : PieceState p o → PieceState p o :=
-  fun ps =>
-  { permute := ps.permute⁻¹
-    orient := fun x => - ps.orient (ps.permute⁻¹ x) }
 
-lemma ps_mul_left_inv {p o : ℕ+} : ∀ (a : PieceState p o), ps_mul (ps_inv a) a = {permute := 1, orient := 0} := by
-  intro a
-  simp [ps_inv, ps_mul]
-  sorry
+  @[simp]
+  lemma ps_mul_one {p o : ℕ+} :
+  ∀ (a : PieceState p o),
+  ps_mul a {permute := 1, orient := 0} = a := by
+    intro a
+    simp only [ps_mul]
+    simp only [mul_one, invFun_as_coe, Pi.zero_comp, zero_add]
+    done
 
-/- This sets up a group structure for all Rubik's cube positions (including invalid ones that couldn't be reached from a solved state without removing pieces from the cube, twisting corners, etc.). -/
-instance PieceGroup (pieces orientations: ℕ+) :
-Group (PieceState pieces orientations) := {
-  mul := ps_mul
-  mul_assoc := ps_mul_assoc
-  one := {permute := 1, orient := 0}
-  one_mul := ps_one_mul
-  mul_one := ps_mul_one
-  inv := ps_inv
-  mul_left_inv := ps_mul_left_inv
-}
 
-lemma PieceState.mul_def {p o : ℕ+} (a b : PieceState p o) : a * b = ps_mul a b := by rfl
+  def ps_inv {p o : ℕ+}
+  : PieceState p o → PieceState p o
+  :=
+    fun ps =>
+    {
+      permute := ps.permute⁻¹
+      -- 0 1 2
+      -- 举例:如果原方向增加量orient为(1,2,...)，那么逆操作应该是(-1,-2,...) , 也就是(+2,+1,...)
+      -- 比如 a:F {
+      --  permute: Perm (Fin 8) := (1=>2,2=>6,3,4,5=>1,6=>5,7,8) -- 有8项
+      --  orient : Vector (Fin 3) 8 := (2,1,0,0,1,2,0,0) -- 有8项
+      --}
+      -- 那么 -a:F' {
+      --  permute: Perm (Fin 8) := (1<=2,2<=6,3,4,5<=1,6<=5,7,8) -- 有8项
+      --  orient : Vector (Fin 3) 8 := (2,1,0,0,1,2,0,0) -- 有8项
+      --}
+      --
+      -- 关键是经过a操作增量后，再经过a'增量，应该为0
+      -- 也就是需要满足 ps_mul a a' = {orient:0}
+      -- a'.orient ∘ a.permute.invFun + a.orient = 0
+      -- 因此 a'.orient ∘ a.permute.invFun = -a.orient
+      --  a'.orient = (-a.orient) ∘ a.permute
+      -- orient := fun x => - ps.orient (ps.permute⁻¹ x)
+      orient := (-ps.orient) ∘ ps.permute
+    }
 
-lemma PieceState.inv_def {p o : ℕ+} (a b : PieceState p o) : a⁻¹ = ps_inv a := by rfl
+  @[simp]
+  lemma ps_mul_left_inv {p o : ℕ+} :
+  ∀ (a : PieceState p o),
+  ps_mul (ps_inv a) a = {permute := 1, orient := 0}
+  -- 比如 a:F {
+  --  permute: Perm (Fin 8) := (1=>2,2=>6,3,4,5=>1,6=>5,7,8) -- 有8项
+  --  orient : Vector (Fin 3) 8 := (2,1,0,0,1,2,0,0) -- 有8项
+  --}
+  -- 那么 -a:F' {
+  --  permute: Perm (Fin 8) := (1<=2,2<=6,3,4,5<=1,6<=5,7,8) -- 有8项
+  --  orient : Vector (Fin 3) 8 := (2,1,0,0,1,2,0,0) -- 有8项
+  --}
+  := by
+    intro a
+    simp only [ps_inv]
+    simp only [ps_mul]
+    simp only [mul_left_inv]
+    simp only [invFun_as_coe, PieceState.mk.injEq, true_and]
+    exact neg_eq_iff_add_eq_zero.mp rfl
 
-abbrev CornerType := PieceState 8 3
-abbrev EdgeType := PieceState 12 2
+  /- This sets up a group structure for all Rubik's cube positions
+  (including invalid ones that couldn't be reached from a solved state without removing pieces from the cube,
+  twisting corners, etc.). -/
+  instance PieceGroup (p o: ℕ+) :
+  Group (PieceState p o) := {
+    mul := ps_mul
+    mul_assoc := ps_mul_assoc
+    one := {permute := 1, orient := 0}
+    one_mul := ps_one_mul
+    mul_one := ps_mul_one
+    inv := ps_inv
+    mul_left_inv := ps_mul_left_inv
+  }
 
-instance Rubiks2x2Group : Group CornerType := PieceGroup 8 3
 
-abbrev RubiksSuperType := CornerType × EdgeType
-instance RubiksSuperGroup : Group RubiksSuperType := Prod.instGroup
+  @[simp]
+  lemma PieceState.mul_def {p o : ℕ+} (a b : PieceState p o) : a * b = ps_mul a b := by rfl
+  @[simp]
+  lemma PieceState.inv_def {p o : ℕ+} (a b : PieceState p o) : a⁻¹ = ps_inv a := by rfl
+
+  abbrev CornerType := PieceState 8 3
+  abbrev EdgeType := PieceState 12 2
+
+  instance Rubiks2x2Group :
+  Group CornerType
+  := PieceGroup 8 3
+
+  abbrev RubiksSuperType := CornerType × EdgeType
+  instance RubiksSuperGroup -- 就是手写证明中的群H
+  : Group RubiksSuperType
+  := Prod.instGroup --???
 
 end RubiksSuperGroup
 
-/- Creates an orientation function given a list of input-output pairs (with 0 for anything left unspecified). -/
-def Orient (p o : ℕ+) (pairs : List ((Fin p) × (Fin o))) : Fin p → Fin o :=
+/- Creates an orientation function given a list of input-output pairs
+(with 0 for anything left unspecified). -/
+def Orient
+(p o : ℕ+)
+(pairs : List ((Fin p) × (Fin o)))
+: Fin p → Fin o :=
   fun i =>
     match pairs.lookup i with
     | some x => x
     | none => 0
+-- 举例说明：
+  -- 当我们给定以下参数时：
+  -- p = 3
+  -- o = 2
+  -- pairs = [(0, 1), (1, 0), (2, 1)]
+  -- 我们可以调用函数 Orient 并传入这些参数：
 
-def Solved : RubiksSuperType := 1
+  -- result = Orient 3 2 [(0, 1), (1, 0), (2, 1)]
+  -- 函数将返回一个从 (Fin 3) 到 (Fin 2) 的映射，我们可以通过传递不同的 (Fin 3) 的值来查看结果。
+
+  -- 例如，当我们传递 0 作为输入时：
+
+  -- output = result 0
+  -- 函数将在 pairs 中查找键为 0 的元素，并返回匹配的结果。在我们的例子中，pairs 包含 (0, 1)，因此函数将返回 (Fin 2) 类型的值 1。
+
+  -- 同样地，当我们传递 1 或 2 作为输入时，函数将返回相应的结果 (Fin 2) 类型的值 0 和 1。
+
+  -- 所以，根据我们给定的参数，调用 result 函数并传递不同的输入值，我们可以得到以下结果：
+
+  -- result 0 = 1
+  -- result 1 = 0
+  -- result 2 = 1
+  -- 这是根据 pairs 中的映射关系得到的结果。
+#eval Orient 3 2 [(0, 1), (1, 0), (2, 1)] -- ![1, 0, 1]
+-- 换句话说，首先需要我们提供一组这样的数组：每一项形式为(Fin p)×(Fin o)，也就是都是2个分量的向量。
+-- 函数结果得到一个数组，有3项，每一项结果x满足：0 <= x < 2 。
+-- 得到的数组的每一项值是这样决定的：如果索引能遍历找每一项的第一个分量，找到相同的值，则返回第二个分量，反之返回0。
+
+def Solved
+: RubiksSuperType
+:= 1
 
 section FACE_TURNS
 
-  /- These two functions (from kendfrey's repository) create a cycle permutation, which is useful for defining the rotation of any given face, as seen directly below. -/
-  def cycleImpl {α : Type*} [DecidableEq α] : α → List α → Perm α
+  /- These two functions (from kendfrey's repository) create a cycle permutation,
+  which is useful for defining the rotation of any given face, as seen directly below. -/
+  --todo--
+  def cycleImpl {α : Type*} [DecidableEq α]
+  : α → List α → Perm α
     | _, [] => 1
     | a, (x :: xs) => swap a x * cycleImpl x xs
 
-  def cyclePieces {α : Type*} [DecidableEq α] : List α → Perm α
+  def cyclePieces {α : Type*} [DecidableEq α]
+  : List α → Perm α
     | [] => 1
     | (x :: xs) => cycleImpl x xs
 
@@ -179,7 +268,7 @@ section FACE_TURNS
   def F' := F⁻¹
   def B' := B⁻¹
 
-  #check Multiplicative.coeToFun
+  -- #check Multiplicative.coeToFun
 
   inductive FaceTurn : RubiksSuperType → Prop where
     | U : FaceTurn U
@@ -238,195 +327,195 @@ def EdgeFlip : RubiksSuperType := ({permute := 1, orient := 0}, {permute := 1, o
 
 section RubiksGroup
 
--- def ValidCube : Set RubiksSuperType := {c | Perm.sign c.fst.permute = Perm.sign c.snd.permute ∧ Fin.foldl 8 (fun acc n => acc + c.fst.orient n) 0 = 0 ∧ Fin.foldl 12 (fun acc n => acc + c.snd.orient n) 0 = 0}
-def ValidCube : Set RubiksSuperType := {c | Perm.sign c.fst.permute = Perm.sign c.snd.permute ∧ Finset.sum ({0,1,2,3,4,5,6,7} : Finset (Fin 8)) c.fst.orient = 0 ∧ Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11} : Finset (Fin 12)) c.snd.orient = 0}
+  -- def ValidCube : Set RubiksSuperType := {c | Perm.sign c.fst.permute = Perm.sign c.snd.permute ∧ Fin.foldl 8 (fun acc n => acc + c.fst.orient n) 0 = 0 ∧ Fin.foldl 12 (fun acc n => acc + c.snd.orient n) 0 = 0}
+  def ValidCube : Set RubiksSuperType := {c | Perm.sign c.fst.permute = Perm.sign c.snd.permute ∧ Finset.sum ({0,1,2,3,4,5,6,7} : Finset (Fin 8)) c.fst.orient = 0 ∧ Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11} : Finset (Fin 12)) c.snd.orient = 0}
 
-lemma mul_mem' {a b : RubiksSuperType} : a ∈ ValidCube → b ∈ ValidCube → a * b ∈ ValidCube := by
-  intro hav hbv
-  simp [ValidCube, PieceState.mul_def, ps_mul]
-  repeat' apply And.intro
-  { have h1 : sign a.1.permute = sign a.2.permute := by apply hav.left
-    have h2 : sign b.1.permute = sign b.2.permute := by apply hbv.left
-    simp [h1, h2] }
-  { have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} a.1.orient = 0 := by apply hav.right.left
-    have h2 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} b.1.orient = 0 := by apply hbv.right.left
-    -- rw [PieceState.orient, PieceState.orient]
-    rw [Finset.sum_add_distrib, h2]
-    sorry }
-  { sorry }
+  lemma mul_mem' {a b : RubiksSuperType} : a ∈ ValidCube → b ∈ ValidCube → a * b ∈ ValidCube := by
+    intro hav hbv
+    simp [ValidCube, PieceState.mul_def, ps_mul]
+    repeat' apply And.intro
+    { have h1 : sign a.1.permute = sign a.2.permute := by apply hav.left
+      have h2 : sign b.1.permute = sign b.2.permute := by apply hbv.left
+      simp [h1, h2] }
+    { have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} a.1.orient = 0 := by apply hav.right.left
+      have h2 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} b.1.orient = 0 := by apply hbv.right.left
+      -- rw [PieceState.orient, PieceState.orient]
+      rw [Finset.sum_add_distrib, h2]
+      sorry }
+    { sorry }
 
-#check Finset.sum_add_distrib
+  #check Finset.sum_add_distrib
 
-lemma one_mem' : 1 ∈ ValidCube := by
-    simp [ValidCube]
-    apply And.intro
-    { apply Eq.refl }
-    { apply And.intro
+  lemma one_mem' : 1 ∈ ValidCube := by
+      simp [ValidCube]
+      apply And.intro
       { apply Eq.refl }
-      { apply Eq.refl } }
+      { apply And.intro
+        { apply Eq.refl }
+        { apply Eq.refl } }
 
-lemma inv_mem' {x : RubiksSuperType} : x ∈ ValidCube → x⁻¹ ∈ ValidCube := by
-  intro hxv
-  simp [ValidCube, PieceState.inv_def, ps_inv]
-  repeat' apply And.intro
-  { apply hxv.left }
-  { sorry }
-  { sorry }
+  lemma inv_mem' {x : RubiksSuperType} : x ∈ ValidCube → x⁻¹ ∈ ValidCube := by
+    intro hxv
+    simp [ValidCube, PieceState.inv_def, ps_inv]
+    repeat' apply And.intro
+    { apply hxv.left }
+    { sorry }
+    { sorry }
 
-/- Defining the subgroup of valid Rubik's cube positions. -/
-instance RubiksGroup : Subgroup RubiksSuperType := {
-  carrier := ValidCube
-  mul_mem' := mul_mem'
-  one_mem' := one_mem'
-  inv_mem' := inv_mem'
-}
+  /- Defining the subgroup of valid Rubik's cube positions. -/
+  instance RubiksGroup : Subgroup RubiksSuperType := {
+    carrier := ValidCube
+    mul_mem' := mul_mem'
+    one_mem' := one_mem'
+    inv_mem' := inv_mem'
+  }
 
-/- Defining the intuitively valid set of Rubik's cube positions. -/
-inductive Reachable : RubiksSuperType → Prop where
-  | Solved : Reachable Solved
-  | FT : ∀x : RubiksSuperType, FaceTurn x → Reachable x
-  | mul : ∀x y : RubiksSuperType, Reachable x → Reachable y → Reachable (x * y)
+  /- Defining the intuitively valid set of Rubik's cube positions. -/
+  inductive Reachable : RubiksSuperType → Prop where
+    | Solved : Reachable Solved
+    | FT : ∀x : RubiksSuperType, FaceTurn x → Reachable x
+    | mul : ∀x y : RubiksSuperType, Reachable x → Reachable y → Reachable (x * y)
 
 end RubiksGroup
 
 /- The widget below was adapted from kendfrey's repository. -/
 section WIDGET
 
-inductive Color : Type | white | green | red | blue | orange | yellow
+  inductive Color : Type | white | green | red | blue | orange | yellow
 
-instance : ToString Color where
-  toString :=
-  fun c => match c with
-    | Color.white => "#ffffff"
-    | Color.green => "#00ff00"
-    | Color.red => "#ff0000"
-    | Color.blue => "#0000ff"
-    | Color.orange => "#ff7f00"
-    | Color.yellow => "#ffff00"
+  instance : ToString Color where
+    toString :=
+    fun c => match c with
+      | Color.white => "#ffffff"
+      | Color.green => "#00ff00"
+      | Color.red => "#ff0000"
+      | Color.blue => "#0000ff"
+      | Color.orange => "#ff7f00"
+      | Color.yellow => "#ffff00"
 
-def List.vec {α : Type} : Π a : List α, Vector α (a.length)
-  | [] => Vector.nil
-  | (x :: xs) => Vector.cons x (xs.vec)
+  def List.vec {α : Type} : Π a : List α, Vector α (a.length)
+    | [] => Vector.nil
+    | (x :: xs) => Vector.cons x (xs.vec)
 
-def corner_map : Vector (Vector Color 3) 8 :=
-[
-  [Color.white, Color.orange, Color.blue].vec,
-  [Color.white, Color.blue, Color.red].vec,
-  [Color.white, Color.red, Color.green].vec,
-  [Color.white, Color.green, Color.orange].vec,
-  [Color.yellow, Color.orange, Color.green].vec,
-  [Color.yellow, Color.green, Color.red].vec,
-  [Color.yellow, Color.red, Color.blue].vec,
-  [Color.yellow, Color.blue, Color.orange].vec
-].vec
+  def corner_map : Vector (Vector Color 3) 8 :=
+  [
+    [Color.white, Color.orange, Color.blue].vec,
+    [Color.white, Color.blue, Color.red].vec,
+    [Color.white, Color.red, Color.green].vec,
+    [Color.white, Color.green, Color.orange].vec,
+    [Color.yellow, Color.orange, Color.green].vec,
+    [Color.yellow, Color.green, Color.red].vec,
+    [Color.yellow, Color.red, Color.blue].vec,
+    [Color.yellow, Color.blue, Color.orange].vec
+  ].vec
 
-def edge_map : Vector (Vector Color 2) 12 :=
-[
-  [Color.white, Color.blue].vec,
-  [Color.white, Color.red].vec,
-  [Color.white, Color.green].vec,
-  [Color.white, Color.orange].vec,
-  [Color.yellow, Color.green].vec,
-  [Color.yellow, Color.red].vec,
-  [Color.yellow, Color.blue].vec,
-  [Color.yellow, Color.orange].vec,
-  [Color.blue, Color.orange].vec,
-  [Color.blue, Color.red].vec,
-  [Color.green, Color.red].vec,
-  [Color.green, Color.orange].vec
-].vec
+  def edge_map : Vector (Vector Color 2) 12 :=
+  [
+    [Color.white, Color.blue].vec,
+    [Color.white, Color.red].vec,
+    [Color.white, Color.green].vec,
+    [Color.white, Color.orange].vec,
+    [Color.yellow, Color.green].vec,
+    [Color.yellow, Color.red].vec,
+    [Color.yellow, Color.blue].vec,
+    [Color.yellow, Color.orange].vec,
+    [Color.blue, Color.orange].vec,
+    [Color.blue, Color.red].vec,
+    [Color.green, Color.red].vec,
+    [Color.green, Color.orange].vec
+  ].vec
 
-def corner_sticker : Fin 8 → Fin 3 → RubiksSuperType → Color :=
-  fun i o cube => (corner_map.get (cube.1.permute⁻¹ i)).get (Fin.sub o (cube.1.orient i))
+  def corner_sticker : Fin 8 → Fin 3 → RubiksSuperType → Color :=
+    fun i o cube => (corner_map.get (cube.1.permute⁻¹ i)).get (Fin.sub o (cube.1.orient i))
 
-def edge_sticker : Fin 12 → Fin 2 → RubiksSuperType → Color :=
-  fun i o cube => (edge_map.get (cube.2.permute⁻¹ i)).get (Fin.sub o (cube.2.orient i))
+  def edge_sticker : Fin 12 → Fin 2 → RubiksSuperType → Color :=
+    fun i o cube => (edge_map.get (cube.2.permute⁻¹ i)).get (Fin.sub o (cube.2.orient i))
 
-open Lean Widget
+  open Lean Widget
 
-def L8x3 : List (ℕ × ℕ) := (List.map (fun x => (x, 0)) (List.range 8)) ++ (List.map (fun x => (x, 1)) (List.range 8)) ++ (List.map (fun x => (x, 2)) (List.range 8))
-def L12x2 : List (ℕ × ℕ) := (List.map (fun x => (x, 0)) (List.range 12)) ++ (List.map (fun x => (x, 1)) (List.range 12))
+  def L8x3 : List (ℕ × ℕ) := (List.map (fun x => (x, 0)) (List.range 8)) ++ (List.map (fun x => (x, 1)) (List.range 8)) ++ (List.map (fun x => (x, 2)) (List.range 8))
+  def L12x2 : List (ℕ × ℕ) := (List.map (fun x => (x, 0)) (List.range 12)) ++ (List.map (fun x => (x, 1)) (List.range 12))
 
-def cubeStickerJson : RubiksSuperType → Json :=
-  fun cube => Json.mkObj
-  ((List.map (fun p => (s!"c_{p.fst}_{p.snd}", Json.str (toString (corner_sticker p.fst p.snd $ cube)))) L8x3)
-  ++
-  (List.map (fun p => (s!"e_{p.fst}_{p.snd}", Json.str (toString (edge_sticker p.fst p.snd $ cube)))) L12x2))
+  def cubeStickerJson : RubiksSuperType → Json :=
+    fun cube => Json.mkObj
+    ((List.map (fun p => (s!"c_{p.fst}_{p.snd}", Json.str (toString (corner_sticker p.fst p.snd $ cube)))) L8x3)
+    ++
+    (List.map (fun p => (s!"e_{p.fst}_{p.snd}", Json.str (toString (edge_sticker p.fst p.snd $ cube)))) L12x2))
 
-@[widget] def cubeWidget : UserWidgetDefinition where
-  name := "Cube State"
-  javascript :="
-    import * as React from 'react';
+  @[widget] def cubeWidget : UserWidgetDefinition where
+    name := "Cube State"
+    javascript :="
+      import * as React from 'react';
 
-  export default function (props) {
-    return React.createElement(
-      'div',
-      {
-        style: {
-          display: 'grid',
-          gridTemplateColumns: 'repeat(12, 20px)',
-          gridTemplateRows: 'repeat(9, 20px)',
-          rowGap: '2px',
-          columnGap: '2px',
-          margin: '10px',
+    export default function (props) {
+      return React.createElement(
+        'div',
+        {
+          style: {
+            display: 'grid',
+            gridTemplateColumns: 'repeat(12, 20px)',
+            gridTemplateRows: 'repeat(9, 20px)',
+            rowGap: '2px',
+            columnGap: '2px',
+            margin: '10px',
+          },
         },
-      },
-      React.createElement('div', {style: {gridColumn: '4', gridRow: '1', backgroundColor: props.c_0_0}}),
-      React.createElement('div', {style: {gridColumn: '5', gridRow: '1', backgroundColor: props.e_0_0}}),
-      React.createElement('div', {style: {gridColumn: '6', gridRow: '1', backgroundColor: props.c_1_0}}),
-      React.createElement('div', {style: {gridColumn: '4', gridRow: '2', backgroundColor: props.e_3_0}}),
-      React.createElement('div', {style: {gridColumn: '5', gridRow: '2', backgroundColor: '#ffffff'}}),
-      React.createElement('div', {style: {gridColumn: '6', gridRow: '2', backgroundColor: props.e_1_0}}),
-      React.createElement('div', {style: {gridColumn: '4', gridRow: '3', backgroundColor: props.c_3_0}}),
-      React.createElement('div', {style: {gridColumn: '5', gridRow: '3', backgroundColor: props.e_2_0}}),
-      React.createElement('div', {style: {gridColumn: '6', gridRow: '3', backgroundColor: props.c_2_0}}),
-      React.createElement('div', {style: {gridColumn: '1', gridRow: '4', backgroundColor: props.c_0_1}}),
-      React.createElement('div', {style: {gridColumn: '2', gridRow: '4', backgroundColor: props.e_3_1}}),
-      React.createElement('div', {style: {gridColumn: '3', gridRow: '4', backgroundColor: props.c_3_2}}),
-      React.createElement('div', {style: {gridColumn: '1', gridRow: '5', backgroundColor: props.e_8_1}}),
-      React.createElement('div', {style: {gridColumn: '2', gridRow: '5', backgroundColor: '#ff7f00'}}),
-      React.createElement('div', {style: {gridColumn: '3', gridRow: '5', backgroundColor: props.e_11_1}}),
-      React.createElement('div', {style: {gridColumn: '1', gridRow: '6', backgroundColor: props.c_7_2}}),
-      React.createElement('div', {style: {gridColumn: '2', gridRow: '6', backgroundColor: props.e_7_1}}),
-      React.createElement('div', {style: {gridColumn: '3', gridRow: '6', backgroundColor: props.c_4_1}}),
-      React.createElement('div', {style: {gridColumn: '4', gridRow: '4', backgroundColor: props.c_3_1}}),
-      React.createElement('div', {style: {gridColumn: '5', gridRow: '4', backgroundColor: props.e_2_1}}),
-      React.createElement('div', {style: {gridColumn: '6', gridRow: '4', backgroundColor: props.c_2_2}}),
-      React.createElement('div', {style: {gridColumn: '4', gridRow: '5', backgroundColor: props.e_11_0}}),
-      React.createElement('div', {style: {gridColumn: '5', gridRow: '5', backgroundColor: '#00ff00'}}),
-      React.createElement('div', {style: {gridColumn: '6', gridRow: '5', backgroundColor: props.e_10_0}}),
-      React.createElement('div', {style: {gridColumn: '4', gridRow: '6', backgroundColor: props.c_4_2}}),
-      React.createElement('div', {style: {gridColumn: '5', gridRow: '6', backgroundColor: props.e_4_1}}),
-      React.createElement('div', {style: {gridColumn: '6', gridRow: '6', backgroundColor: props.c_5_1}}),
-      React.createElement('div', {style: {gridColumn: '7', gridRow: '4', backgroundColor: props.c_2_1}}),
-      React.createElement('div', {style: {gridColumn: '8', gridRow: '4', backgroundColor: props.e_1_1}}),
-      React.createElement('div', {style: {gridColumn: '9', gridRow: '4', backgroundColor: props.c_1_2}}),
-      React.createElement('div', {style: {gridColumn: '7', gridRow: '5', backgroundColor: props.e_10_1}}),
-      React.createElement('div', {style: {gridColumn: '8', gridRow: '5', backgroundColor: '#ff0000'}}),
-      React.createElement('div', {style: {gridColumn: '9', gridRow: '5', backgroundColor: props.e_9_1}}),
-      React.createElement('div', {style: {gridColumn: '7', gridRow: '6', backgroundColor: props.c_5_2}}),
-      React.createElement('div', {style: {gridColumn: '8', gridRow: '6', backgroundColor: props.e_5_1}}),
-      React.createElement('div', {style: {gridColumn: '9', gridRow: '6', backgroundColor: props.c_6_1}}),
-      React.createElement('div', {style: {gridColumn: '10', gridRow: '4', backgroundColor: props.c_1_1}}),
-      React.createElement('div', {style: {gridColumn: '11', gridRow: '4', backgroundColor: props.e_0_1}}),
-      React.createElement('div', {style: {gridColumn: '12', gridRow: '4', backgroundColor: props.c_0_2}}),
-      React.createElement('div', {style: {gridColumn: '10', gridRow: '5', backgroundColor: props.e_9_0}}),
-      React.createElement('div', {style: {gridColumn: '11', gridRow: '5', backgroundColor: '#0000ff'}}),
-      React.createElement('div', {style: {gridColumn: '12', gridRow: '5', backgroundColor: props.e_8_0}}),
-      React.createElement('div', {style: {gridColumn: '10', gridRow: '6', backgroundColor: props.c_6_2}}),
-      React.createElement('div', {style: {gridColumn: '11', gridRow: '6', backgroundColor: props.e_6_1}}),
-      React.createElement('div', {style: {gridColumn: '12', gridRow: '6', backgroundColor: props.c_7_1}}),
-      React.createElement('div', {style: {gridColumn: '4', gridRow: '7', backgroundColor: props.c_4_0}}),
-      React.createElement('div', {style: {gridColumn: '5', gridRow: '7', backgroundColor: props.e_4_0}}),
-      React.createElement('div', {style: {gridColumn: '6', gridRow: '7', backgroundColor: props.c_5_0}}),
-      React.createElement('div', {style: {gridColumn: '4', gridRow: '8', backgroundColor: props.e_7_0}}),
-      React.createElement('div', {style: {gridColumn: '5', gridRow: '8', backgroundColor: '#ffff00'}}),
-      React.createElement('div', {style: {gridColumn: '6', gridRow: '8', backgroundColor: props.e_5_0}}),
-      React.createElement('div', {style: {gridColumn: '4', gridRow: '9', backgroundColor: props.c_7_0}}),
-      React.createElement('div', {style: {gridColumn: '5', gridRow: '9', backgroundColor: props.e_6_0}}),
-      React.createElement('div', {style: {gridColumn: '6', gridRow: '9', backgroundColor: props.c_6_0}}),
-    );
-  }"
+        React.createElement('div', {style: {gridColumn: '4', gridRow: '1', backgroundColor: props.c_0_0}}),
+        React.createElement('div', {style: {gridColumn: '5', gridRow: '1', backgroundColor: props.e_0_0}}),
+        React.createElement('div', {style: {gridColumn: '6', gridRow: '1', backgroundColor: props.c_1_0}}),
+        React.createElement('div', {style: {gridColumn: '4', gridRow: '2', backgroundColor: props.e_3_0}}),
+        React.createElement('div', {style: {gridColumn: '5', gridRow: '2', backgroundColor: '#ffffff'}}),
+        React.createElement('div', {style: {gridColumn: '6', gridRow: '2', backgroundColor: props.e_1_0}}),
+        React.createElement('div', {style: {gridColumn: '4', gridRow: '3', backgroundColor: props.c_3_0}}),
+        React.createElement('div', {style: {gridColumn: '5', gridRow: '3', backgroundColor: props.e_2_0}}),
+        React.createElement('div', {style: {gridColumn: '6', gridRow: '3', backgroundColor: props.c_2_0}}),
+        React.createElement('div', {style: {gridColumn: '1', gridRow: '4', backgroundColor: props.c_0_1}}),
+        React.createElement('div', {style: {gridColumn: '2', gridRow: '4', backgroundColor: props.e_3_1}}),
+        React.createElement('div', {style: {gridColumn: '3', gridRow: '4', backgroundColor: props.c_3_2}}),
+        React.createElement('div', {style: {gridColumn: '1', gridRow: '5', backgroundColor: props.e_8_1}}),
+        React.createElement('div', {style: {gridColumn: '2', gridRow: '5', backgroundColor: '#ff7f00'}}),
+        React.createElement('div', {style: {gridColumn: '3', gridRow: '5', backgroundColor: props.e_11_1}}),
+        React.createElement('div', {style: {gridColumn: '1', gridRow: '6', backgroundColor: props.c_7_2}}),
+        React.createElement('div', {style: {gridColumn: '2', gridRow: '6', backgroundColor: props.e_7_1}}),
+        React.createElement('div', {style: {gridColumn: '3', gridRow: '6', backgroundColor: props.c_4_1}}),
+        React.createElement('div', {style: {gridColumn: '4', gridRow: '4', backgroundColor: props.c_3_1}}),
+        React.createElement('div', {style: {gridColumn: '5', gridRow: '4', backgroundColor: props.e_2_1}}),
+        React.createElement('div', {style: {gridColumn: '6', gridRow: '4', backgroundColor: props.c_2_2}}),
+        React.createElement('div', {style: {gridColumn: '4', gridRow: '5', backgroundColor: props.e_11_0}}),
+        React.createElement('div', {style: {gridColumn: '5', gridRow: '5', backgroundColor: '#00ff00'}}),
+        React.createElement('div', {style: {gridColumn: '6', gridRow: '5', backgroundColor: props.e_10_0}}),
+        React.createElement('div', {style: {gridColumn: '4', gridRow: '6', backgroundColor: props.c_4_2}}),
+        React.createElement('div', {style: {gridColumn: '5', gridRow: '6', backgroundColor: props.e_4_1}}),
+        React.createElement('div', {style: {gridColumn: '6', gridRow: '6', backgroundColor: props.c_5_1}}),
+        React.createElement('div', {style: {gridColumn: '7', gridRow: '4', backgroundColor: props.c_2_1}}),
+        React.createElement('div', {style: {gridColumn: '8', gridRow: '4', backgroundColor: props.e_1_1}}),
+        React.createElement('div', {style: {gridColumn: '9', gridRow: '4', backgroundColor: props.c_1_2}}),
+        React.createElement('div', {style: {gridColumn: '7', gridRow: '5', backgroundColor: props.e_10_1}}),
+        React.createElement('div', {style: {gridColumn: '8', gridRow: '5', backgroundColor: '#ff0000'}}),
+        React.createElement('div', {style: {gridColumn: '9', gridRow: '5', backgroundColor: props.e_9_1}}),
+        React.createElement('div', {style: {gridColumn: '7', gridRow: '6', backgroundColor: props.c_5_2}}),
+        React.createElement('div', {style: {gridColumn: '8', gridRow: '6', backgroundColor: props.e_5_1}}),
+        React.createElement('div', {style: {gridColumn: '9', gridRow: '6', backgroundColor: props.c_6_1}}),
+        React.createElement('div', {style: {gridColumn: '10', gridRow: '4', backgroundColor: props.c_1_1}}),
+        React.createElement('div', {style: {gridColumn: '11', gridRow: '4', backgroundColor: props.e_0_1}}),
+        React.createElement('div', {style: {gridColumn: '12', gridRow: '4', backgroundColor: props.c_0_2}}),
+        React.createElement('div', {style: {gridColumn: '10', gridRow: '5', backgroundColor: props.e_9_0}}),
+        React.createElement('div', {style: {gridColumn: '11', gridRow: '5', backgroundColor: '#0000ff'}}),
+        React.createElement('div', {style: {gridColumn: '12', gridRow: '5', backgroundColor: props.e_8_0}}),
+        React.createElement('div', {style: {gridColumn: '10', gridRow: '6', backgroundColor: props.c_6_2}}),
+        React.createElement('div', {style: {gridColumn: '11', gridRow: '6', backgroundColor: props.e_6_1}}),
+        React.createElement('div', {style: {gridColumn: '12', gridRow: '6', backgroundColor: props.c_7_1}}),
+        React.createElement('div', {style: {gridColumn: '4', gridRow: '7', backgroundColor: props.c_4_0}}),
+        React.createElement('div', {style: {gridColumn: '5', gridRow: '7', backgroundColor: props.e_4_0}}),
+        React.createElement('div', {style: {gridColumn: '6', gridRow: '7', backgroundColor: props.c_5_0}}),
+        React.createElement('div', {style: {gridColumn: '4', gridRow: '8', backgroundColor: props.e_7_0}}),
+        React.createElement('div', {style: {gridColumn: '5', gridRow: '8', backgroundColor: '#ffff00'}}),
+        React.createElement('div', {style: {gridColumn: '6', gridRow: '8', backgroundColor: props.e_5_0}}),
+        React.createElement('div', {style: {gridColumn: '4', gridRow: '9', backgroundColor: props.c_7_0}}),
+        React.createElement('div', {style: {gridColumn: '5', gridRow: '9', backgroundColor: props.e_6_0}}),
+        React.createElement('div', {style: {gridColumn: '6', gridRow: '9', backgroundColor: props.c_6_0}}),
+      );
+    }"
 
 end WIDGET
 

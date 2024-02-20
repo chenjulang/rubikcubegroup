@@ -102,6 +102,7 @@ lemma solved_is_solved : IsSolved (Solved) := by
 
 -- set_option maxHeartbeats 50000
 
+
 lemma four_rs_solved : IsSolved (R * R * R * R) := by
   simp [R, IsSolved, CornersSolved, EdgesSolved, Solved]
   repeat (all_goals apply And.intro)
