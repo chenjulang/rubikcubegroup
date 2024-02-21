@@ -38,7 +38,7 @@ section RubiksSuperGroup
     }
 
 
-  @[simp]
+  @[simp] -- 这个同时代表了手写证明中的ρ和σ的同态性质
   theorem permute_mul {p o : ℕ+} (a1 a2 : PieceState p o)
   : (a1 * a2).permute = a1.permute * a2.permute
   := rfl
@@ -382,7 +382,6 @@ def EdgeFlip : RubiksSuperType
 
 section RubiksGroup
 
-  --todo
   -- 魔方第二基本定理直接就定义了～～～其实也不全是，只是两个定义，两个定义需要互推。（要推生成集）
   -- def ValidCube : Set RubiksSuperType := {c | Perm.sign c.fst.permute = Perm.sign c.snd.permute ∧ Fin.foldl 8 (fun acc n => acc + c.fst.orient n) 0 = 0 ∧ Fin.foldl 12 (fun acc n => acc + c.snd.orient n) 0 = 0}
   def ValidCube :
@@ -393,26 +392,69 @@ section RubiksGroup
     c |
     Perm.sign c.fst.permute = Perm.sign c.snd.permute
     ∧
-    Finset.sum ({0,1,2,3,4,5,6,7} : Finset (Fin 8)) c.fst.orient = 0
+    Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) c.fst.orient = 0
     ∧
-    Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11} : Finset (Fin 12)) c.snd.orient = 0
+    Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) c.snd.orient = 0
   }
 
-  lemma mul_mem' {a b : RubiksSuperType} : a ∈ ValidCube → b ∈ ValidCube → a * b ∈ ValidCube := by
-    intro hav hbv
-    simp [ValidCube, PieceState.mul_def, ps_mul]
-    repeat' apply And.intro
-    { have h1 : sign a.1.permute = sign a.2.permute := by apply hav.left
-      have h2 : sign b.1.permute = sign b.2.permute := by apply hbv.left
-      simp [h1, h2] }
-    { have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} a.1.orient = 0 := by apply hav.right.left
-      have h2 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} b.1.orient = 0 := by apply hbv.right.left
-      -- rw [PieceState.orient, PieceState.orient]
-      rw [Finset.sum_add_distrib, h2]
-      sorry }
-    { sorry }
+  --todo--会不会是orient定义错了呢？
 
-  #check Finset.sum_add_distrib
+  lemma mul_mem' {a b : RubiksSuperType}
+  : a ∈ ValidCube → b ∈ ValidCube → a * b ∈ ValidCube
+  := by
+    intro hav hbv
+    simp only [ValidCube]
+    -- simp only [PieceState.mul_def]
+    -- simp only [ps_mul]
+    -- repeat' apply And.intro
+    apply And.intro
+    {
+      have h1 : sign a.1.permute = sign a.2.permute
+        := by apply hav.left
+      have h2 : sign b.1.permute = sign b.2.permute
+        := by apply hbv.left
+      simp only [Prod.fst_mul, PieceState.mul_def, Prod.snd_mul]
+      simp only [ps_mul]
+      simp only [map_mul]
+      exact Mathlib.Tactic.LinearCombination.mul_pf h1 h2
+    }
+    apply And.intro
+    {
+      have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} a.1.orient = 0
+        := by apply hav.right.left
+      have h2 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} b.1.orient = 0
+        := by apply hbv.right.left
+      -- rw [PieceState.orient, PieceState.orient]
+      -- rw [Finset.sum_add_distrib, h2]
+      simp only [Finset.mem_singleton, Finset.mem_insert, zero_ne_one, false_or, Prod.fst_mul,PieceState.mul_def]
+      simp only [ps_mul]
+      simp only [Finset.mem_singleton, Finset.mem_insert, zero_ne_one, false_or, invFun_as_coe,
+        Pi.add_apply, Function.comp_apply]
+      simp only [Finset.sum_add_distrib]
+      rw [h1]
+      simp only [add_zero]
+      -- refine Equiv.Perm.prod_comp
+      -- apply h2
+      sorry
+    }
+    {
+      have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8,9,10,11} a.2.orient = 0
+        := by apply hav.right.right
+      have h2 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8,9,10,11} b.2.orient = 0
+        := by apply hbv.right.right
+      simp only [Finset.mem_singleton, Finset.mem_insert, zero_ne_one, false_or, Prod.snd_mul,
+        PieceState.mul_def]
+      simp only [ps_mul]
+      simp only [Finset.mem_singleton, Finset.mem_insert, zero_ne_one, false_or, invFun_as_coe,
+        Pi.add_apply, Function.comp_apply]
+      simp only [Finset.sum_add_distrib]
+      rw [h1]
+      simp only [add_zero]
+      sorry
+    }
+
+  -- #check Finset.sum
+  -- #check Finset.sum_add_distrib
 
   lemma one_mem' : 1 ∈ ValidCube := by
       simp [ValidCube]
