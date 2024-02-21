@@ -397,9 +397,11 @@ section RubiksGroup
     Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) c.snd.orient = 0
   }
 
-  --todo--会不会是orient定义错了呢？
-
+  @[simp]
   lemma mul_mem' {a b : RubiksSuperType}
+  -- {i1 i2 i3 i4 i5 i6 i7 i8: Fin 8}
+  -- (s : Finset (Fin 8):= {i1,i2,i3,i4,i5,i6,i7,i8})
+  -- (notEq: ∀ x∈s ,∀ y∈s , x≠y)
   : a ∈ ValidCube → b ∈ ValidCube → a * b ∈ ValidCube
   := by
     intro hav hbv
@@ -435,6 +437,7 @@ section RubiksGroup
       simp only [add_zero]
       -- refine Equiv.Perm.prod_comp
       -- apply h2
+      -- rw [Finset.sum_range_succ]
       sorry
     }
     {
@@ -456,22 +459,39 @@ section RubiksGroup
   -- #check Finset.sum
   -- #check Finset.sum_add_distrib
 
-  lemma one_mem' : 1 ∈ ValidCube := by
-      simp [ValidCube]
-      apply And.intro
+  @[simp]
+  lemma one_mem'
+  : 1 ∈ ValidCube
+  := by
+    simp [ValidCube]
+    apply And.intro
+    { apply Eq.refl }
+    { apply And.intro
       { apply Eq.refl }
-      { apply And.intro
-        { apply Eq.refl }
-        { apply Eq.refl } }
+      { apply Eq.refl }
+    }
 
-  lemma inv_mem' {x : RubiksSuperType} : x ∈ ValidCube → x⁻¹ ∈ ValidCube := by
+  @[simp]
+  lemma inv_mem' {x : RubiksSuperType}
+  : x∈ValidCube → x⁻¹∈ValidCube
+  := by
     intro hxv
     simp [ValidCube, PieceState.inv_def, ps_inv]
-    repeat' apply And.intro
+    -- repeat' apply And.intro
+    apply And.intro
     { apply hxv.left }
-    { sorry }
-    { sorry }
+    apply And.intro
+    { have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} x.1.orient = 0
+        := by apply hxv.right.left
+      sorry
+    }
+    {
+      have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8,9,10,11} x.2.orient = 0
+        := by apply hxv.right.right
+      sorry
+    }
 
+  --todo--
   /- Defining the subgroup of valid Rubik's cube positions. -/
   instance RubiksGroup : Subgroup RubiksSuperType := {
     carrier := ValidCube
