@@ -8,6 +8,7 @@ open Equiv Perm
 
 section ValidityChecks
 
+
 -- lemma RValid : R ∈ ValidCube :=
 --   by
 --     simp [R, ValidCube]
@@ -101,7 +102,6 @@ lemma solved_is_solved : IsSolved (Solved) := by
     { apply Eq.refl } }
 
 -- set_option maxHeartbeats 50000
-
 
 lemma four_rs_solved : IsSolved (R * R * R * R) := by
   simp [R, IsSolved, CornersSolved, EdgesSolved, Solved]

@@ -491,7 +491,6 @@ section RubiksGroup
       sorry
     }
 
-  --todo--
   /- Defining the subgroup of valid Rubik's cube positions. -/
   instance RubiksGroup : Subgroup RubiksSuperType := {
     carrier := ValidCube
@@ -501,33 +500,45 @@ section RubiksGroup
   }
 
   /- Defining the intuitively valid set of Rubik's cube positions. -/
-  inductive Reachable : RubiksSuperType → Prop where
+  inductive Reachable
+  : RubiksSuperType → Prop
+  where
     | Solved : Reachable Solved
     | FT : ∀x : RubiksSuperType, FaceTurn x → Reachable x
     | mul : ∀x y : RubiksSuperType, Reachable x → Reachable y → Reachable (x * y)
 
 end RubiksGroup
 
+
 /- The widget below was adapted from kendfrey's repository. -/
 section WIDGET
 
-  inductive Color : Type | white | green | red | blue | orange | yellow
+  inductive Color
+  : Type
+  | white | green | red | blue | orange | yellow
 
   instance : ToString Color where
     toString :=
-    fun c => match c with
-      | Color.white => "#ffffff"
-      | Color.green => "#00ff00"
-      | Color.red => "#ff0000"
-      | Color.blue => "#0000ff"
-      | Color.orange => "#ff7f00"
-      | Color.yellow => "#ffff00"
+      fun c => match c with
+        | Color.white => "#ffffff"
+        | Color.green => "#00ff00"
+        | Color.red => "#ff0000"
+        | Color.blue => "#0000ff"
+        | Color.orange => "#ff7f00"
+        | Color.yellow => "#ffff00"
 
-  def List.vec {α : Type} : Π a : List α, Vector α (a.length)
+  /--  只是将 List 变成Vector-/
+  def List.vec {α : Type}
+  : Π a : List α, Vector α (a.length)
     | [] => Vector.nil
     | (x :: xs) => Vector.cons x (xs.vec)
 
-  def corner_map : Vector (Vector Color 3) 8 :=
+  -- #check List.vec {1,2,3,4,5}
+
+
+  def corner_map
+  : Vector (Vector Color 3) 8
+  :=
   [
     [Color.white, Color.orange, Color.blue].vec,
     [Color.white, Color.blue, Color.red].vec,
@@ -538,6 +549,7 @@ section WIDGET
     [Color.yellow, Color.red, Color.blue].vec,
     [Color.yellow, Color.blue, Color.orange].vec
   ].vec
+
 
   def edge_map : Vector (Vector Color 2) 12 :=
   [
@@ -555,24 +567,54 @@ section WIDGET
     [Color.green, Color.orange].vec
   ].vec
 
-  def corner_sticker : Fin 8 → Fin 3 → RubiksSuperType → Color :=
-    fun i o cube => (corner_map.get (cube.1.permute⁻¹ i)).get (Fin.sub o (cube.1.orient i))
+  def corner_sticker
+  : Fin 8 → Fin 3 → RubiksSuperType → Color
+  :=
+    fun i o cube =>
+    (corner_map.get (cube.1.permute⁻¹ i)).get (Fin.sub o (cube.1.orient i))
 
-  def edge_sticker : Fin 12 → Fin 2 → RubiksSuperType → Color :=
+  def edge_sticker
+  : Fin 12 → Fin 2 → RubiksSuperType → Color
+  :=
     fun i o cube => (edge_map.get (cube.2.permute⁻¹ i)).get (Fin.sub o (cube.2.orient i))
+
+  --todo--
 
   open Lean Widget
 
-  def L8x3 : List (ℕ × ℕ) := (List.map (fun x => (x, 0)) (List.range 8)) ++ (List.map (fun x => (x, 1)) (List.range 8)) ++ (List.map (fun x => (x, 2)) (List.range 8))
-  def L12x2 : List (ℕ × ℕ) := (List.map (fun x => (x, 0)) (List.range 12)) ++ (List.map (fun x => (x, 1)) (List.range 12))
+  def L8x3
+  : List (ℕ × ℕ)
+  :=
+  (List.map (fun x => (x, 0)) (List.range 8))
+  ++
+  (List.map (fun x => (x, 1)) (List.range 8))
+  ++
+  (List.map (fun x => (x, 2)) (List.range 8))
+  def L12x2
+  : List (ℕ × ℕ)
+  :=
+  (List.map (fun x => (x, 0)) (List.range 12))
+  ++
+  (List.map (fun x => (x, 1)) (List.range 12))
 
-  def cubeStickerJson : RubiksSuperType → Json :=
+  def cubeStickerJson
+  : RubiksSuperType → Json
+  :=
     fun cube => Json.mkObj
-    ((List.map (fun p => (s!"c_{p.fst}_{p.snd}", Json.str (toString (corner_sticker p.fst p.snd $ cube)))) L8x3)
-    ++
-    (List.map (fun p => (s!"e_{p.fst}_{p.snd}", Json.str (toString (edge_sticker p.fst p.snd $ cube)))) L12x2))
+    (
+      (List.map
+        (fun p => (s!"c_{p.fst}_{p.snd}", Json.str (toString (corner_sticker p.fst p.snd $ cube))))
+        L8x3
+      )
+      ++
+      (List.map
+        (fun p => (s!"e_{p.fst}_{p.snd}", Json.str (toString (edge_sticker p.fst p.snd $ cube))))
+        L12x2
+      )
+    )
 
-  @[widget] def cubeWidget : UserWidgetDefinition where
+  @[widget]
+  def cubeWidget : UserWidgetDefinition where
     name := "Cube State"
     javascript :="
       import * as React from 'react';
@@ -658,16 +700,32 @@ end WIDGET
 /- Useful predicates for the SolutionAlgorithm, as well as for some minor proofs. -/
 section SolutionState
 
-def CornersSolved : RubiksSuperType → Prop :=
-  fun c => c.fst.permute = 1 ∧ c.fst.orient = 0
+  def CornersSolved :
+  RubiksSuperType → Prop
+  :=
+    fun c =>
+      c.fst.permute = 1
+      ∧
+      c.fst.orient = 0
 
-def EdgesSolved : RubiksSuperType → Prop :=
-  fun c => c.snd.permute = 1 ∧ c.snd.orient = 0
+  def EdgesSolved
+  : RubiksSuperType → Prop
+  :=
+    fun c =>
+      c.snd.permute = 1
+      ∧
+      c.snd.orient = 0
 
-def IsSolved : RubiksSuperType → Prop := fun c => CornersSolved c ∧ EdgesSolved c
+  def IsSolved
+  : RubiksSuperType → Prop
+  :=
+    fun c =>
+      CornersSolved c
+      ∧
+      EdgesSolved c
 
-instance {c} : Decidable (CornersSolved c) := by apply And.decidable
-instance {c} : Decidable (EdgesSolved c) := by apply And.decidable
-instance {c} : Decidable (IsSolved c) := by apply And.decidable
+  instance {c} : Decidable (CornersSolved c) := by apply And.decidable
+  instance {c} : Decidable (EdgesSolved c) := by apply And.decidable
+  instance {c} : Decidable (IsSolved c) := by apply And.decidable
 
 end SolutionState
