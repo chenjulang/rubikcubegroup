@@ -365,6 +365,8 @@ def TPerm : RubiksSuperType -- 这个*是在哪里定义的呢？，看定义就
   := R * U * R' * U' * R' * F * R2 * U' * R' * U' * R * U * R' * F'
 def AlteredYPerm : RubiksSuperType
   := R * U' * R' * U' * R * U * R' * F' * R * U * R' * U' * R' * F * R
+def MyTestActions : RubiksSuperType
+  := R *U'* R* U* R* U* R* U'* R'* U'* R* R
 
 
 def CornerTwist : RubiksSuperType  -- 应该是形容两个不可能的魔方状态：只旋转一次角块，还有只旋转一次棱块
@@ -696,6 +698,9 @@ end WIDGET
 #widget cubeWidget (cubeStickerJson AlteredYPerm)
 #widget cubeWidget (cubeStickerJson CornerTwist)
 #widget cubeWidget (cubeStickerJson EdgeFlip)
+
+#widget cubeWidget (cubeStickerJson MyTestActions)
+
 
 /- Useful predicates for the SolutionAlgorithm, as well as for some minor proofs. -/
 section SolutionState

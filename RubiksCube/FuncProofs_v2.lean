@@ -760,8 +760,8 @@ section ValidityChecks
       -- repeat' apply And.intro
       apply And.intro
       repeat apply Eq.refl
-      simp only [Finset.mem_singleton, Finset.mem_insert, zero_ne_one, false_or, Pi.zero_apply,
-        Finset.sum_const_zero, and_self]
+      exact Prod.mk_eq_zero.mp rfl
+
 
       -- all_goals apply Eq.refl
 

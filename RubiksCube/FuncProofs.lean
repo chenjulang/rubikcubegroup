@@ -3,20 +3,20 @@ import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.GroupTheory.Perm.Fin
 
 open Equiv Perm
+set_option maxHeartbeats 400000
 
 /- NOTE: ft_valid and reachable_valid will take a moment for Lean to process. -/
 -- 怎么缩短时间呢？
 
 section ValidityChecks
 
-  --不要：
+  --例子：
   -- lemma RValid : R ∈ ValidCube :=
   --   by
   --     simp [R, ValidCube]
   --     apply And.intro
   --     { apply Eq.refl }
   --     { apply Eq.refl }
-
 
   lemma ft_valid
   : ∀x : RubiksSuperType,
@@ -26,47 +26,58 @@ section ValidityChecks
       intro x hx
       cases hx with
       | _ =>
-        simp [ValidCube, U, D, R, L, F, B, U2, D2, R2, L2, F2, B2, U', D', R', L', F', B']
-        repeat' apply And.intro
-        all_goals apply Eq.refl
+        -- method 1:
+        -- simp [ValidCube, U, D, R, L, F, B, U2, D2, R2, L2, F2, B2, U', D', R', L', F', B']
+        -- repeat' apply And.intro
+        -- all_goals apply Eq.refl
+        --------------
+        -- method 2:
+        -- simp only [ValidCube, U, D, R, L, F, B, U2, D2, R2, L2, F2, B2, U', D', R', L', F', B']
+        -- <;> apply And.intro;apply Eq.refl;exact Prod.mk_eq_zero.mp rfl
+        -- done
+        sorry
 
 
-  -- lemma TPermValid : TPerm ∈ ValidCube :=
-  --   by
-  --     simp [TPerm]
-  --     repeat apply RubiksGroup.mul_mem'
-  --     all_goals apply ft_valid
-  --     { apply FaceTurn.R }
-  --     { apply FaceTurn.U }
-  --     { apply FaceTurn.R' }
-  --     { apply FaceTurn.U' }
-  --     { apply FaceTurn.R' }
-  --     { apply FaceTurn.F }
-  --     { apply FaceTurn.R2 }
-  --     { apply FaceTurn.U' }
-  --     { apply FaceTurn.R' }
-  --     { apply FaceTurn.U' }
-  --     { apply FaceTurn.R }
-  --     { apply FaceTurn.U }
-  --     { apply FaceTurn.R' }
-  --     { apply FaceTurn.F' }
+  lemma TPermValid : TPerm ∈ ValidCube :=
+    by
+      simp [TPerm]
+      repeat apply RubiksGroup.mul_mem'
+      all_goals apply ft_valid
+      { apply FaceTurn.R }
+      { apply FaceTurn.U }
+      { apply FaceTurn.R' }
+      { apply FaceTurn.U' }
+      { apply FaceTurn.R' }
+      { apply FaceTurn.F }
+      { apply FaceTurn.R2 }
+      { apply FaceTurn.U' }
+      { apply FaceTurn.R' }
+      { apply FaceTurn.U' }
+      { apply FaceTurn.R }
+      { apply FaceTurn.U }
+      { apply FaceTurn.R' }
+      { apply FaceTurn.F' }
 
-  -- lemma CornerTwistInvalid : CornerTwist ∉ ValidCube :=
-  --   by
-  --     simp [CornerTwist, ValidCube]
-  --     intro h
-  --     -- have h2 : ∀x ∈ ({0,1,2,3,4,5,6,7} : Set (Fin 8)), (fun | 0 => 1 | _ => 0) x = 0 := Finset.sum_eq_zero_iff.mp h
-  --     sorry
+  --todo--
 
-  -- lemma EdgeFlipInvalid : EdgeFlip ∉ ValidCube :=
-  --   by
-  --     simp [EdgeFlip, ValidCube]
-  --     sorry
+
+  lemma CornerTwistInvalid : CornerTwist ∉ ValidCube :=
+    by
+      simp only [CornerTwist, ValidCube]
+      intro h
+
+      -- have h2 : ∀x ∈ ({0,1,2,3,4,5,6,7} : Set (Fin 8)), (fun | 0 => 1 | _ => 0) x = 0 := Finset.sum_eq_zero_iff.mp h
+      sorry
+
+  lemma EdgeFlipInvalid : EdgeFlip ∉ ValidCube :=
+    by
+      simp [EdgeFlip, ValidCube]
+      sorry
 
 end ValidityChecks
 
 
--- /- This theorem shows that the set of valid cube states as defined in terms of permutations and orientations of the pieces contains all positions reachable with standard Rubik's cube moves. Further showing that these two sets are in fact the same is equivalent to providing a solution algorithm for any valid cube state. I do not have a proof that the solution algorithm in `SolutionAlgorithm.lean` will solve any valid cube, but I am confident that this is the case (assuming no bugs in my concretely defined setup moves). -/
+/- This theorem shows that the set of valid cube states as defined in terms of permutations and orientations of the pieces contains all positions reachable with standard Rubik's cube moves. Further showing that these two sets are in fact the same is equivalent to providing a solution algorithm for any valid cube state. I do not have a proof that the solution algorithm in `SolutionAlgorithm.lean` will solve any valid cube, but I am confident that this is the case (assuming no bugs in my concretely defined setup moves). -/
 -- theorem reachable_valid : ∀x : RubiksSuperType, Reachable x → x ∈ ValidCube := by
 --   intro x hrx
 --   induction hrx with
