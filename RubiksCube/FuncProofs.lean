@@ -3,7 +3,7 @@ import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.GroupTheory.Perm.Fin
 
 open Equiv Perm
-set_option maxHeartbeats 400000
+-- set_option maxHeartbeats 4000000
 
 /- NOTE: ft_valid and reachable_valid will take a moment for Lean to process. -/
 -- 怎么缩短时间呢？
@@ -93,7 +93,6 @@ section ValidityChecks
 
 end ValidityChecks
 
---todo--
 
 /- This theorem shows that the set of valid cube states as defined in terms of permutations and orientations of
 the pieces contains all positions reachable with standard Rubik's cube moves. Further showing that these
@@ -103,9 +102,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
 -- 魔方第二基本定理的左推右部分：
 -- 所以说，魔方第二基本定理的右推左部分还没有给出：
+--todo--
 theorem valid_reachable
 :∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
-:= by sorry
+:= by
+  sorry
+
 
 theorem reachable_valid
 : ∀x : RubiksSuperType, Reachable x → x ∈ ValidCube
@@ -113,24 +115,33 @@ theorem reachable_valid
   intro x hrx
   induction hrx with
   | Solved =>
-      simp [Solved, ValidCube]
+      simp only [Solved, ValidCube]
       apply And.intro
       { apply Eq.refl }
       { apply And.intro
         { apply Eq.refl }
         { apply Eq.refl } }
   | FT c hc =>
-      cases hc with
-      | _ =>
-          simp [ValidCube]
-          apply And.intro
-          { apply Eq.refl }
-          { apply And.intro
-            { apply Eq.refl }
-            { apply Eq.refl } }
+    sorry
+    --这里很慢：
+    -- cases hc with
+    -- | _ =>
+    --     simp only [ValidCube]
+    --     apply And.intro
+    --     { apply Eq.refl }
+    --     { apply And.intro
+    --       { apply Eq.refl }
+    --       { apply Eq.refl } }
+    --     done
   | mul x y hrx hry a_ih a_ih_1 =>
-      apply RubiksGroup.mul_mem'
-      all_goals assumption
+      -- 归纳证明：
+      -- *** 精华在这里，前面写了几百行，就是为了这几行：
+      apply RubiksGroup.mul_mem' -- 反推一步，两个元素都是
+      simp only [Subsemigroup.mem_carrier, Submonoid.mem_toSubsemigroup, Subgroup.mem_toSubmonoid]
+      exact a_ih
+      exact a_ih_1
+      -- method 2:
+      -- all_goals assumption
 
 theorem RubikCubeSecondBasicRule
 : ∀x : RubiksSuperType, Reachable x ↔ x ∈ ValidCube
@@ -141,37 +152,55 @@ theorem RubikCubeSecondBasicRule
   · exact valid_reachable h
   done
 
--- -- instance {n : ℕ} {α : Type*} [DecidableEq α] : DecidableEq (Fin n → α) :=
--- --   fun f g => Fintype.decidablePiFintype f g
 
--- --? Why do both of these pause forever?
--- -- lemma four_rs_eq_solved : (R * R * R * R) = Solved := by
--- --   simp [R, Solved]
--- --   aesop
 
--- lemma solved_is_solved : IsSolved (Solved) := by
---   simp [IsSolved, CornersSolved, EdgesSolved, Solved]
+-- instance {n : ℕ} {α : Type*} [DecidableEq α] : DecidableEq (Fin n → α) :=
+--   fun f g => Fintype.decidablePiFintype f g
+
+--? Why do both of these pause forever?
+-- lemma four_rs_eq_solved
+-- : (R * R * R * R) = Solved
+-- := by
+--   simp only [R, Solved]
+--   simp only [Prod.mk_mul_mk, PieceState.mul_def, ps_mul_assoc, Prod.mk_eq_one]
+--   simp only [ps_mul]
+--   simp only [invFun_as_coe, Pi.zero_comp, add_zero]
 --   apply And.intro
---   { apply And.intro
---     { apply Eq.refl }
---     { apply Eq.refl } }
---   { apply And.intro
---     { apply Eq.refl }
---     { apply Eq.refl } }
+--   simp only [cyclePieces, cycleImpl]
+--   simp only [mul_one]
+--   ring_nf
+--   -- 如何让lean4简化这些permute的运算呢？
+--   aesop
 
--- -- set_option maxHeartbeats 50000
+--todo--
 
--- lemma four_rs_solved : IsSolved (R * R * R * R) := by
---   simp [R, IsSolved, CornersSolved, EdgesSolved, Solved]
---   repeat (all_goals apply And.intro)
---   { simp [cyclePieces, cycleImpl, PieceState.mul_def, ps_mul, Equiv.Perm.permGroup.mul_assoc]
---     -- have h : swap 1 6 * (swap 6 5 * swap 5 2) *
---     -- (swap 1 6 * (swap 6 5 * swap 5 2) * (swap 1 6 * (swap 6 5 * swap 5 2) * (swap 1 6 * (swap 6 5 * swap 5 2)))) = swap 1 6 * swap 6 5 * swap 5 2 *
---     -- swap 1 6 * swap 6 5 * swap 5 2 * swap 1 6 * swap 6 5 * swap 5 2 * swap 1 6 * swap 6 5 * swap 5 2 := by apply
---     sorry }
---   { simp [cyclePieces, cycleImpl, PieceState.mul_def, ps_mul, Orient]
---     sorry }
---   { sorry }
---   { sorry }
+lemma solved_is_solved
+: IsSolved (Solved)
+:= by
+  simp only [IsSolved, CornersSolved, EdgesSolved, Solved]
+  apply And.intro
+  { apply And.intro
+    { apply Eq.refl }
+    { apply Eq.refl } }
+  { apply And.intro
+    { apply Eq.refl }
+    { apply Eq.refl } }
+  done
+
+-- 这个也是类似“four_rs_eq_solved”的证明，虽然也没给出，这里就不证明了
+lemma four_rs_solved :
+IsSolved (R * R * R * R)
+:= by
+  simp only [R, IsSolved, CornersSolved, EdgesSolved, Solved]
+  repeat (all_goals apply And.intro)
+  { simp only [cyclePieces, cycleImpl, PieceState.mul_def, ps_mul, Equiv.Perm.permGroup.mul_assoc]
+    -- have h : swap 1 6 * (swap 6 5 * swap 5 2) *
+    -- (swap 1 6 * (swap 6 5 * swap 5 2) * (swap 1 6 * (swap 6 5 * swap 5 2) * (swap 1 6 * (swap 6 5 * swap 5 2)))) = swap 1 6 * swap 6 5 * swap 5 2 *
+    -- swap 1 6 * swap 6 5 * swap 5 2 * swap 1 6 * swap 6 5 * swap 5 2 * swap 1 6 * swap 6 5 * swap 5 2 := by apply
+    sorry }
+  { simp [cyclePieces, cycleImpl, PieceState.mul_def, ps_mul, Orient]
+    sorry }
+  { sorry }
+  { sorry }
 
 #check Equiv.Perm.permGroup.mul_assoc

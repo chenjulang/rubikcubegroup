@@ -1,4 +1,3 @@
-import Lean
 import RubiksCube.RubiksCubeFunc
 import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.GroupTheory.Perm.Fin
@@ -16,13 +15,23 @@ def update : RubiksSuperType → List RubiksSuperType → RubiksSuperType
   | c, [] => c
   | c, u :: us => update (c * u) us
 
-def generate : List RubiksSuperType → RubiksSuperType := fun l => update Solved l
+def generate
+: List RubiksSuperType → RubiksSuperType
+:= fun l => update Solved l
 
-def AYPList : List RubiksSuperType := [R, U', R', U', R, U, R', F', R, U, R', U', R', F, R]
+def AYPList
+: List RubiksSuperType
+:= [R, U', R', U', R, U, R', F', R, U, R', U', R', F, R]
 
-def TPList : List RubiksSuperType := [R, U, R', U', R', F, R2, U', R', U', R, U, R', F']
+def TPList
+: List RubiksSuperType
+:= [R, U, R', U', R', F, R2, U', R', U', R, U, R', F']
 
-/- This function is used to find a (non-buffer) piece that is incorrectly oriented whenever the buffer piece is in the buffer slot but the relevant set of pieces is not solved. This process of swapping the buffer piece out of the buffer slot is sometimes referred to as "breaking into a new cycle," and is discussed here: https://youtu.be/ZZ41gWvltT8?si=LxTY7dWfq_0yGaP6&t=220. -/
+/- This function is used to find a (non-buffer) piece that is incorrectly oriented
+ whenever the buffer piece is in the buffer slot but the relevant set of pieces is not solved.
+ This process of swapping the buffer piece out of the buffer slot is sometimes referred to
+ as "breaking into a new cycle,"
+  and is discussed here: https://youtu.be/ZZ41gWvltT8?si=LxTY7dWfq_0yGaP6&t=220. -/
 def Misoriented {n m : ℕ+} (x : Fin n) (f : Fin n → Fin m) : Fin n :=
   Id.run do
   let mut out := x
@@ -62,7 +71,9 @@ def cornerSetup : Fin 8 → Fin 3 → List RubiksSuperType
   | 7, 1 => [D2]
   | 7, 2 => [D', R]
 
-def cornerSwap (corner : Fin 8) (orientation : Fin 3) : List RubiksSuperType :=
+def cornerSwap (corner : Fin 8) (orientation : Fin 3)
+: List RubiksSuperType
+:=
   let setup := cornerSetup corner orientation
   setup ++ AYPList ++ (invert setup)
 
@@ -121,12 +132,14 @@ unsafe def solveScramble : List RubiksSuperType → List RubiksSuperType :=
   fun l => solveCube (generate l)
 
 #eval toString $ cornerSwap 7 1
-#eval toString $ solveEdges (R * B2 * D * L2 * B2 * R2 * B2 * D * F2 * U * R2 * D2 * R' * U' * B * F * L' * D2 * R * D' * U')
-#eval update R (solveEdges R)
+-- #eval toString $ solveEdges (R * B2 * D * L2 * B2 * R2 * B2 * D * F2 * U * R2 * D2 * R' * U' * B * F * L' * D2 * R * D' * U')
+-- #eval update R (solveEdges R)
 
-#eval toString $ update R (solveCube R)
-#eval toString $ update (R * B2 * D * L2 * B2 * R2 * B2 * D * F2 * U * R2 * D2 * R' * U' * B * F * L' * D2 * R * D' * U') (solveCube (R * B2 * D * L2 * B2 * R2 * B2 * D * F2 * U * R2 * D2 * R' * U' * B * F * L' * D2 * R * D' * U'))
+-- #eval toString $ update R (solveCube R)
+-- #eval toString $ update (R * B2 * D * L2 * B2 * R2 * B2 * D * F2 * U * R2 * D2 * R' * U' * B * F * L' * D2 * R * D' * U') (solveCube (R * B2 * D * L2 * B2 * R2 * B2 * D * F2 * U * R2 * D2 * R' * U' * B * F * L' * D2 * R * D' * U'))
 
-/- Since the solution algorithm is unsafe, it cannot be used directly in the widget declarations, but the list of moves that solve the edges were generated using the algorithm and the toString method above. -/
+/- Since the solution algorithm is unsafe, it cannot be used directly in the widget declarations,
+but the list of moves that solve the edges were generated using the algorithm and
+the toString method above. -/
 #widget cubeWidget (cubeStickerJson (R * B2 * D * L2 * B2 * R2 * B2 * D * F2 * U * R2 * D2 * R' * U' * B * F * L' * D2 * R * D' * U'))
 #widget cubeWidget (cubeStickerJson (update (R * B2 * D * L2 * B2 * R2 * B2 * D * F2 * U * R2 * D2 * R' * U' * B * F * L' * D2 * R * D' * U') [F, R, U, R', R, U, R', U', R', F, R2, U', R', U', R, U, R', F', R, U', R', F', B', L, R, U, R', U', R', F, R2, U', R', U', R, U, R', F', L', B, B', R, U', R', R, U, R', U', R', F, R2, U', R', U', R, U, R', F', R, U, R', B, B, L, R, U, R', U', R', F, R2, U', R', U', R, U, R', F', L', B', R, U, R', U', R', F, R2, U', R', U', R, U, R', F', B, R, U', R', R, U, R', U', R', F, R2, U', R', U', R, U, R', F', R, U, R', B', F, L', R, U, R', U', R', F, R2, U', R', U', R, U, R', F', L, F', R, U, R', R, U, R', U', R', F, R2, U', R', U', R, U, R', F', R, U', R', F', R, U, R', R, U, R', U', R', F, R2, U', R', U', R, U, R', F', R, U', R', F, D2, L2, R, U, R', U', R', F, R2, U', R', U', R, U, R', F', L2, D2, D, F, L', R, U, R', U', R', F, R2, U', R', U', R, U, R', F', L, F', D', D2, L2, R, U, R', U', R', F, R2, U', R', U', R, U, R', F', L2, D2]))
