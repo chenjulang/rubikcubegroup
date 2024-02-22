@@ -15,13 +15,17 @@ open scoped ProofWidgets.Jsx
 得到逆操作-/
 def invert : List RubiksSuperType → List RubiksSuperType
   | [] => []
-  | c :: cs => invert cs ++ [c⁻¹]
+  | c :: cs =>
+      -- dbg_trace "add1: {cs}";
+      invert cs ++ [c⁻¹]
 -- #eval (invert [F,R,B])
 -- c=F cs=[R,B] => invert [R,B] ++ [F']
 -- invert [R,B] = c=R,cs=[B] => invert [B] ++ [R']
 -- invert [B] = c=B,cs=[] => invert [] ++ [B']
 -- 总结： (invert [B] ++ [R']) ++ [F'] = (invert [] ++ [B'] ++ [R']) ++ [F']
 -- = ([B'] ++ [R']) ++ [F'] = [B',R',F']
+
+
 
 /-- 在最前面插入一个操作 -/
 def update : RubiksSuperType → List RubiksSuperType → RubiksSuperType
@@ -65,7 +69,7 @@ def BlindCornerList
   and is discussed here: https://youtu.be/ZZ41gWvltT8?si=LxTY7dWfq_0yGaP6&t=220.
 -/
 /-- 函数效果：
-逐个检查 i 是否与 x 不同且 f i 不等于 0。得到这样的一个索引。
+从0到(n-1)逐个检查索引 i 是否与 x 不同且 f i 不等于 0。得到这样的一个索引。
   1.如果找到满足条件的 i，则将其赋值给 out 并结束循环。
   2.如果循环结束后没有找到满足条件的 i，则返回 x 作为默认值。
 -/
@@ -95,7 +99,7 @@ def Misoriented {n m : ℕ+}
 --   | 5 => 2
 --   | 6 => 3
 --   | 7 => 2
-#eval (Orient 8 3 [(0, 2), (3, 1), (4, 2), (7, 1)]) -- : Fin 8 → Fin 3
+-- #eval (Orient 8 3 [(0, 2), (3, 1), (4, 2), (7, 1)]) -- : Fin 8 → Fin 3
 -- ![2, 0, 0, 1, 2, 0, 0, 1]
 -- #eval Misoriented 1 (Orient 8 3 [(0, 2), (3, 1), (4, 2), (7, 1)]) -- 是一个索引：满足索引不等于参数x，索引对应项不等于0。-- 0
 -- #eval Misoriented 2 (Orient 8 3 [(0, 2), (3, 1), (4, 2), (7, 1)]) -- 0
@@ -104,6 +108,8 @@ def Misoriented {n m : ℕ+}
 
 abbrev FT := {t : RubiksSuperType // FaceTurn t}
 
+/-- 可以观察到不存在L,U,B,是因为不想和棱块3,4有交集。
+所以效果至少会有：棱块位置循环3↔4-/
 def cornerSetup
 : Fin 8 → Fin 3 → List RubiksSuperType
   | 0, _ => []
@@ -138,19 +144,66 @@ def cornerSwap
   let setup := cornerSetup corner orientation
   setup ++ AYPList ++ (invert setup)
 
---todo--
+-- 棱块一直是3↔4吗？真是
+-- cornerSwap ? ?:
+-- AYP: R U' R' U' R U R' F' R U R' U' R' F R
+-- 1,0:方向不变,角3↔4,棱3↔4
+-- 1,1:方向变,角3↔4,棱3↔4
+-- 1,2:方向变,角↔,棱↔
+-- 2,0:方向变,角↔,棱↔
+-- 2,1:方向变,角↔,棱↔
+-- 2,2:方向变,角↔,棱↔
+-- 3,0:方向变,角↔,棱↔
+-- 3,1:方向变,角↔,棱↔
+-- 3,2:方向变,角↔,棱↔
+-- 4,0:方向变,角↔,棱↔
+-- 4,1:方向变,角↔,棱↔
+-- 4,2:方向变,角↔,棱↔
+-- 5,0:方向变,角↔,棱↔
+-- 5,1:方向变,角↔,棱↔
+-- 5,2:方向变,角↔,棱↔
+-- 6,0:方向变,角↔,棱↔
+-- 6,1:方向变,角↔,棱↔
+-- 6,2:方向变,角↔,棱↔
+-- 7,0:方向变,角↔,棱↔
+-- 7,1:方向变,角↔,棱↔
+-- 7,2:方向变,角↔,棱↔
+
+
+
+#eval toString $ cornerSwap 2 0
+-- F R U' R' U' R U R' F' R U R' U' R' F R F'
+
+
 /-- 应该是在单纯还原角块-/
 unsafe def solveCorners
 : RubiksSuperType → List RubiksSuperType
+-- 举例：传入参数(update Solved (cornerSwap 7 1))
 :=
   fun c =>
     if CornersSolved c then []
     else
       let buffer := c.1.permute⁻¹ 0
+      -- c.1.permute = [0,3,6,4,7,5,1,2] ,就是循环：(1,3,4,2,6)
+      -- c.1.permute⁻¹ 就是 (6,2,4,3,1)
+      -- buffer = c.1.permute⁻¹ 0 = 0
       let swap := match buffer with
-        | 0 => cornerSwap (Misoriented 0 c.1.orient) 0
+        | 0 => cornerSwap (Misoriented 0 c.1.orient) 0 -- 这一步得到的就是一个交换子公式本身。
+        -- 0 => cornerSwap (Misoriented 0 c.1.orient) 0
+        -- swap = [R, D', R, U', R', U', R, U, R', F', R, U, R', U', R', F, R, D, R']
         | _ => cornerSwap buffer (c.1.orient 0)
-      swap ++ solveCorners (update c swap)
+      (swap ++ solveCorners (update c swap)) -- 直接写一个对象就是返回值了，牛～～
+      --
+
+--todo 为什么没还原?问题就在cornerSwap的后面两个参数上，估计是匹配错了,看怎么改一下？--
+  -- solveCorners如何把所有角块都solve掉呢？是否需要循环语句呢？
+
+-- #eval cornerSwap 7 1
+-- #eval toString $ cornerSwap 7 1
+-- D D R U' R' U' R U R' F' R U R' U' R' F R D D -- 是一个角块2循环+棱块2循环
+-- #eval update Solved (cornerSwap 7 1)
+#eval toString $ cornerSwap (Misoriented 0 (update Solved (cornerSwap 7 1)).1.orient) 0
+-- #eval solveCorners (update Solved (cornerSwap 7 1))
 
 def edgeSetup : Fin 12 → Fin 2 → List RubiksSuperType
   | 0, 0 => [R, U', R']
@@ -181,24 +234,37 @@ def edgeSwap (edge : Fin 12) (orientation : Fin 2) : List RubiksSuperType :=
   let setup := edgeSetup edge orientation
   setup ++ TPList ++ (invert setup)
 
-unsafe def solveEdges : RubiksSuperType → List RubiksSuperType := fun c =>
-  if EdgesSolved c then []
-  else
-    let buffer := c.2.permute⁻¹ 1
-    let swap := match buffer with
-      | 1 => edgeSwap (Misoriented 1 c.2.orient) 0
-      | _ => edgeSwap buffer (c.2.orient 1)
-    swap ++ solveEdges (update c swap)
+
+unsafe def solveEdges
+: RubiksSuperType → List RubiksSuperType
+:=
+  fun c =>
+    if EdgesSolved c then []
+    else
+      let buffer := c.2.permute⁻¹ 1
+      let swap := match buffer with
+        | 1 => edgeSwap (Misoriented 1 c.2.orient) 0
+        | _ => edgeSwap buffer (c.2.orient 1)
+      swap ++ solveEdges (update c swap)
+
 
 unsafe def solveCube : RubiksSuperType → List RubiksSuperType := fun c =>
   let edgeSolution := solveEdges c
   edgeSolution ++ solveCorners (update c edgeSolution)
 
+
 unsafe def solveScramble : List RubiksSuperType → List RubiksSuperType :=
   fun l => solveCube (generate l)
 
+
+
 #eval toString $ cornerSwap 7 1
+  -- 一个不保持TW坐标下方向数的棱位置2循环+角位置2循环
+  -- 这是在造公式啊～～
+  -- D D R U' R' U' R U R' F' R U R' U' R' F R D D
+
 -- #eval toString $ solveEdges (R * B2 * D * L2 * B2 * R2 * B2 * D * F2 * U * R2 * D2 * R' * U' * B * F * L' * D2 * R * D' * U')
+  -- stackoverflow报错了Server process for file:///Users/chenjulang/Desktop/%E6%95%B0%E5%AD%A6/rubikcubegroup/RubiksCube/SolutionAlgorithm.lean crashed, likely due to a stack overflow or a bug.
 -- #eval update R (solveEdges R)
 
 -- #eval toString $ update R (solveCube R)
