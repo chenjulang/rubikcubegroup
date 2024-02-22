@@ -7,9 +7,16 @@ open Equiv Perm Lean Widget
 open scoped ProofWidgets.Jsx
 
 /- invert and update are useful for dealing with setup moves and partial solutions. -/
+-- 得到逆操作
 def invert : List RubiksSuperType → List RubiksSuperType
   | [] => []
   | c :: cs => invert cs ++ [c⁻¹]
+-- #eval (invert [F,R,B])
+-- c=F cs=[R,B] => invert [R,B] ++ [F']
+-- invert [R,B] = c=R,cs=[B] => invert [B] ++ [R']
+-- invert [B] = c=B,cs=[] => invert [] ++ [B']
+-- 总结： (invert [B] ++ [R']) ++ [F'] = (invert [] ++ [B'] ++ [R']) ++ [F']
+-- = ([B'] ++ [R']) ++ [F'] = [B',R',F']
 
 def update : RubiksSuperType → List RubiksSuperType → RubiksSuperType
   | c, [] => c
@@ -22,6 +29,7 @@ def generate
 def AYPList
 : List RubiksSuperType
 := [R, U', R', U', R, U, R', F', R, U, R', U', R', F, R]
+
 
 def TPList
 : List RubiksSuperType
