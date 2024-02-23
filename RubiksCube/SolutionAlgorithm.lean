@@ -44,15 +44,17 @@ def generate
 -- #eval generate [F]
 
 
-/-- 一个保持方向数的棱位置2循环+角位置2循环-/
+/-- 一个保持方向数的棱位置2循环+角位置2循环。角块2↔3,棱块2↔4。-/
 def TPList
 : List RubiksSuperType
 := [R, U, R', U', R', F, R2, U', R', U', R, U, R', F']
+-- R U R' U' R' F R R U' R' U' R U R' F'
 
-/-- 一个不保持方向数的棱位置2循环+角位置2循环-/
+/-- 一个不保持方向数的棱位置2循环+角位置2循环。角块1↔7,棱块10↔11-/
 def AYPList
 : List RubiksSuperType
 := [R, U', R', U', R, U, R', F', R, U, R', U', R', F, R]
+-- R U' R' U' R U R' F' R U R' U' R' F R
 
 /-- 盲拧视频中所谓的“奇偶检验”公式。
 一个保持方向数的棱位置2循环+角位置2循环-/
@@ -107,6 +109,17 @@ def Misoriented {n m : ℕ+}
 
 
 abbrev FT := {t : RubiksSuperType // FaceTurn t}
+
+--todo -- 盲拧视频原理是不是用2循环来将一个队列全部排好呢？对的，这里所说的缓冲块，是让某个块先在这里停留一下，下一波操作就会把它还原到原位置。
+-- 盲拧教程中：这些其实就是特殊的情况：
+  -- 1.“小循环”指的是如何用之前的公式解决单纯的3棱块位置循环 or 单纯的2棱块方向数+1 or ...
+  -- 2.“奇偶校验”是一个公式，效果是方向数不变，角块位置2循环+棱块位置2循环。
+        -- 使用这个的原因是：比如在棱块位置还原过程中，随之变化的其实还有两个角块
+        -- 如果公式使用了奇数次，那么两个角块位置是交换的。
+        -- 如果到最后只剩下单纯的2棱块位置乱了，还有上述2个角块位置乱了，那么只需要使用这个公式来补漏。
+-- 例子理解原理：
+  -- 打乱：B' U L L F F L L B B F' R R F' U U F F L L R R U' F' D' B B L R R B'
+  -- 使用公式 TP: R U R' U' R' F R R U' R' U' R U R' F'
 
 /-- 可以观察到不存在L,U,B,是因为不想和棱块3,4有交集。
 所以效果至少会有：棱块位置循环3↔4-/
@@ -192,11 +205,14 @@ unsafe def solveCorners
         -- 0 => cornerSwap (Misoriented 0 c.1.orient) 0
         -- swap = [R, D', R, U', R', U', R, U, R', F', R, U, R', U', R', F, R, D, R']
         | _ => cornerSwap buffer (c.1.orient 0)
-      (swap ++ solveCorners (update c swap)) -- 直接写一个对象就是返回值了，牛～～
+      (swap ++ solveCorners (update c swap)) -- 直接写一个对象就是返回值了
       --
 
---todo 为什么没还原?问题就在cornerSwap的后面两个参数上，估计是匹配错了,看怎么改一下？--
+
+
+--todo 为什么没还原这么简单的TP打乱呢?
   -- solveCorners如何把所有角块都solve掉呢？是否需要循环语句呢？
+
 
 -- #eval cornerSwap 7 1
 -- #eval toString $ cornerSwap 7 1
