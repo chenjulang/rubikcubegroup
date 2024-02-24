@@ -101,22 +101,42 @@ two sets are in fact the same is equivalent to providing a solution algorithm fo
 I do not have a proof that the solution algorithm in `SolutionAlgorithm.lean` will solve any valid cube,
 but I am confident that this is the case (assuming no bugs in my concretely defined setup moves). -/
 
--- 魔方第二基本定理的左推右部分：
--- 所以说，魔方第二基本定理的右推左部分还没有给出：
+-- 魔方第二基本定理的右推左部分：
 --todo--
+
+  lemma solved_reachable
+  (x : RubiksSuperType)
+  (h : x = Solved)
+  : Reachable x
+  := by
+    rw [h]
+    exact Reachable.Solved
+
+
 theorem valid_reachable
 :∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
 := by
   intro x hvx
   simp [ValidCube] at hvx
-  induction x with
-  | mk fst snd => sorry
+  -- x经过有限次操作变成了y
+  set y : RubiksSuperType := sorry
+  have h1 : y = Solved := sorry
+  -- x经过有限次操作变成了y → Reachable y → Reachable x
+  have h2 : Reachable y → Reachable x := sorry
+  apply h2
+  exact solved_reachable y h1
+  done
 
 
+  -- induction x with
+  -- | mk fst snd => sorry
+
+-- 魔方第二基本定理的左推右部分：
 theorem reachable_valid
 : ∀x : RubiksSuperType, Reachable x → x ∈ ValidCube
 := by
   intro x hrx
+  -- cases hrx with
   induction hrx with
   | Solved =>
       simp only [Solved, ValidCube]

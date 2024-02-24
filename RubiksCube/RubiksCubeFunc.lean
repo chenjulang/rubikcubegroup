@@ -40,7 +40,7 @@ section RubiksSuperGroup
   --   }
   def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
     fun a1 a2 => {
-      permute := a1.permute * a2.permute -- *先运算右，再运算左。
+      permute := a1.permute * a2.permute -- *先运算左，再运算右。
       orient := (a2.orient ∘ a1.permute.invFun) + a1.orient -- ∘是右边的函数作用到左边的对象
     }
  -- 将上面替换成下面的等价写法，好处：1.可以到处写*，来代替ps_mul，lean系统会自动匹配到这个*的类型用法。
@@ -56,6 +56,7 @@ section RubiksSuperGroup
   -- 这里可以写*，来代替ps_mul
   : (a1 * a2).permute = a1.permute * a2.permute
   := by rfl
+  -- 这里可以写*，来代替ps_mul
   @[simp]
   theorem orient_mul {p o : ℕ+} (a1 a2 : PieceState p o)
   -- 这里可以写*，来代替ps_mul
@@ -63,35 +64,23 @@ section RubiksSuperGroup
   := by rfl
 
 
-  -- @[simp]
-  -- lemma ps_mul_assoc {p o : ℕ+} :
-  -- ∀ (a b c : PieceState p o),
-  -- ps_mul a (ps_mul b c) = ps_mul (ps_mul a b) c := by
-  --   intro a b c
-  --   simp [ps_mul]
-  --   apply And.intro
-  --   · simp [Perm.mul_def]
-  --     simp [Equiv.trans_assoc]
-  --   · rw [← add_assoc]
-  --     simp only [add_left_inj]
-  --     exact rfl
-  --   done
-
-
   @[simp]
   lemma ps_mul_assoc {p o : ℕ+} :
   ∀ (a b c : PieceState p o),
-  -- ps_mul a (ps_mul b c) = ps_mul (ps_mul a b) c -- 一样的，换个位置。
   ps_mul (ps_mul a b) c = ps_mul a (ps_mul b c)
   := by
     intro a b c
-    simp [ps_mul]
+    simp only [ps_mul]
+    simp only [invFun_as_coe]
+    simp only [PieceState.mk.injEq] -- 两同类型对象相等，等价于，各分量相等。
     apply And.intro
-    · simp [Perm.mul_def]
-      simp [Equiv.trans_assoc]
+    · simp only [Perm.mul_def]
+      simp only [Equiv.trans_assoc] -- A.trans B 指的是先作用B，再作用A
     · rw [← add_assoc]
-      simp only [add_left_inj]
-      exact rfl
+      simp only [add_left_inj] -- X ∘ (a.permute * b.permute).symm  = X ∘ b.permute.symm ∘ ⇑a.permute.symm
+      have h1 : c.orient ∘ ((a.permute * b.permute).symm)  = c.orient ∘ b.permute.symm ∘ a.permute.symm
+        := by exact rfl
+      exact rfl -- 这步不简单的
     done
 
 
@@ -199,7 +188,6 @@ end RubiksSuperGroup
 /- Creates an orientation function given a list of input-output pairs
 (with 0 for anything left unspecified). -/
   -- 应该是为了方便定义每个操作的方向数增加量,然后定义的这两个东西：
-
 def Orient
 (p o : ℕ+)
 (pairs : List ((Fin p) × (Fin o)))
@@ -504,11 +492,13 @@ section RubiksGroup
     apply And.intro
     { have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} x.1.orient = 0
         := by apply hxv.right.left
+      -- 一样的问题，很容易看出来，不知道怎么写：
       sorry
     }
     {
       have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8,9,10,11} x.2.orient = 0
         := by apply hxv.right.right
+      -- 一样的问题，很容易看出来，不知道怎么写：
       sorry
     }
 
