@@ -246,7 +246,7 @@ unsafe def solveCorners
   -- D D R U' R' U' R U R' F' R U R' U' R' F R D D -- 是一个角块2循环+棱块2循环
 -- #eval update Solved (cornerSwap 7 1)
 -- #eval toString $ cornerSwap (Misoriented 0 (update Solved (cornerSwap 7 1)).1.orient) 0
-#eval toString $ solveCorners (update Solved (cornerSwap 7 1))
+-- #eval toString $ solveCorners (update Solved (cornerSwap 7 1))
 -- 5次才还原？？？明明一次就可以的
 -- D, D, R, U', R', U', R, U, R', F', R, U, R', U', R', F, R, D, D, D, D, R, U', R', U', R, U, R', F', R, U, R', U', R', F, R, D, D, D, D, R, U', R', U', R, U, R', F', R, U, R', U', R', F, R, D, D, D, D, R, U', R', U', R, U, R', F', R, U, R', U', R', F, R, D, D, D, D, R, U', R', U', R, U, R', F', R, U, R', U', R', F, R, D, D
 

@@ -11,12 +11,12 @@ open Equiv Perm
 section ValidityChecks
 
   --例子：
-  -- lemma RValid : R ∈ ValidCube :=
-  --   by
-  --     simp [R, ValidCube]
-  --     apply And.intro
-  --     { apply Eq.refl }
-  --     { apply Eq.refl }
+  lemma RValid : R ∈ ValidCube :=
+    by
+      simp [R, ValidCube]
+      apply And.intro
+      { apply Eq.refl }
+      { apply Eq.refl }
 
   lemma ft_valid
   : ∀x : RubiksSuperType,
@@ -26,6 +26,7 @@ section ValidityChecks
       intro x hx
       cases hx with
       | _ =>
+        -- 能证明但是很慢。分开写快一点？：
         -- method 1:
         -- simp [ValidCube, U, D, R, L, F, B, U2, D2, R2, L2, F2, B2, U', D', R', L', F', B']
         -- repeat' apply And.intro
@@ -106,7 +107,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 theorem valid_reachable
 :∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
 := by
-  sorry
+  intro x hvx
+  simp [ValidCube] at hvx
+  induction x with
+  | mk fst snd => sorry
 
 
 theorem reachable_valid
@@ -123,7 +127,7 @@ theorem reachable_valid
         { apply Eq.refl } }
   | FT c hc =>
     sorry
-    --这里很慢：
+    --这里能证明，但是运行很慢：
     -- cases hc with
     -- | _ =>
     --     simp only [ValidCube]
@@ -143,6 +147,7 @@ theorem reachable_valid
       -- method 2:
       -- all_goals assumption
 
+/-- 魔方第二基本定理 -/
 theorem RubikCubeSecondBasicRule
 : ∀x : RubiksSuperType, Reachable x ↔ x ∈ ValidCube
 := by
