@@ -8,10 +8,23 @@ section RubiksSuperGroup
 
   instance (n : Nat) : Repr (Perm (Fin n)) :=
     ⟨reprPrec ∘ Equiv.toFun⟩
+  -- 这个实例声明表明对于任意的 n : Nat，类型 Perm (Fin n) 具有 Repr 实例。
+  -- 在 Lean 中，Repr 是一个类型类，用于定义类型的外部表示形式。它提供了将值转换为字符串的方法，以便在打印输出和调试信息中使用。例如，当你在 Lean 中使用 #eval 命令打印一个值时，它将使用 Repr 实例将该值转换为字符串进行显示。
+  -- 该实例声明的右侧是一个匿名构造子，它使用了函数合成操作符 (∘) 来组合两个函数：reprPrec 和 Equiv.toFun。reprPrec 是一个内置函数，用于将值转换为字符串的表示形式，而 Equiv.toFun 是一个类型为 Equiv α β → α → β 的函数，它将一个等价关系 Equiv 转换为一个函数。
+  -- 因此，整个实例声明的含义是，对于类型 Perm (Fin n)，我们可以使用函数合成的方式将其转换为字符串表示形式。这意味着在打印输出或调试信息中，Perm (Fin n) 类型的值将以字符串的形式显示。
 
   instance (n : Nat) : DecidableEq (Perm (Fin n)) :=
     λ a b => mk.injEq a.toFun a.invFun _ _ b.toFun b.invFun _ _ ▸ inferInstance
-
+  -- 这个实例声明表明对于任意的 n : Nat，类型 Perm (Fin n) 具有 DecidableEq 实例。
+  -- 在 Lean 中，DecidableEq 是一个类型类，用于定义两个值之间的可决等价性。它提供了一个决策过程，可以确定两个值是否相等。
+  -- 该实例声明的右侧是一个 lambda 函数，它接受两个参数 a 和 b，表示要比较的两个 Perm (Fin n) 类型的值。函数体的逻辑如下：
+  -- mk.injEq 是一个内置函数，用于构造一个类型为 a = b 的等式，其中 a.toFun 和 b.toFun 是两个 Perm (Fin n) 类型值的函数表示形式，而 a.invFun 和 b.invFun 是它们的逆函数表示形式。
+  -- _ 是 Lean 中的占位符，表示需要提供证据的空白。
+  -- ▸ 是等式推理的操作符，它表示将前面的等式应用到后面的表达式上。
+  -- inferInstance 是一个内置函数，用于根据上下文中的信息自动推断出一个实例。
+  -- 因此，整个实例声明的含义是，我们可以通过构造相应的等式来判断两个 Perm (Fin n) 类型的值是否相等。这个等式的构造基于 a 和 b 的函数表示形式以及其逆函数表示形式。inferInstance 函数用于自动推断所需的实例。
+  -- 这个实例声明的效果是，当你在 Lean 中使用 = 运算符来比较两个 Perm (Fin n) 类型的值时，Lean 将使用这个实例提供的决策过程来判断它们是否相等。
+  -- #check ▸
 
   /- This PieceState structure is used to represent the entire state of both corner pieces and edge pieces.-/
   structure PieceState (pieces orientations: ℕ+) where
@@ -27,10 +40,10 @@ section RubiksSuperGroup
   --   }
   def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
     fun a1 a2 => {
-      permute := a1.permute * a2.permute
-      orient := (a2.orient ∘ a1.permute.invFun) + a1.orient
+      permute := a1.permute * a2.permute -- *先运算右，再运算左。
+      orient := (a2.orient ∘ a1.permute.invFun) + a1.orient -- ∘是右边的函数作用到左边的对象
     }
- -- 将上面替换成下面的等价写法，好处：1.可以到处写*，lean系统会自动匹配到这个*的类型用法。
+ -- 将上面替换成下面的等价写法，好处：1.可以到处写*，来代替ps_mul，lean系统会自动匹配到这个*的类型用法。
   instance {p o : ℕ+} : Mul (PieceState p o) where
     mul a1 a2 := {
       permute := a1.permute * a2.permute
@@ -40,8 +53,14 @@ section RubiksSuperGroup
 
   @[simp] -- 这个同时代表了手写证明中的ρ和σ的同态性质
   theorem permute_mul {p o : ℕ+} (a1 a2 : PieceState p o)
+  -- 这里可以写*，来代替ps_mul
   : (a1 * a2).permute = a1.permute * a2.permute
-  := rfl
+  := by rfl
+  @[simp]
+  theorem orient_mul {p o : ℕ+} (a1 a2 : PieceState p o)
+  -- 这里可以写*，来代替ps_mul
+  : (a1 * a2).orient = (a2.orient ∘ a1.permute.invFun) + a1.orient
+  := by rfl
 
 
   -- @[simp]
@@ -212,7 +231,7 @@ def Orient
   -- result 1 = 0
   -- result 2 = 1
   -- 这是根据 pairs 中的映射关系得到的结果。
-#eval Orient 3 2 [(0, 1), (1, 0), (2, 1)] -- ![1, 0, 1]
+-- #eval Orient 3 2 [(0, 1), (1, 0), (2, 1)] -- ![1, 0, 1]
 -- 换句话说，首先需要我们提供一组这样的数组：每一项形式为(Fin p)×(Fin o)，也就是都是2个分量的向量。
 -- 函数结果得到一个数组，有3项，每一项结果x满足：0 <= x < 2 。
 -- 得到的数组的每一项值是这样决定的：如果索引能遍历找每一项的第一个分量，找到相同的值，则返回第二个分量，反之返回0。
