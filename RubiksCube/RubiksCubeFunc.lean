@@ -29,7 +29,7 @@ section RubiksSuperGroup
   /- This PieceState structure is used to represent the entire state of both corner pieces and edge pieces.-/
   structure PieceState (pieces orientations: ℕ+) where
     permute : Perm (Fin pieces)
-    orient : Fin pieces → Fin orientations
+    orient : Fin pieces → Fin orientations -- 这里应该不是增加量，是绝对量
     deriving Repr, DecidableEq
 
 
@@ -38,29 +38,30 @@ section RubiksSuperGroup
   --     permute := a1.permute * a2.permute
   --     orient := (a2.orient ∘ a1.permute.invFun) + a1.orient
   --   }
+  -- todo-- 重新理解这个的现实意义：
   def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
     fun a1 a2 => {
-      permute := a1.permute * a2.permute -- *先运算左，再运算右。
-      orient := (a2.orient ∘ a1.permute.invFun) + a1.orient -- ∘是右边的函数作用到左边的对象
+      permute := a2.permute * a1.permute -- *先运算右，再运算左。
+      orient := (a1.orient ∘ a2.permute.invFun) + a2.orient -- ∘是右边的函数作用到左边的对象
     }
  -- 将上面替换成下面的等价写法，好处：1.可以到处写*，来代替ps_mul，lean系统会自动匹配到这个*的类型用法。
   instance {p o : ℕ+} : Mul (PieceState p o) where
     mul a1 a2 := {
-      permute := a1.permute * a2.permute
-      orient := (a2.orient ∘ a1.permute.invFun) + a1.orient
+      permute := a2.permute * a1.permute
+      orient := (a1.orient ∘ a2.permute.invFun) + a2.orient
     }
 
 
   @[simp] -- 这个同时代表了手写证明中的ρ和σ的同态性质
   theorem permute_mul {p o : ℕ+} (a1 a2 : PieceState p o)
   -- 这里可以写*，来代替ps_mul
-  : (a1 * a2).permute = a1.permute * a2.permute
+  : (a1 * a2).permute = a2.permute * a1.permute
   := by rfl
   -- 这里可以写*，来代替ps_mul
   @[simp]
   theorem orient_mul {p o : ℕ+} (a1 a2 : PieceState p o)
   -- 这里可以写*，来代替ps_mul
-  : (a1 * a2).orient = (a2.orient ∘ a1.permute.invFun) + a1.orient
+  : (a1 * a2).orient = (a1.orient ∘ a2.permute.invFun) + a2.orient
   := by rfl
 
 
@@ -75,12 +76,10 @@ section RubiksSuperGroup
     simp only [PieceState.mk.injEq] -- 两同类型对象相等，等价于，各分量相等。
     apply And.intro
     · simp only [Perm.mul_def]
-      simp only [Equiv.trans_assoc] -- A.trans B 指的是先作用B，再作用A
+      simp only [Equiv.trans_assoc] -- A.trans B 指的是映射先看A，再看B
     · rw [← add_assoc]
       simp only [add_left_inj] -- X ∘ (a.permute * b.permute).symm  = X ∘ b.permute.symm ∘ ⇑a.permute.symm
-      have h1 : c.orient ∘ ((a.permute * b.permute).symm)  = c.orient ∘ b.permute.symm ∘ a.permute.symm
-        := by exact rfl
-      exact rfl -- 这步不简单的
+      exact rfl
     done
 
 
@@ -91,12 +90,12 @@ section RubiksSuperGroup
   := by
     intro a
     simp only [ps_mul]
-    simp only [one_mul]
+    -- simp only [one_mul]
     simp only [invFun_as_coe]
-    simp only [one_symm]
-    simp only [coe_one]
-    simp only [Function.comp.right_id]
-    simp only [add_zero]
+    -- simp only [mul_one, Pi.zero_comp, zero_add]
+    simp only [mul_one]
+    simp only [Pi.zero_comp]
+    simp only [zero_add]
     done
 
 
@@ -107,7 +106,8 @@ section RubiksSuperGroup
     intro a
     simp only [ps_mul]
     simp only [mul_one, invFun_as_coe]
-    simp only [Pi.zero_comp, zero_add]
+    simp only [one_mul, one_symm, coe_one, Function.comp.right_id, add_zero]
+    -- simp only [Pi.zero_comp, zero_add]
     done
 
 
@@ -154,12 +154,15 @@ section RubiksSuperGroup
     intro a
     simp only [ps_inv]
     simp only [ps_mul]
-    simp only [mul_left_inv]
+    -- simp only [mul_left_inv]
     simp only [invFun_as_coe, PieceState.mk.injEq, true_and]
-    refine' neg_eq_iff_add_eq_zero.mp _
+    simp only [mul_right_inv, true_and]
+    -- refine' neg_eq_iff_add_eq_zero.mp _
     have h1 : a.permute⁻¹.symm = a.permute := by rfl
-    rw [h1]
-    rfl
+    have h2 : ((-a.orient) ∘ a.permute) ∘ a.permute.symm = (-a.orient)
+      := by exact (comp_symm_eq a.permute (-a.orient) ((-a.orient) ∘ ⇑a.permute)).mpr rfl
+    rw [h2]
+    exact add_left_neg a.orient
 
 
   /- This sets up a group structure for all Rubik's cube positions
@@ -182,7 +185,7 @@ section RubiksSuperGroup
   -- 这里应该是为了简写乘号：*，还有逆：⁻¹。
   @[simp]
   lemma PieceState.mul_def {p o : ℕ+} (a b : PieceState p o)
-  : a * b = ps_mul a b := by rfl
+  : a * b  = ps_mul a b := by rfl
   @[simp]
   lemma PieceState.inv_def {p o : ℕ+} (a b : PieceState p o)
   : a⁻¹ = ps_inv a := by rfl
@@ -207,45 +210,27 @@ section RubiksSuperGroup
 
 end RubiksSuperGroup
 
-  --todo--
 /- Creates an orientation function given a list of input-output pairs
 (with 0 for anything left unspecified). -/
-  -- 应该是为了方便定义每个操作的方向数增加量,然后定义的这两个东西：
+  -- 为了方便定义每个操作的方向数增加量orient,然后定义的这两个东西：
 def Orient
 (p o : ℕ+)
 (pairs : List ((Fin p) × (Fin o)))
 : Fin p → Fin o :=
   fun i =>
     match pairs.lookup i with
+    -- pairs.lookup用法：
+      -- lookup 3 [(1, 2), (3, 4), (3, 5)] = some 4
+      -- lookup 2 [(1, 2), (3, 4), (3, 5)] = none
     | some x => x
     | none => 0
 -- 举例说明：
-  -- 当我们给定以下参数时：
-  -- p = 3
-  -- o = 2
-  -- pairs = [(0, 1), (1, 0), (2, 1)]
-  -- 我们可以调用函数 Orient 并传入这些参数：
-
-  -- result = Orient 3 2 [(0, 1), (1, 0), (2, 1)]
-  -- 函数将返回一个从 (Fin 3) 到 (Fin 2) 的映射，我们可以通过传递不同的 (Fin 3) 的值来查看结果。
-
-  -- 例如，当我们传递 0 作为输入时：
-
-  -- output = result 0
-  -- 函数将在 pairs 中查找键为 0 的元素，并返回匹配的结果。在我们的例子中，pairs 包含 (0, 1)，因此函数将返回 (Fin 2) 类型的值 1。
-
-  -- 同样地，当我们传递 1 或 2 作为输入时，函数将返回相应的结果 (Fin 2) 类型的值 0 和 1。
-
-  -- 所以，根据我们给定的参数，调用 result 函数并传递不同的输入值，我们可以得到以下结果：
-
-  -- result 0 = 1
-  -- result 1 = 0
-  -- result 2 = 1
-  -- 这是根据 pairs 中的映射关系得到的结果。
 -- #eval Orient 3 2 [(0, 1), (1, 0), (2, 1)] -- ![1, 0, 1]
+-- #eval Orient 3 2 [(0, 1), (1, 0), (3, 1)] -- ![1, 0, 0]
 -- 换句话说，首先需要我们提供一组这样的数组：每一项形式为(Fin p)×(Fin o)，也就是都是2个分量的向量。
 -- 函数结果得到一个数组，有3项，每一项结果x满足：0 <= x < 2 。
--- 得到的数组的每一项值是这样决定的：如果索引能遍历找每一项的第一个分量，找到相同的值，则返回第二个分量，反之返回0。
+-- 得到的数组的每一项值是这样决定的：如果索引能遍历找每一项的第一个分量，找到相同的值，则返回第二个分量，
+-- 反之遍历找每一项的第一个分量都找不到，直接返回0。
 
 def Solved
 : RubiksSuperType
@@ -253,15 +238,15 @@ def Solved
 
 section FACE_TURNS
 
+  --todo--
+
   /- These two functions (from kendfrey's repository) create a cycle permutation,
   which is useful for defining the rotation of any given face, as seen directly below. -/
-  -- 应该是为了方便定义每个操作的排列permute,然后定义的这两个东西：
-
+  -- 为了方便定义每个操作的排列permute,然后定义的这两个东西：
   def cycleImpl {α : Type*} [DecidableEq α]
   : α → List α → Perm α
     | _, [] => 1 -- “_”指的是第一个元素。可以写成a吗???
     | a, (x :: xs) => (swap a x) * (cycleImpl x xs) -- “a”指的是第一个元素
-    --
 
   def cyclePieces {α : Type*} [DecidableEq α]
   : List α → Perm α
@@ -278,12 +263,22 @@ section FACE_TURNS
   --      = (0,1) * ((1,2) * (cycleImpl 2 [3]))
   --      = (0,1) * ((1,2) * ((2,3) * (cycleImpl 3 [])))
   --      = (0,1) * ((1,2) * ((2,3) * e))
-  -- permute的乘法是从右往左算吗？***
+  --      = (0,1) * ((1,2) * (2,3))
+  -- permute的乘法是从右往左算的。***
+  -- 比如这里(1,2) * (2,3) 其实是等价于，(2,3).trans (1,2)
+  -- 也就是先看(2,3)，再看 (1,2)。1→ 1→ 2 ; 2→ 3→ 3; 3→ 2→ 1
   --      = (0,1) * (2,3,1)
   --      = (2,3,0,1)
   --      = (0,1,2,3)
 
+  -- #eval (cyclePieces [1, 2] : Perm (Fin 12)) -- (1,2)
+  -- #eval (cyclePieces [2, 3] : Perm (Fin 12)) -- (2,3)
+  -- #eval (cyclePieces [1, 2] : Perm (Fin 12)) * (cyclePieces [2, 3] : Perm (Fin 12)) -- (1,2,3)
+  --   --  这个说明了(1,2) * (2,3) = (1,2,3)
+
+
   -- #eval (cyclePieces [0, 1, 2, 3] : Perm (Fin 12)) -- 其实就是4循环(0,1,2,3)
+    -- ![1, 2, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11]
   -- #eval List.map (cyclePieces [0, 1, 2, 3] : Perm (Fin 12)) (List.range 12)
   -- #eval (cyclePieces [0, 5, 8] : Perm (Fin 12)) -- 其实就是3循环(0,5,8)
   -- #eval List.map (cyclePieces [0, 5, 8] : Perm (Fin 12)) (List.range 12)
@@ -449,7 +444,8 @@ section RubiksGroup
       simp only [Prod.fst_mul, PieceState.mul_def, Prod.snd_mul]
       simp only [ps_mul]
       simp only [map_mul]
-      exact Mathlib.Tactic.LinearCombination.mul_pf h1 h2
+      -- exact Mathlib.Tactic.LinearCombination.mul_pf h1 h2
+      exact Mathlib.Tactic.LinearCombination.mul_pf h2 h1
     }
     apply And.intro
     {
@@ -464,7 +460,7 @@ section RubiksGroup
       simp only [Finset.mem_singleton, Finset.mem_insert, zero_ne_one, false_or, invFun_as_coe,
         Pi.add_apply, Function.comp_apply]
       simp only [Finset.sum_add_distrib]
-      rw [h1]
+      rw [h2]
       simp only [add_zero]
       -- refine Equiv.Perm.prod_comp
       -- apply h2
@@ -482,7 +478,7 @@ section RubiksGroup
       simp only [Finset.mem_singleton, Finset.mem_insert, zero_ne_one, false_or, invFun_as_coe,
         Pi.add_apply, Function.comp_apply]
       simp only [Finset.sum_add_distrib]
-      rw [h1]
+      rw [h2]
       simp only [add_zero]
       sorry
     }
