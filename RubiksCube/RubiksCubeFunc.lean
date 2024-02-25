@@ -78,8 +78,22 @@ section RubiksSuperGroup
     · simp only [Perm.mul_def]
       simp only [Equiv.trans_assoc] -- A.trans B 指的是映射先看A，再看B
     · rw [← add_assoc]
+      --todo-- 这个分配律有点怪，是函数结合的分配律。我的手写证明是错的～～～
+      -- have h0: (c.orient ∘ b.permute.symm + b.orient) ∘ a.permute.symm = (c.orient ∘ b.permute.symm ∘ a.permute.symm  + b.orient∘ a.permute.symm )
+      --   := by exact rfl
+      -- have h01: (c.orient + b.orient) ∘ a.permute = (c.orient ∘ a.permute + b.orient ∘ a.permute )
+      --   := by exact rfl -- 分配律成立
+      -- rw [h0]
       simp only [add_left_inj] -- X ∘ (a.permute * b.permute).symm  = X ∘ b.permute.symm ∘ ⇑a.permute.symm
-      exact rfl
+      -- have h1: (b.permute * a.permute).symm  = a.permute.symm ∘ b.permute.symm
+      -- := by
+      --   -- ∘ 先作用右，再作用左
+      --   -- f.trans g 先作用f，再作用g
+      --   simp only [Perm.mul_def]
+      --   exact rfl
+      --   done
+      -- rw [h1]
+      rfl
     done
 
 
@@ -134,9 +148,18 @@ section RubiksSuperGroup
       -- a'.orient ∘ a.permute.invFun + a.orient = 0
       -- 因此 a'.orient ∘ a.permute.invFun = -a.orient
       --  a'.orient = (-a.orient) ∘ a.permute
+      -- orient := (-ps.orient) ∘ ps.permute
       -- orient := fun x => - ps.orient (ps.permute⁻¹ x)
-      orient := (-ps.orient) ∘ ps.permute
+
+      -- 满足结合律的运算定义是这样的：(a1.orient ∘ a2.permute.invFun) + a2.orient
+      -- 要满足ps_mul a a' = {orient:0}
+      -- (a.orient ∘ a'.permute.invFun) + a'.orient  = 0
+      -- a'.orient = -(a.orient ∘ a'.permute.invFun)
+      -- orient := -(ps.orient ∘ ps.permute⁻¹.invFun)
+      orient := -(ps.orient ∘ ps.permute)
     }
+
+  -- 定义右的逆，证明左也成立：
 
   @[simp]
   lemma ps_mul_left_inv {p o : ℕ+} :
@@ -161,8 +184,7 @@ section RubiksSuperGroup
     have h1 : a.permute⁻¹.symm = a.permute := by rfl
     have h2 : ((-a.orient) ∘ a.permute) ∘ a.permute.symm = (-a.orient)
       := by exact (comp_symm_eq a.permute (-a.orient) ((-a.orient) ∘ ⇑a.permute)).mpr rfl
-    rw [h2]
-    exact add_left_neg a.orient
+    exact eq_neg_iff_add_eq_zero.mp h2
 
 
   /- This sets up a group structure for all Rubik's cube positions
