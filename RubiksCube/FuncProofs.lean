@@ -114,7 +114,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
 
 theorem valid_reachable
-:∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
+: ∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
 := by
   intro x hvx
   simp [ValidCube] at hvx
@@ -127,9 +127,6 @@ theorem valid_reachable
   exact solved_reachable y h1
   done
 
-
-  -- induction x with
-  -- | mk fst snd => sorry
 
 -- 魔方第二基本定理的左推右部分：
 theorem reachable_valid

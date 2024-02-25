@@ -91,7 +91,12 @@ section RubiksSuperGroup
   := by
     intro a
     simp only [ps_mul]
-    simp only [one_mul, invFun_as_coe, one_symm, coe_one, Function.comp.right_id, add_zero]
+    simp only [one_mul]
+    simp only [invFun_as_coe]
+    simp only [one_symm]
+    simp only [coe_one]
+    simp only [Function.comp.right_id]
+    simp only [add_zero]
     done
 
 
@@ -101,8 +106,10 @@ section RubiksSuperGroup
   ps_mul a {permute := 1, orient := 0} = a := by
     intro a
     simp only [ps_mul]
-    simp only [mul_one, invFun_as_coe, Pi.zero_comp, zero_add]
+    simp only [mul_one, invFun_as_coe]
+    simp only [Pi.zero_comp, zero_add]
     done
+
 
 
   def ps_inv {p o : ℕ+}
@@ -149,42 +156,58 @@ section RubiksSuperGroup
     simp only [ps_mul]
     simp only [mul_left_inv]
     simp only [invFun_as_coe, PieceState.mk.injEq, true_and]
-    exact neg_eq_iff_add_eq_zero.mp rfl
+    refine' neg_eq_iff_add_eq_zero.mp _
+    have h1 : a.permute⁻¹.symm = a.permute := by rfl
+    rw [h1]
+    rfl
+
 
   /- This sets up a group structure for all Rubik's cube positions
-  (including invalid ones that couldn't be reached from a solved state without removing pieces from the cube,
+  (including invalid ones that couldn't be reached from a solved state without
+  removing pieces from the cube,
   twisting corners, etc.). -/
   instance PieceGroup (p o: ℕ+) :
   Group (PieceState p o) := {
-    mul := ps_mul
-    mul_assoc := ps_mul_assoc
-    one := {permute := 1, orient := 0}
-    one_mul := ps_one_mul
-    mul_one := ps_mul_one
-    inv := ps_inv
-    mul_left_inv := ps_mul_left_inv
+    mul := ps_mul -- 第一种运算，记为*
+    mul_assoc := ps_mul_assoc -- *的结合律
+    one := {permute := 1, orient := 0} -- *的单位1
+    -- 下面 ？: PieceState p o
+    one_mul := ps_one_mul -- 1 * ? = ?
+    mul_one := ps_mul_one -- ? * 1 = ?
+    inv := ps_inv -- (?)⁻¹ = ps_inv p o
+    mul_left_inv := ps_mul_left_inv -- (?)⁻¹ * (?) = 单位1
   }
 
 
+  -- 这里应该是为了简写乘号：*，还有逆：⁻¹。
   @[simp]
-  lemma PieceState.mul_def {p o : ℕ+} (a b : PieceState p o) : a * b = ps_mul a b := by rfl
+  lemma PieceState.mul_def {p o : ℕ+} (a b : PieceState p o)
+  : a * b = ps_mul a b := by rfl
   @[simp]
-  lemma PieceState.inv_def {p o : ℕ+} (a b : PieceState p o) : a⁻¹ = ps_inv a := by rfl
+  lemma PieceState.inv_def {p o : ℕ+} (a b : PieceState p o)
+  : a⁻¹ = ps_inv a := by rfl
+
 
   abbrev CornerType := PieceState 8 3
   abbrev EdgeType := PieceState 12 2
 
-  instance Rubiks2x2Group :
+  -- 由这样的集合：CornerType，定义了一个群
+  instance RubiksCornerGroup :
   Group CornerType
   := PieceGroup 8 3
+  instance RubiksEdgeGroup :
+  Group EdgeType
+  := PieceGroup 12 2
 
   abbrev RubiksSuperType := CornerType × EdgeType
+
   instance RubiksSuperGroup -- 就是手写证明中的群H
   : Group RubiksSuperType
-  := Prod.instGroup --???
+  := by exact Prod.instGroup -- 应该就是笛卡尔积元素组成的群，第一种运算为：“每一个分量本身的运算，运算结果的某个分量就是这个分量的运算结果”。
 
 end RubiksSuperGroup
 
+  --todo--
 /- Creates an orientation function given a list of input-output pairs
 (with 0 for anything left unspecified). -/
   -- 应该是为了方便定义每个操作的方向数增加量,然后定义的这两个东西：
@@ -267,7 +290,6 @@ section FACE_TURNS
 
   -- #eval Orient 8 3 [(1, 1), (6, 2), (5, 1), (2, 2)] -- ![0, 1, 2, 0, 0, 1, 2, 0] 换句话说，只有1，2，5，6是非零值
 
-  --todo
   --重新附个图
   --检查一下这些orient是否正确
   --而且方向数的点怎么定义的也要根据下面想一下
@@ -589,7 +611,6 @@ section WIDGET
   :=
     fun i o cube => (edge_map.get (cube.2.permute⁻¹ i)).get (Fin.sub o (cube.2.orient i))
 
-  --todo--
 
   open Lean Widget
 
