@@ -169,7 +169,14 @@ section RubiksSuperGroup
       -- (a'.orient ∘ a.permute) = -a.orient
       -- (a'.orient ∘ a.permute) i = (-a.orient) i
       -- a'.orient ∘ (a.permute i) = (-a.orient) i
-      orient := -(ps.orient ∘ ps.permute)
+      -- 比如ps.permute = (第1=>2,2=>3,3=>1)
+      -- i取第1，则(a.permute i)就是第2
+        -- 因此 a'.orient的第2项 = (-a.orient)的第1项
+        -- 要想找到 a'.orient的第1项，则反推需要(a.permute i)就是第1，继续反推i取第3才对
+      -- i取第3，则(a.permute i)就是第1
+        -- a'.orient的第1项 = (-a.orient)的第2项
+        -- a'.orient的第n项 = (-a.orient)的第(ps.permute.invFun n)项
+      orient := fun x => (- ps.orient) (ps.permute⁻¹ x)
     }
 
   -- 定义右的逆，证明左也成立：
@@ -199,6 +206,8 @@ section RubiksSuperGroup
       := by exact (comp_symm_eq a.permute (-a.orient) ((-a.orient) ∘ ⇑a.permute)).mpr rfl
     -- exact eq_neg_iff_add_eq_zero.mp
     -- apply?
+    simp only [Pi.neg_apply]
+    exact neg_eq_iff_add_eq_zero.mp rfl
 
 
   /- This sets up a group structure for all Rubik's cube positions
@@ -496,7 +505,7 @@ section RubiksGroup
       simp only [Finset.mem_singleton, Finset.mem_insert, zero_ne_one, false_or, invFun_as_coe,
         Pi.add_apply, Function.comp_apply]
       simp only [Finset.sum_add_distrib]
-      rw [h2]
+      rw [h1]
       simp only [add_zero]
       -- refine Equiv.Perm.prod_comp
       -- apply h2
@@ -514,7 +523,7 @@ section RubiksGroup
       simp only [Finset.mem_singleton, Finset.mem_insert, zero_ne_one, false_or, invFun_as_coe,
         Pi.add_apply, Function.comp_apply]
       simp only [Finset.sum_add_distrib]
-      rw [h2]
+      rw [h1]
       simp only [add_zero]
       sorry
     }
