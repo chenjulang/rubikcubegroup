@@ -88,24 +88,34 @@ section RubiksSuperGroup
         exact rfl
         done
       rw [h1]
-      -- *****注意这里不是用分配律证明的
-      ext i
-      have h2: ((a.orient ∘ b.permute.symm + b.orient) ∘ ⇑c.permute.symm) i
-      = (a.orient ∘ b.permute.symm + b.orient) (c.permute.symm i) -- 只是复合的定义
-        := by
-        simp only [Function.comp_apply, Pi.add_apply]
-      rw [h2]
-      simp only [Pi.add_apply] -- 一个向量分成两个向量的和
-      have h3:  (a.orient ∘ b.permute.symm) (c.permute.symm i) =
-      (a.orient ∘ ⇑b.permute.symm ∘ c.permute.symm) i
-        := by
-        simp only [Function.comp_apply]
-      rw [h3]
-      have h4: PieceState.orient b (c.permute.symm i)
-      = (b.orient ∘ c.permute.symm) i
-        := by
-        simp only [Function.comp_apply]
-      rw [h4]
+      clear h1
+      -- 关键*****
+      have h5: (a.orient ∘ b.permute.symm + b.orient) ∘ c.permute.symm =
+      a.orient ∘ (b.permute.symm ∘ c.permute.symm)+ b.orient ∘ c.permute.symm
+      -- 手写一下这个
+      := by
+        rfl
+        -- ext i
+        -- -- 全部当成映射来理解，数组也是映射
+        -- -- 映射可拆，但是被映射的向量不可拆。这里是映射可拆的例子：
+        -- have h2: ((a.orient ∘ b.permute.symm + b.orient) ∘ ⇑c.permute.symm) i
+        -- = (a.orient ∘ b.permute.symm + b.orient) (c.permute.symm i) -- 只是复合的定义
+        --   := by
+        --   simp only [Function.comp_apply]
+        -- rw [h2]
+        -- clear h2
+        -- simp only [Pi.add_apply] -- 一个向量分成两个向量的和
+        -- have h3:  (a.orient ∘ b.permute.symm) (c.permute.symm i) =
+        -- (a.orient ∘ ⇑b.permute.symm ∘ c.permute.symm) i
+        --   := by
+        --   simp only [Function.comp_apply]
+        -- rw [h3]
+        -- have h4: PieceState.orient b (c.permute.symm i)
+        -- = (b.orient ∘ c.permute.symm) i
+        --   := by
+        --   simp only [Function.comp_apply]
+        -- rw [h4]
+      exact h5
       done
     done
 
