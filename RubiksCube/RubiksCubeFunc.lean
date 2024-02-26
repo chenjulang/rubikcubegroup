@@ -38,7 +38,6 @@ section RubiksSuperGroup
   --     permute := a1.permute * a2.permute
   --     orient := (a2.orient ∘ a1.permute.invFun) + a1.orient
   --   }
-  -- todo-- 重新理解这个的现实意义：
   -- 会不会是在状态a的基础上看的呢？
   def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
     fun a1 a2 => {
@@ -506,6 +505,7 @@ section RubiksGroup
         Pi.add_apply, Function.comp_apply]
       simp only [Finset.sum_add_distrib]
       rw [h1]
+      clear h1
       simp only [add_zero]
       -- refine Equiv.Perm.prod_comp
       -- apply h2
@@ -524,6 +524,7 @@ section RubiksGroup
         Pi.add_apply, Function.comp_apply]
       simp only [Finset.sum_add_distrib]
       rw [h1]
+      clear h1
       simp only [add_zero]
       sorry
     }
