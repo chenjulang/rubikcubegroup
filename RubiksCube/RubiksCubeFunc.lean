@@ -39,6 +39,7 @@ section RubiksSuperGroup
   --     orient := (a2.orient ∘ a1.permute.invFun) + a1.orient
   --   }
   -- todo-- 重新理解这个的现实意义：
+  -- 会不会是在状态a的基础上看的呢？
   def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
     fun a1 a2 => {
       permute := a2.permute * a1.permute -- *先运算右，再运算左。
@@ -78,22 +79,34 @@ section RubiksSuperGroup
     · simp only [Perm.mul_def]
       simp only [Equiv.trans_assoc] -- A.trans B 指的是映射先看A，再看B
     · rw [← add_assoc]
-      --todo-- 这个分配律有点怪，是函数结合的分配律。我的手写证明是错的～～～
-      -- have h0: (c.orient ∘ b.permute.symm + b.orient) ∘ a.permute.symm = (c.orient ∘ b.permute.symm ∘ a.permute.symm  + b.orient∘ a.permute.symm )
-      --   := by exact rfl
-      -- have h01: (c.orient + b.orient) ∘ a.permute = (c.orient ∘ a.permute + b.orient ∘ a.permute )
-      --   := by exact rfl -- 分配律成立
-      -- rw [h0]
       simp only [add_left_inj] -- X ∘ (a.permute * b.permute).symm  = X ∘ b.permute.symm ∘ ⇑a.permute.symm
-      -- have h1: (b.permute * a.permute).symm  = a.permute.symm ∘ b.permute.symm
-      -- := by
-      --   -- ∘ 先作用右，再作用左
-      --   -- f.trans g 先作用f，再作用g
-      --   simp only [Perm.mul_def]
-      --   exact rfl
-      --   done
-      -- rw [h1]
-      rfl
+      have h1: (c.permute * b.permute).symm  = b.permute.symm ∘ c.permute.symm
+      := by
+        -- ∘ 先作用右，再作用左
+        -- f.trans g 先作用f，再作用g
+        simp only [Perm.mul_def]
+        exact rfl
+        done
+      rw [h1]
+      -- *****注意这里不是用分配律证明的
+      ext i
+      have h2: ((a.orient ∘ b.permute.symm + b.orient) ∘ ⇑c.permute.symm) i
+      = (a.orient ∘ b.permute.symm + b.orient) (c.permute.symm i) -- 只是复合的定义
+        := by
+        simp only [Function.comp_apply, Pi.add_apply]
+      rw [h2]
+      simp only [Pi.add_apply] -- 一个向量分成两个向量的和
+      have h3:  (a.orient ∘ b.permute.symm) (c.permute.symm i) =
+      (a.orient ∘ ⇑b.permute.symm ∘ c.permute.symm) i
+        := by
+        simp only [Function.comp_apply]
+      rw [h3]
+      have h4: PieceState.orient b (c.permute.symm i)
+      = (b.orient ∘ c.permute.symm) i
+        := by
+        simp only [Function.comp_apply]
+      rw [h4]
+      done
     done
 
 
