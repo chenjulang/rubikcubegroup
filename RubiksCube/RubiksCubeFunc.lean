@@ -43,13 +43,13 @@ section RubiksSuperGroup
   def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
     fun a1 a2 => {
       permute := a2.permute * a1.permute -- *先运算右，再运算左。
-      orient := (a1.orient ∘ a2.permute.invFun) + a2.orient -- ∘是右边的函数作用到左边的对象
+      orient := (a2.orient ∘ a1.permute) + a1.orient -- ∘是右边的函数作用到左边的对象
     }
  -- 将上面替换成下面的等价写法，好处：1.可以到处写*，来代替ps_mul，lean系统会自动匹配到这个*的类型用法。
   instance {p o : ℕ+} : Mul (PieceState p o) where
     mul a1 a2 := {
       permute := a2.permute * a1.permute
-      orient := (a1.orient ∘ a2.permute.invFun) + a2.orient
+      orient := (a2.orient ∘ a1.permute) + a1.orient
     }
 
 
@@ -62,7 +62,7 @@ section RubiksSuperGroup
   @[simp]
   theorem orient_mul {p o : ℕ+} (a1 a2 : PieceState p o)
   -- 这里可以写*，来代替ps_mul
-  : (a1 * a2).orient = (a1.orient ∘ a2.permute.invFun) + a2.orient
+  : (a1 * a2).orient = (a2.orient ∘ a1.permute) + a1.orient
   := by rfl
 
 
@@ -73,28 +73,32 @@ section RubiksSuperGroup
   := by
     intro a b c
     simp only [ps_mul]
-    simp only [invFun_as_coe]
+    -- simp only [invFun_as_coe]
     simp only [PieceState.mk.injEq] -- 两同类型对象相等，等价于，各分量相等。
     apply And.intro
     · simp only [Perm.mul_def]
       simp only [Equiv.trans_assoc] -- A.trans B 指的是映射先看A，再看B
-    · ext i
-      simp only [Pi.add_apply]
-      simp only [Function.comp_apply]
-      simp only [Pi.add_apply]
+    · simp only [coe_mul]
       rw [← add_assoc]
-      simp only [Function.comp_apply]
-      have h1: (c.permute * b.permute).symm  = b.permute.symm ∘ c.permute.symm
-      := by
-        -- ∘ 先作用右，再作用左
-        -- f.trans g 先作用f，再作用g
-        simp only [Perm.mul_def]
-        exact rfl
-        done
-      rw [h1]
-      clear h1
-      simp only [Function.comp_apply]
-      -- 直接左右相等了。
+      simp only [add_left_inj]
+      rfl
+      -- ext i
+      -- simp only [Pi.add_apply]
+      -- simp only [Function.comp_apply]
+      -- simp only [Pi.add_apply]
+      -- rw [← add_assoc]
+      -- simp only [Function.comp_apply]
+      -- have h1: (c.permute * b.permute).symm  = b.permute.symm ∘ c.permute.symm
+      -- := by
+      --   -- ∘ 先作用右，再作用左
+      --   -- f.trans g 先作用f，再作用g
+      --   simp only [Perm.mul_def]
+      --   exact rfl
+      --   done
+      -- rw [h1]
+      -- clear h1
+      -- simp only [Function.comp_apply]
+      -- -- 直接左右相等了。
     done
 
 
