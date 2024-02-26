@@ -110,11 +110,12 @@ section RubiksSuperGroup
     intro a
     simp only [ps_mul]
     -- simp only [one_mul]
-    simp only [invFun_as_coe]
+    -- simp only [invFun_as_coe]
     -- simp only [mul_one, Pi.zero_comp, zero_add]
     simp only [mul_one]
-    simp only [Pi.zero_comp]
-    simp only [zero_add]
+    -- simp only [Pi.zero_comp]
+    -- simp only [zero_add]
+    simp only [coe_one, Function.comp.right_id, add_zero]
     done
 
 
@@ -124,9 +125,10 @@ section RubiksSuperGroup
   ps_mul a {permute := 1, orient := 0} = a := by
     intro a
     simp only [ps_mul]
-    simp only [mul_one, invFun_as_coe]
+    -- simp only [mul_one, invFun_as_coe]
     simp only [one_mul, one_symm, coe_one, Function.comp.right_id, add_zero]
     -- simp only [Pi.zero_comp, zero_add]
+    simp only [Pi.zero_comp, zero_add]
     done
 
 
@@ -161,6 +163,12 @@ section RubiksSuperGroup
       -- (a.orient ∘ a'.permute.invFun) + a'.orient  = 0
       -- a'.orient = -(a.orient ∘ a'.permute.invFun)
       -- orient := -(ps.orient ∘ ps.permute⁻¹.invFun)
+
+      -- 要满足ps_mul a a' = {orient:0}
+      -- (a'.orient ∘ a.permute) + a.orient = 0
+      -- (a'.orient ∘ a.permute) = -a.orient
+      -- (a'.orient ∘ a.permute) i = (-a.orient) i
+      -- a'.orient ∘ (a.permute i) = (-a.orient) i
       orient := -(ps.orient ∘ ps.permute)
     }
 
@@ -189,7 +197,8 @@ section RubiksSuperGroup
     have h1 : a.permute⁻¹.symm = a.permute := by rfl
     have h2 : ((-a.orient) ∘ a.permute) ∘ a.permute.symm = (-a.orient)
       := by exact (comp_symm_eq a.permute (-a.orient) ((-a.orient) ∘ ⇑a.permute)).mpr rfl
-    exact eq_neg_iff_add_eq_zero.mp h2
+    -- exact eq_neg_iff_add_eq_zero.mp
+    -- apply?
 
 
   /- This sets up a group structure for all Rubik's cube positions
