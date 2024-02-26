@@ -78,8 +78,12 @@ section RubiksSuperGroup
     apply And.intro
     · simp only [Perm.mul_def]
       simp only [Equiv.trans_assoc] -- A.trans B 指的是映射先看A，再看B
-    · rw [← add_assoc]
-      simp only [add_left_inj] -- X ∘ (a.permute * b.permute).symm  = X ∘ b.permute.symm ∘ ⇑a.permute.symm
+    · ext i
+      simp only [Pi.add_apply]
+      simp only [Function.comp_apply]
+      simp only [Pi.add_apply]
+      rw [← add_assoc]
+      simp only [Function.comp_apply]
       have h1: (c.permute * b.permute).symm  = b.permute.symm ∘ c.permute.symm
       := by
         -- ∘ 先作用右，再作用左
@@ -89,34 +93,8 @@ section RubiksSuperGroup
         done
       rw [h1]
       clear h1
-      -- 关键*****
-      have h5: (a.orient ∘ b.permute.symm + b.orient) ∘ c.permute.symm =
-      a.orient ∘ (b.permute.symm ∘ c.permute.symm)+ b.orient ∘ c.permute.symm
-      -- 手写一下这个
-      := by
-        rfl
-        -- ext i
-        -- -- 全部当成映射来理解，数组也是映射
-        -- -- 映射可拆，但是被映射的向量不可拆。这里是映射可拆的例子：
-        -- have h2: ((a.orient ∘ b.permute.symm + b.orient) ∘ ⇑c.permute.symm) i
-        -- = (a.orient ∘ b.permute.symm + b.orient) (c.permute.symm i) -- 只是复合的定义
-        --   := by
-        --   simp only [Function.comp_apply]
-        -- rw [h2]
-        -- clear h2
-        -- simp only [Pi.add_apply] -- 一个向量分成两个向量的和
-        -- have h3:  (a.orient ∘ b.permute.symm) (c.permute.symm i) =
-        -- (a.orient ∘ ⇑b.permute.symm ∘ c.permute.symm) i
-        --   := by
-        --   simp only [Function.comp_apply]
-        -- rw [h3]
-        -- have h4: PieceState.orient b (c.permute.symm i)
-        -- = (b.orient ∘ c.permute.symm) i
-        --   := by
-        --   simp only [Function.comp_apply]
-        -- rw [h4]
-      exact h5
-      done
+      simp only [Function.comp_apply]
+      -- 直接左右相等了。
     done
 
 
