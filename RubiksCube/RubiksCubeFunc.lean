@@ -598,13 +598,12 @@ section RubiksGroup
   -- #check Finset.sum
   -- #check Finset.sum_add_distrib
 
-  --todo--
 
   @[simp]
   lemma one_mem'
   : 1 ∈ ValidCube
   := by
-    simp [ValidCube]
+    simp only [ValidCube]
     apply And.intro
     { apply Eq.refl }
     { apply And.intro
@@ -612,9 +611,10 @@ section RubiksGroup
       { apply Eq.refl }
     }
 
+
   @[simp]
   lemma inv_mem' {x : RubiksSuperType}
-  : x∈ValidCube → x⁻¹∈ValidCube
+  : x∈ValidCube → x⁻¹ ∈ ValidCube
   := by
     intro hxv
     simp [ValidCube, PieceState.inv_def, ps_inv]
@@ -624,23 +624,30 @@ section RubiksGroup
     apply And.intro
     { have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} x.1.orient = 0
         := by apply hxv.right.left
-      -- 一样的问题，很容易看出来，不知道怎么写：
+      -- 和“mul_mem'”一样的问题，很容易看出来，不知道怎么写：
       sorry
     }
     {
       have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8,9,10,11} x.2.orient = 0
         := by apply hxv.right.right
-      -- 一样的问题，很容易看出来，不知道怎么写：
+      -- 和“mul_mem'”一样的问题，很容易看出来，不知道怎么写：
       sorry
     }
+
 
   /- Defining the subgroup of valid Rubik's cube positions. -/
   instance RubiksGroup : Subgroup RubiksSuperType := {
     carrier := ValidCube
-    mul_mem' := mul_mem'
-    one_mem' := one_mem'
-    inv_mem' := inv_mem'
+    mul_mem' := mul_mem' -- 封闭性质
+    one_mem' := one_mem' -- 单位1元素
+    inv_mem' := inv_mem' -- 逆元素
+    -- 结合律不用证明，父群已经证明。
+    -- 左乘1=本身不用证明
+    -- 右乘1=本身不用证明
+    -- 左乘逆=1不用证明
+    -- 右乘逆=1不用证明
   }
+
 
   /- Defining the intuitively valid set of Rubik's cube positions. -/
   inductive Reachable
@@ -670,13 +677,15 @@ section WIDGET
         | Color.orange => "#ff7f00"
         | Color.yellow => "#ffff00"
 
-  /--  只是将 List 变成Vector-/
+
+  /-- 为每一个List类型定义了一个成员变量，只需要.vec就可以调用出来。 将 List 变成Vector-/
   def List.vec {α : Type}
   : Π a : List α, Vector α (a.length)
     | [] => Vector.nil
     | (x :: xs) => Vector.cons x (xs.vec)
 
   -- #check List.vec {1,2,3,4,5}
+
 
 
   def corner_map
@@ -739,10 +748,11 @@ section WIDGET
   ++
   (List.map (fun x => (x, 1)) (List.range 12))
 
+
   def cubeStickerJson
   : RubiksSuperType → Json
   :=
-    fun cube => Json.mkObj
+    fun cube => Json.mkObj --???
     (
       (List.map
         (fun p => (s!"c_{p.fst}_{p.snd}", Json.str (toString (corner_sticker p.fst p.snd $ cube))))
@@ -852,6 +862,7 @@ section SolutionState
   RubiksSuperType → Prop
   :=
     fun c =>
+      -- 定义需要满足：
       c.fst.permute = 1
       ∧
       c.fst.orient = 0
@@ -860,6 +871,7 @@ section SolutionState
   : RubiksSuperType → Prop
   :=
     fun c =>
+      -- 定义需要满足：
       c.snd.permute = 1
       ∧
       c.snd.orient = 0
@@ -868,10 +880,12 @@ section SolutionState
   : RubiksSuperType → Prop
   :=
     fun c =>
+      -- 定义需要满足：
       CornersSolved c
       ∧
       EdgesSolved c
 
+  -- 这3个instance的作用是？
   instance {c} : Decidable (CornersSolved c) := by apply And.decidable
   instance {c} : Decidable (EdgesSolved c) := by apply And.decidable
   instance {c} : Decidable (IsSolved c) := by apply And.decidable

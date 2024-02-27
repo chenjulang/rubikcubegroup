@@ -8,15 +8,21 @@ open Equiv Perm
 /- NOTE: ft_valid and reachable_valid will take a moment for Lean to process. -/
 -- 怎么缩短时间呢？
 
+  --todo--
+
 section ValidityChecks
 
   --例子：
   lemma RValid : R ∈ ValidCube :=
     by
-      simp [R, ValidCube]
+      simp only [R, ValidCube]
       apply And.intro
       { apply Eq.refl }
-      { apply Eq.refl }
+      { apply And.intro
+        · exact rfl
+        · rfl
+      }
+      done
 
   lemma ft_valid
   : ∀x : RubiksSuperType,
