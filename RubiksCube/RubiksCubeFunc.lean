@@ -337,29 +337,38 @@ section FACE_TURNS
     -- permute描述的是位置，orient描述的是方向数。
   -- 第2大括号"{}"内描述的是：棱块
     -- permute描述的是位置，orient描述的是方向数。
+    -- #eval (cyclePieces [0, 1, 2, 3] : Perm (Fin 12))
+      -- 为了创建位置4循环(0,1,2,3)，就像上述那样写。
+    -- #eval Orient 8 3 [(0, 1), (1, 0), (2, 2), (3, 2), (4, 0), (5, 1), (6, 0), (7, 0)]
+      -- 比如为了创建这个方向数向量：![1, 0, 2, 2, 0, 1, 0, 0]
+
+  -- 当然也是可以定义中间层转动，两层同时转动等等...
+  -- ,,,   :  :  :  :
+  --   => [, , , ]  Orient X X [(, ), (, ), (, ), (, )]
+
   def U : RubiksSuperType :=
     ⟨
-      --todo
-      {permute := cyclePieces [0, 1, 2, 3], orient := 0},
-      {permute := cyclePieces [0, 1, 2, 3], orient := 0}
+      {permute := cyclePieces [1, 2, 3, 0], orient := 0},
+      {permute := cyclePieces [1, 4, 5, 0], orient := 0}
     ⟩
   def D : RubiksSuperType :=
     ⟨
       {permute := cyclePieces [4, 5, 6, 7], orient := 0},
-      {permute := cyclePieces [4, 5, 6, 7], orient := 0}
+      {permute := cyclePieces [8, 9, 10, 11], orient := 0}
     ⟩
   def R : RubiksSuperType :=
     ⟨
-      {permute := cyclePieces [1, 6, 5, 2], orient := Orient 8 3 [(1, 1), (6, 2), (5, 1), (2, 2)]},
-      {permute := cyclePieces [1, 9, 5, 10], orient := 0}
+      {permute := cyclePieces [1,2,6,5], orient := Orient 8 3 [(1, 2), (2, 1), (5, 1), (6, 2)]},
+      {permute := cyclePieces [1, 6, 9, 5], orient := Orient 12 2 [(1,1 ), (5,1 ), (6,1 ), (9,1 )]}
     ⟩
   def L : RubiksSuperType :=
     ⟨
-      {permute := cyclePieces [0, 3, 4, 7], orient := Orient 8 3 [(0, 2), (3, 1), (4, 2), (7, 1)]},
-      {permute := cyclePieces [3, 11, 7, 8], orient := 0}
+      {permute := cyclePieces [0, 4, 7, 3], orient := Orient 8 3 [(0, 1), (3, 2), (4, 2), (7, 1)]},
+      {permute := cyclePieces [3,4 ,11 ,7 ], orient := Orient 12 2 [(3, 1), (4,1 ), (7, 1), (11, 1)]}
     ⟩
   def F : RubiksSuperType :=
     ⟨
+       --todo--
       {permute := cyclePieces [2, 5, 4, 3], orient := Orient 8 3 [(2, 1), (5, 2), (4, 1), (3, 2)]},
       {permute := cyclePieces [2, 10, 4, 11], orient := Orient 12 2 [(2, 1), (10, 1), (4, 1), (11, 1)]}
     ⟩
