@@ -114,7 +114,7 @@ section RubiksSuperGroup
     simp only [mul_one]
     -- simp only [Pi.zero_comp]
     -- simp only [zero_add]
-    simp only [coe_one, Function.comp.right_id, add_zero]
+    simp only [coe_one, Function.comp_id, add_zero]
     done
 
 
@@ -125,7 +125,7 @@ section RubiksSuperGroup
     intro a
     simp only [ps_mul]
     -- simp only [mul_one, invFun_as_coe]
-    simp only [one_mul, one_symm, coe_one, Function.comp.right_id, add_zero]
+    simp only [one_mul, one_symm, coe_one, Function.comp_id, add_zero]
     -- simp only [Pi.zero_comp, zero_add]
     simp only [Pi.zero_comp, zero_add]
     done
@@ -273,8 +273,12 @@ def Orient
 -- #eval Orient 3 2 [(0, 1), (1, 0), (3, 1)] -- ![1, 0, 0]
 -- 换句话说，首先需要我们提供一组这样的数组：每一项形式为(Fin p)×(Fin o)，也就是都是2个分量的向量。
 -- 函数结果得到一个数组，有3项，每一项结果x满足：0 <= x < 2 。
--- 得到的数组的每一项值是这样决定的：如果索引能遍历找每一项的第一个分量，找到相同的值，则返回第二个分量，
--- 反之遍历找每一项的第一个分量都找不到，直接返回0。
+-- 得到的数组的每一项值是这样决定的：
+  -- 如果索引能遍历找每一项的第一个分量，找到相同的值，则返回第二个分量，
+  -- 反之遍历找每一项的第一个分量都找不到，直接返回0。
+-- #eval Orient 8 3 [(0, 1), (1, 0), (2, 2), (3, 2), (4, 0), (5, 1), (6, 0), (7, 0)]
+  -- 比如为了创建这个向量：![1, 0, 2, 2, 0, 1, 0, 0]， 可以上面这样输入参数。8项分量，每一项为Fin 3,即小于3。
+
 
 def Solved
 : RubiksSuperType
@@ -282,15 +286,13 @@ def Solved
 
 section FACE_TURNS
 
-  --todo--
-
   /- These two functions (from kendfrey's repository) create a cycle permutation,
   which is useful for defining the rotation of any given face, as seen directly below. -/
   -- 为了方便定义每个操作的排列permute,然后定义的这两个东西：
   def cycleImpl {α : Type*} [DecidableEq α]
   : α → List α → Perm α
     | _, [] => 1 -- “_”指的是第一个元素。可以写成a吗???
-    | a, (x :: xs) => (swap a x) * (cycleImpl x xs) -- “a”指的是第一个元素
+    | a, (x :: xs) => (swap a x) * (cycleImpl x xs) -- “a”指的是第一个参数
 
   def cyclePieces {α : Type*} [DecidableEq α]
   : List α → Perm α
@@ -314,29 +316,32 @@ section FACE_TURNS
   --      = (0,1) * (2,3,1)
   --      = (2,3,0,1)
   --      = (0,1,2,3)
-
+  ---------
   -- #eval (cyclePieces [1, 2] : Perm (Fin 12)) -- (1,2)
   -- #eval (cyclePieces [2, 3] : Perm (Fin 12)) -- (2,3)
   -- #eval (cyclePieces [1, 2] : Perm (Fin 12)) * (cyclePieces [2, 3] : Perm (Fin 12)) -- (1,2,3)
   --   --  这个说明了(1,2) * (2,3) = (1,2,3)
-
-
+  ----------
   -- #eval (cyclePieces [0, 1, 2, 3] : Perm (Fin 12)) -- 其实就是4循环(0,1,2,3)
     -- ![1, 2, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11]
   -- #eval List.map (cyclePieces [0, 1, 2, 3] : Perm (Fin 12)) (List.range 12)
   -- #eval (cyclePieces [0, 5, 8] : Perm (Fin 12)) -- 其实就是3循环(0,5,8)
   -- #eval List.map (cyclePieces [0, 5, 8] : Perm (Fin 12)) (List.range 12)
+  -- #eval (cyclePieces [0, 1, 2, 3] : Perm (Fin 12))
+    -- 为了创建4循环(0,1,2,3)，就像上述那样写。
 
-  -- #eval Orient 8 3 [(1, 1), (6, 2), (5, 1), (2, 2)] -- ![0, 1, 2, 0, 0, 1, 2, 0] 换句话说，只有1，2，5，6是非零值
-
-  --重新附个图
-  --检查一下这些orient是否正确
+  -- 检查一下这些orient是否正确，完全不一样？我需要用TW算法重新定义吗？
   --而且方向数的点怎么定义的也要根据下面想一下
 
+  -- 第1大括号"{}"内描述的是：角块
+    -- permute描述的是位置，orient描述的是方向数。
+  -- 第2大括号"{}"内描述的是：棱块
+    -- permute描述的是位置，orient描述的是方向数。
   def U : RubiksSuperType :=
     ⟨
-      {permute := cyclePieces [0, 1, 2, 3], orient := 0}, -- 第一是角块
-      {permute := cyclePieces [0, 1, 2, 3], orient := 0}  -- 第二是棱块
+      --todo
+      {permute := cyclePieces [0, 1, 2, 3], orient := 0},
+      {permute := cyclePieces [0, 1, 2, 3], orient := 0}
     ⟩
   def D : RubiksSuperType :=
     ⟨
@@ -399,6 +404,8 @@ section FACE_TURNS
     | F' : FaceTurn F'
     | B' : FaceTurn B'
 
+  -- #check FaceTurn.U -- Prop
+
   instance : ToString RubiksSuperType where
     toString : RubiksSuperType → String :=
     fun c =>
@@ -423,23 +430,35 @@ section FACE_TURNS
       else if c = B' then "B'"
       else s!"{repr c}"
 
+  -- def aRubikSuperType : RubiksSuperType :=
+  --   ⟨
+  --     {permute := cyclePieces [0, 1, 2, 3], orient := 0},
+  --     {permute := cyclePieces [0, 1, 2, 3], orient := 0}
+  --   ⟩
+  -- 举例使用：它会把这个RubiksSuperType类型的东西对比来得到字符串。
+  -- #eval toString $ aRubikSuperType
+
+
   -- instance : Multiplicative.coeToFun RubiksSuperType := {coe := fun (a : RubiksSuperType) => fun (b : RubiksSuperType) => a * b }
   --? How do I get the line above to work?
 
 end FACE_TURNS
 
 
-def TPerm : RubiksSuperType -- 这个*是在哪里定义的呢？，看定义就知道，因为RubiksSuperType是笛卡尔积CornerType × EdgeType，其乘法就是两个分量分别乘积
+def TPerm : RubiksSuperType
+-- 这个*是在哪里定义的呢？看定义就知道，因为RubiksSuperType是笛卡尔积CornerType × EdgeType，其乘法就是两个分量分别乘积
+-- 这里*实际上是两个分量的ps_mul,要从左往右→运算。
   := R * U * R' * U' * R' * F * R2 * U' * R' * U' * R * U * R' * F'
 def AlteredYPerm : RubiksSuperType
   := R * U' * R' * U' * R * U * R' * F' * R * U * R' * U' * R' * F * R
 def MyTestActions : RubiksSuperType
   := R *U'* R* U* R* U* R* U'* R'* U'* R* R
 
-
-def CornerTwist : RubiksSuperType  -- 应该是形容两个不可能的魔方状态：只旋转一次角块，还有只旋转一次棱块
+-- 以下两个定义，形容两个不可能的魔方状态：只旋转一次角块，还有只旋转一次棱块
+def CornerTwist : RubiksSuperType
   := (
-      {permute := 1, orient := (fun | 0 => 1 | _ => 0) }, -- 这种是归纳定义的向量写法，只有0位置为1，其余为0。
+      {permute := 1, orient := (fun | 0 => 1 | _ => 0) },
+      -- 这种是归纳定义的向量写法，只有0位置为1，“_”意思是其余的，其余为0。
       {permute := 1, orient := 0}
      )
 def EdgeFlip : RubiksSuperType
@@ -461,6 +480,7 @@ section RubiksGroup
   {
     c |
     Perm.sign c.fst.permute = Perm.sign c.snd.permute
+    -- c.fst指的是角块 , c.snd指的是棱块
     ∧
     Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) c.fst.orient = 0
     ∧
@@ -510,7 +530,43 @@ section RubiksGroup
       -- refine Equiv.Perm.prod_comp
       -- apply h2
       -- rw [Finset.sum_range_succ]
-      sorry
+      -- sorry
+      trans Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} b.1.orient
+      -- apply Perm.sum_comp
+      -- · intro x1
+      --   simp only [ne_eq, Finset.coe_insert, Finset.coe_singleton]
+      --   sorry
+      -- · exact h2
+      ---
+      . apply Finset.sum_bijective
+        . exact a.1.permute.bijective
+        . intro i
+          simp only [Finset.mem_insert, Finset.mem_singleton]
+          constructor
+          · intro h
+            cases h with
+            | inl h =>
+              have h0 : a.1.permute i = a.1.permute 0
+                := by exact congrArg (⇑a.1.permute) h
+              rw [h0]
+              clear h0
+              sorry
+            | inr h => cases h with
+            | inl h => sorry
+            | inr h => cases h with
+            | inl h => sorry
+            | inr h => cases h with
+            | inl h => sorry
+            | inr h => cases h with
+            | inl h => sorry
+            | inr h => cases h with
+            | inl h => sorry
+            | inr h => cases h with
+            | inl h => sorry
+            | inr h => sorry
+          · sorry
+        · exact fun i a_1 ↦ rfl
+      · exact h2
     }
     {
       have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8,9,10,11} a.2.orient = 0
@@ -531,6 +587,8 @@ section RubiksGroup
 
   -- #check Finset.sum
   -- #check Finset.sum_add_distrib
+
+  --todo--
 
   @[simp]
   lemma one_mem'
@@ -687,91 +745,94 @@ section WIDGET
       )
     )
 
-  @[widget]
-  def cubeWidget : UserWidgetDefinition where
-    name := "Cube State"
-    javascript :="
-      import * as React from 'react';
+--   @[widget]
+--   def cubeWidget : UserWidgetDefinition where
+--     name := "Cube State"
+--     javascript :="
+--       import * as React from 'react';
 
-    export default function (props) {
-      return React.createElement(
-        'div',
-        {
-          style: {
-            display: 'grid',
-            gridTemplateColumns: 'repeat(12, 20px)',
-            gridTemplateRows: 'repeat(9, 20px)',
-            rowGap: '2px',
-            columnGap: '2px',
-            margin: '10px',
-          },
-        },
-        React.createElement('div', {style: {gridColumn: '4', gridRow: '1', backgroundColor: props.c_0_0}}),
-        React.createElement('div', {style: {gridColumn: '5', gridRow: '1', backgroundColor: props.e_0_0}}),
-        React.createElement('div', {style: {gridColumn: '6', gridRow: '1', backgroundColor: props.c_1_0}}),
-        React.createElement('div', {style: {gridColumn: '4', gridRow: '2', backgroundColor: props.e_3_0}}),
-        React.createElement('div', {style: {gridColumn: '5', gridRow: '2', backgroundColor: '#ffffff'}}),
-        React.createElement('div', {style: {gridColumn: '6', gridRow: '2', backgroundColor: props.e_1_0}}),
-        React.createElement('div', {style: {gridColumn: '4', gridRow: '3', backgroundColor: props.c_3_0}}),
-        React.createElement('div', {style: {gridColumn: '5', gridRow: '3', backgroundColor: props.e_2_0}}),
-        React.createElement('div', {style: {gridColumn: '6', gridRow: '3', backgroundColor: props.c_2_0}}),
-        React.createElement('div', {style: {gridColumn: '1', gridRow: '4', backgroundColor: props.c_0_1}}),
-        React.createElement('div', {style: {gridColumn: '2', gridRow: '4', backgroundColor: props.e_3_1}}),
-        React.createElement('div', {style: {gridColumn: '3', gridRow: '4', backgroundColor: props.c_3_2}}),
-        React.createElement('div', {style: {gridColumn: '1', gridRow: '5', backgroundColor: props.e_8_1}}),
-        React.createElement('div', {style: {gridColumn: '2', gridRow: '5', backgroundColor: '#ff7f00'}}),
-        React.createElement('div', {style: {gridColumn: '3', gridRow: '5', backgroundColor: props.e_11_1}}),
-        React.createElement('div', {style: {gridColumn: '1', gridRow: '6', backgroundColor: props.c_7_2}}),
-        React.createElement('div', {style: {gridColumn: '2', gridRow: '6', backgroundColor: props.e_7_1}}),
-        React.createElement('div', {style: {gridColumn: '3', gridRow: '6', backgroundColor: props.c_4_1}}),
-        React.createElement('div', {style: {gridColumn: '4', gridRow: '4', backgroundColor: props.c_3_1}}),
-        React.createElement('div', {style: {gridColumn: '5', gridRow: '4', backgroundColor: props.e_2_1}}),
-        React.createElement('div', {style: {gridColumn: '6', gridRow: '4', backgroundColor: props.c_2_2}}),
-        React.createElement('div', {style: {gridColumn: '4', gridRow: '5', backgroundColor: props.e_11_0}}),
-        React.createElement('div', {style: {gridColumn: '5', gridRow: '5', backgroundColor: '#00ff00'}}),
-        React.createElement('div', {style: {gridColumn: '6', gridRow: '5', backgroundColor: props.e_10_0}}),
-        React.createElement('div', {style: {gridColumn: '4', gridRow: '6', backgroundColor: props.c_4_2}}),
-        React.createElement('div', {style: {gridColumn: '5', gridRow: '6', backgroundColor: props.e_4_1}}),
-        React.createElement('div', {style: {gridColumn: '6', gridRow: '6', backgroundColor: props.c_5_1}}),
-        React.createElement('div', {style: {gridColumn: '7', gridRow: '4', backgroundColor: props.c_2_1}}),
-        React.createElement('div', {style: {gridColumn: '8', gridRow: '4', backgroundColor: props.e_1_1}}),
-        React.createElement('div', {style: {gridColumn: '9', gridRow: '4', backgroundColor: props.c_1_2}}),
-        React.createElement('div', {style: {gridColumn: '7', gridRow: '5', backgroundColor: props.e_10_1}}),
-        React.createElement('div', {style: {gridColumn: '8', gridRow: '5', backgroundColor: '#ff0000'}}),
-        React.createElement('div', {style: {gridColumn: '9', gridRow: '5', backgroundColor: props.e_9_1}}),
-        React.createElement('div', {style: {gridColumn: '7', gridRow: '6', backgroundColor: props.c_5_2}}),
-        React.createElement('div', {style: {gridColumn: '8', gridRow: '6', backgroundColor: props.e_5_1}}),
-        React.createElement('div', {style: {gridColumn: '9', gridRow: '6', backgroundColor: props.c_6_1}}),
-        React.createElement('div', {style: {gridColumn: '10', gridRow: '4', backgroundColor: props.c_1_1}}),
-        React.createElement('div', {style: {gridColumn: '11', gridRow: '4', backgroundColor: props.e_0_1}}),
-        React.createElement('div', {style: {gridColumn: '12', gridRow: '4', backgroundColor: props.c_0_2}}),
-        React.createElement('div', {style: {gridColumn: '10', gridRow: '5', backgroundColor: props.e_9_0}}),
-        React.createElement('div', {style: {gridColumn: '11', gridRow: '5', backgroundColor: '#0000ff'}}),
-        React.createElement('div', {style: {gridColumn: '12', gridRow: '5', backgroundColor: props.e_8_0}}),
-        React.createElement('div', {style: {gridColumn: '10', gridRow: '6', backgroundColor: props.c_6_2}}),
-        React.createElement('div', {style: {gridColumn: '11', gridRow: '6', backgroundColor: props.e_6_1}}),
-        React.createElement('div', {style: {gridColumn: '12', gridRow: '6', backgroundColor: props.c_7_1}}),
-        React.createElement('div', {style: {gridColumn: '4', gridRow: '7', backgroundColor: props.c_4_0}}),
-        React.createElement('div', {style: {gridColumn: '5', gridRow: '7', backgroundColor: props.e_4_0}}),
-        React.createElement('div', {style: {gridColumn: '6', gridRow: '7', backgroundColor: props.c_5_0}}),
-        React.createElement('div', {style: {gridColumn: '4', gridRow: '8', backgroundColor: props.e_7_0}}),
-        React.createElement('div', {style: {gridColumn: '5', gridRow: '8', backgroundColor: '#ffff00'}}),
-        React.createElement('div', {style: {gridColumn: '6', gridRow: '8', backgroundColor: props.e_5_0}}),
-        React.createElement('div', {style: {gridColumn: '4', gridRow: '9', backgroundColor: props.c_7_0}}),
-        React.createElement('div', {style: {gridColumn: '5', gridRow: '9', backgroundColor: props.e_6_0}}),
-        React.createElement('div', {style: {gridColumn: '6', gridRow: '9', backgroundColor: props.c_6_0}}),
-      );
-    }"
+--     export default function (props) {
+--       return React.createElement(
+--         'div',
+--         {
+--           style: {
+--             display: 'grid',
+--             gridTemplateColumns: 'repeat(12, 20px)',
+--             gridTemplateRows: 'repeat(9, 20px)',
+--             rowGap: '2px',
+--             columnGap: '2px',
+--             margin: '10px',
+--           },
+--         },
+--         React.createElement('div', {style: {gridColumn: '4', gridRow: '1', backgroundColor: props.c_0_0}}),
+--         React.createElement('div', {style: {gridColumn: '5', gridRow: '1', backgroundColor: props.e_0_0}}),
+--         React.createElement('div', {style: {gridColumn: '6', gridRow: '1', backgroundColor: props.c_1_0}}),
+--         React.createElement('div', {style: {gridColumn: '4', gridRow: '2', backgroundColor: props.e_3_0}}),
+--         React.createElement('div', {style: {gridColumn: '5', gridRow: '2', backgroundColor: '#ffffff'}}),
+--         React.createElement('div', {style: {gridColumn: '6', gridRow: '2', backgroundColor: props.e_1_0}}),
+--         React.createElement('div', {style: {gridColumn: '4', gridRow: '3', backgroundColor: props.c_3_0}}),
+--         React.createElement('div', {style: {gridColumn: '5', gridRow: '3', backgroundColor: props.e_2_0}}),
+--         React.createElement('div', {style: {gridColumn: '6', gridRow: '3', backgroundColor: props.c_2_0}}),
+--         React.createElement('div', {style: {gridColumn: '1', gridRow: '4', backgroundColor: props.c_0_1}}),
+--         React.createElement('div', {style: {gridColumn: '2', gridRow: '4', backgroundColor: props.e_3_1}}),
+--         React.createElement('div', {style: {gridColumn: '3', gridRow: '4', backgroundColor: props.c_3_2}}),
+--         React.createElement('div', {style: {gridColumn: '1', gridRow: '5', backgroundColor: props.e_8_1}}),
+--         React.createElement('div', {style: {gridColumn: '2', gridRow: '5', backgroundColor: '#ff7f00'}}),
+--         React.createElement('div', {style: {gridColumn: '3', gridRow: '5', backgroundColor: props.e_11_1}}),
+--         React.createElement('div', {style: {gridColumn: '1', gridRow: '6', backgroundColor: props.c_7_2}}),
+--         React.createElement('div', {style: {gridColumn: '2', gridRow: '6', backgroundColor: props.e_7_1}}),
+--         React.createElement('div', {style: {gridColumn: '3', gridRow: '6', backgroundColor: props.c_4_1}}),
+--         React.createElement('div', {style: {gridColumn: '4', gridRow: '4', backgroundColor: props.c_3_1}}),
+--         React.createElement('div', {style: {gridColumn: '5', gridRow: '4', backgroundColor: props.e_2_1}}),
+--         React.createElement('div', {style: {gridColumn: '6', gridRow: '4', backgroundColor: props.c_2_2}}),
+--         React.createElement('div', {style: {gridColumn: '4', gridRow: '5', backgroundColor: props.e_11_0}}),
+--         React.createElement('div', {style: {gridColumn: '5', gridRow: '5', backgroundColor: '#00ff00'}}),
+--         React.createElement('div', {style: {gridColumn: '6', gridRow: '5', backgroundColor: props.e_10_0}}),
+--         React.createElement('div', {style: {gridColumn: '4', gridRow: '6', backgroundColor: props.c_4_2}}),
+--         React.createElement('div', {style: {gridColumn: '5', gridRow: '6', backgroundColor: props.e_4_1}}),
+--         React.createElement('div', {style: {gridColumn: '6', gridRow: '6', backgroundColor: props.c_5_1}}),
+--         React.createElement('div', {style: {gridColumn: '7', gridRow: '4', backgroundColor: props.c_2_1}}),
+--         React.createElement('div', {style: {gridColumn: '8', gridRow: '4', backgroundColor: props.e_1_1}}),
+--         React.createElement('div', {style: {gridColumn: '9', gridRow: '4', backgroundColor: props.c_1_2}}),
+--         React.createElement('div', {style: {gridColumn: '7', gridRow: '5', backgroundColor: props.e_10_1}}),
+--         React.createElement('div', {style: {gridColumn: '8', gridRow: '5', backgroundColor: '#ff0000'}}),
+--         React.createElement('div', {style: {gridColumn: '9', gridRow: '5', backgroundColor: props.e_9_1}}),
+--         React.createElement('div', {style: {gridColumn: '7', gridRow: '6', backgroundColor: props.c_5_2}}),
+--         React.createElement('div', {style: {gridColumn: '8', gridRow: '6', backgroundColor: props.e_5_1}}),
+--         React.createElement('div', {style: {gridColumn: '9', gridRow: '6', backgroundColor: props.c_6_1}}),
+--         React.createElement('div', {style: {gridColumn: '10', gridRow: '4', backgroundColor: props.c_1_1}}),
+--         React.createElement('div', {style: {gridColumn: '11', gridRow: '4', backgroundColor: props.e_0_1}}),
+--         React.createElement('div', {style: {gridColumn: '12', gridRow: '4', backgroundColor: props.c_0_2}}),
+--         React.createElement('div', {style: {gridColumn: '10', gridRow: '5', backgroundColor: props.e_9_0}}),
+--         React.createElement('div', {style: {gridColumn: '11', gridRow: '5', backgroundColor: '#0000ff'}}),
+--         React.createElement('div', {style: {gridColumn: '12', gridRow: '5', backgroundColor: props.e_8_0}}),
+--         React.createElement('div', {style: {gridColumn: '10', gridRow: '6', backgroundColor: props.c_6_2}}),
+--         React.createElement('div', {style: {gridColumn: '11', gridRow: '6', backgroundColor: props.e_6_1}}),
+--         React.createElement('div', {style: {gridColumn: '12', gridRow: '6', backgroundColor: props.c_7_1}}),
+--         React.createElement('div', {style: {gridColumn: '4', gridRow: '7', backgroundColor: props.c_4_0}}),
+--         React.createElement('div', {style: {gridColumn: '5', gridRow: '7', backgroundColor: props.e_4_0}}),
+--         React.createElement('div', {style: {gridColumn: '6', gridRow: '7', backgroundColor: props.c_5_0}}),
+--         React.createElement('div', {style: {gridColumn: '4', gridRow: '8', backgroundColor: props.e_7_0}}),
+--         React.createElement('div', {style: {gridColumn: '5', gridRow: '8', backgroundColor: '#ffff00'}}),
+--         React.createElement('div', {style: {gridColumn: '6', gridRow: '8', backgroundColor: props.e_5_0}}),
+--         React.createElement('div', {style: {gridColumn: '4', gridRow: '9', backgroundColor: props.c_7_0}}),
+--         React.createElement('div', {style: {gridColumn: '5', gridRow: '9', backgroundColor: props.e_6_0}}),
+--         React.createElement('div', {style: {gridColumn: '6', gridRow: '9', backgroundColor: props.c_6_0}}),
+--       );
+--     }"
 
-end WIDGET
+-- end WIDGET
 
-#widget cubeWidget (cubeStickerJson Solved)
-#widget cubeWidget (cubeStickerJson TPerm)
-#widget cubeWidget (cubeStickerJson AlteredYPerm)
-#widget cubeWidget (cubeStickerJson CornerTwist)
-#widget cubeWidget (cubeStickerJson EdgeFlip)
+-- #widget cubeWidget
+-- #eval (cubeStickerJson Solved)
 
-#widget cubeWidget (cubeStickerJson MyTestActions)
+-- #widget cubeWidget (cubeStickerJson Solved)
+-- #widget cubeWidget (cubeStickerJson TPerm)
+-- #widget cubeWidget (cubeStickerJson AlteredYPerm)
+-- #widget cubeWidget (cubeStickerJson CornerTwist)
+-- #widget cubeWidget (cubeStickerJson EdgeFlip)
+
+-- #widget cubeWidget (cubeStickerJson MyTestActions)
 
 
 /- Useful predicates for the SolutionAlgorithm, as well as for some minor proofs. -/

@@ -13,7 +13,7 @@ package «rubiks-cube» where
   moreServerArgs := extraArgs
 
 require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git" @ "bcd9607bce748203e813b06df9f14de82f906e98"
+  "https://github.com/leanprover-community/mathlib4.git"
 
 @[default_target]
 lean_lib «RubiksCube» where
