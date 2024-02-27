@@ -8,7 +8,6 @@ open Equiv Perm
 /- NOTE: ft_valid and reachable_valid will take a moment for Lean to process. -/
 -- 怎么缩短时间呢？
 
-  --todo--
 
 section ValidityChecks
 
@@ -24,17 +23,18 @@ section ValidityChecks
       }
       done
 
+
   lemma ft_valid
   : ∀x : RubiksSuperType,
   FaceTurn x → x ∈ ValidCube
   :=
     by
       intro x hx
-      cases hx with
-      | _ =>
+      -- cases hx with
+      -- | _ =>
         -- 能证明但是很慢。分开写快一点？：
         -- method 1:
-        -- simp [ValidCube, U, D, R, L, F, B, U2, D2, R2, L2, F2, B2, U', D', R', L', F', B']
+        -- simp only [ValidCube, U, D, R, L, F, B, U2, D2, R2, L2, F2, B2, U', D', R', L', F', B']
         -- repeat' apply And.intro
         -- all_goals apply Eq.refl
         --------------
@@ -42,15 +42,145 @@ section ValidityChecks
         -- simp only [ValidCube, U, D, R, L, F, B, U2, D2, R2, L2, F2, B2, U', D', R', L', F', B']
         -- <;> apply And.intro;apply Eq.refl;exact Prod.mk_eq_zero.mp rfl
         -- done
-        sorry
+        -- sorry
+      --- method 3:
+      -- cases hx with
+      -- | U =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | D =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | R =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | L =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | F =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | B =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | U2 =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | D2 =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | R2 =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | L2 =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | F2 =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | B2 =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | U' =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | D' =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | R' =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | L' =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | F' =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      -- | B' =>
+      --   apply And.intro
+      --   { apply Eq.refl }
+      --   { apply And.intro
+      --     · exact rfl
+      --     · rfl
+      --   }
+      sorry
+      done
 
 
   lemma TPermValid : TPerm ∈ ValidCube :=
     by
-      simp [TPerm]
+      simp only [TPerm]
       repeat apply RubiksGroup.mul_mem'
       all_goals apply ft_valid
-      { apply FaceTurn.R }
+      { apply FaceTurn.R } -- 这下面包括这行都是根据定义来的。
       { apply FaceTurn.U }
       { apply FaceTurn.R' }
       { apply FaceTurn.U' }
@@ -64,41 +194,28 @@ section ValidityChecks
       { apply FaceTurn.U }
       { apply FaceTurn.R' }
       { apply FaceTurn.F' }
+      done
+
 
   lemma CornerTwistInvalid : CornerTwist ∉ ValidCube
   := by
       simp only [CornerTwist, ValidCube]
-      -- intro h
       simp only [Fin.zero_eta, imp_false, Finset.mem_singleton, Finset.mem_insert, zero_ne_one,
         false_or, Set.mem_setOf_eq, map_one, forall_true_left, Pi.zero_apply, Finset.sum_const_zero,
         and_true, true_and]
-      --提示有了，但是还是报错了？
-      -- exact
-      --   (bne_iff_ne
-      --         (Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} fun x ↦
-      --           match x with
-      --           | { val := 0, isLt := .(Nat.mod_lt 0 Fin.instOfNatFin.proof_1) } => 1
-      --           | x => 0)
-      --         0).mp
-      --     rfl
-      sorry
-      -- have h2 : ∀x ∈ ({0,1,2,3,4,5,6,7} : Set (Fin 8)), (fun | 0 => 1 | _ => 0) x = 0 := Finset.sum_eq_zero_iff.mp h
+      exact Fin.pos_iff_ne_zero.mp Nat.le.refl
+      done
 
   lemma EdgeFlipInvalid : EdgeFlip ∉ ValidCube :=
     by
-      simp [EdgeFlip, ValidCube]
-      -- 又有提示，但是证明失败：
-      -- exact
-      --   (bne_iff_ne
-      --         (Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11} fun x ↦
-      --           match x with
-      --           | { val := 0, isLt := .(Nat.mod_lt 0 Fin.instOfNatFin.proof_1) } => 1
-      --           | x => 0)
-      --         0).mp
-      --     rfl
-      sorry
+      simp only [EdgeFlip, ValidCube]
+      simp only [Set.mem_setOf_eq, map_one, Pi.zero_apply, Finset.sum_const_zero, true_and]
+      exact Fin.exists_succ_eq.mp (Exists.intro { val := Nat.zero, isLt := Nat.le.refl } rfl)
+      done
 
 end ValidityChecks
+
+  --todo--
 
 
 /- This theorem shows that the set of valid cube states as defined in terms of permutations and orientations of
