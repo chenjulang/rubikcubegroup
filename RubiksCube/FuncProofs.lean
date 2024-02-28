@@ -215,9 +215,6 @@ section ValidityChecks
 
 end ValidityChecks
 
-  --todo--
-
-
 /- This theorem shows that the set of valid cube states as defined in terms of permutations and orientations of
 the pieces contains all positions reachable with standard Rubik's cube moves. Further showing that these
 two sets are in fact the same is equivalent to providing a solution algorithm for any valid cube state.
@@ -303,19 +300,24 @@ theorem RubikCubeSecondBasicRule
 --   fun f g => Fintype.decidablePiFintype f g
 
 --? Why do both of these pause forever?
--- lemma four_rs_eq_solved
--- : (R * R * R * R) = Solved
--- := by
---   simp only [R, Solved]
---   simp only [Prod.mk_mul_mk, PieceState.mul_def, ps_mul_assoc, Prod.mk_eq_one]
---   simp only [ps_mul]
---   simp only [invFun_as_coe, Pi.zero_comp, add_zero]
---   apply And.intro
---   simp only [cyclePieces, cycleImpl]
---   simp only [mul_one]
---   ring_nf
---   -- 如何让lean4简化这些permute的运算呢？
---   aesop
+lemma four_rs_eq_solved
+: (R * R * R * R) = Solved
+:= by
+  simp only [R, Solved]
+  simp only [Prod.mk_mul_mk, PieceState.mul_def, ps_mul_assoc, Prod.mk_eq_one]
+  simp only [ps_mul]
+  simp only [Prod.mk.injEq, PieceState.mk.injEq]
+  simp only [cyclePieces,cycleImpl]
+  apply And.intro
+  · simp only [mul_one, coe_mul, coe_fn_mk]
+    apply And.intro
+    · ext i
+      simp only [coe_mul, Function.comp_apply, coe_one, id_eq]
+
+      -- 这里也是经过1到8检验，都会变回本身。
+  -- ring_nf
+  -- 如何让lean4简化这些permute的运算呢？
+  -- aesop
 
 --todo--
 
@@ -332,20 +334,20 @@ lemma solved_is_solved
     { apply Eq.refl } }
   done
 
--- 这个也是类似“four_rs_eq_solved”的证明，虽然也没给出，这里就不证明了
-lemma four_rs_solved :
-IsSolved (R * R * R * R)
-:= by
-  simp only [R, IsSolved, CornersSolved, EdgesSolved, Solved]
-  repeat (all_goals apply And.intro)
-  { simp only [cyclePieces, cycleImpl, PieceState.mul_def, ps_mul, Equiv.Perm.permGroup.mul_assoc]
-    -- have h : swap 1 6 * (swap 6 5 * swap 5 2) *
-    -- (swap 1 6 * (swap 6 5 * swap 5 2) * (swap 1 6 * (swap 6 5 * swap 5 2) * (swap 1 6 * (swap 6 5 * swap 5 2)))) = swap 1 6 * swap 6 5 * swap 5 2 *
-    -- swap 1 6 * swap 6 5 * swap 5 2 * swap 1 6 * swap 6 5 * swap 5 2 * swap 1 6 * swap 6 5 * swap 5 2 := by apply
-    sorry }
-  { simp [cyclePieces, cycleImpl, PieceState.mul_def, ps_mul, Orient]
-    sorry }
-  { sorry }
-  { sorry }
+-- -- 这个也是类似“four_rs_eq_solved”的证明，虽然也没给出，这里就不证明了
+-- lemma four_rs_solved :
+-- IsSolved (R * R * R * R)
+-- := by
+--   simp only [R, IsSolved, CornersSolved, EdgesSolved, Solved]
+--   repeat (all_goals apply And.intro)
+--   { simp only [cyclePieces, cycleImpl, PieceState.mul_def, ps_mul, Equiv.Perm.permGroup.mul_assoc]
+--     -- have h : swap 1 6 * (swap 6 5 * swap 5 2) *
+--     -- (swap 1 6 * (swap 6 5 * swap 5 2) * (swap 1 6 * (swap 6 5 * swap 5 2) * (swap 1 6 * (swap 6 5 * swap 5 2)))) = swap 1 6 * swap 6 5 * swap 5 2 *
+--     -- swap 1 6 * swap 6 5 * swap 5 2 * swap 1 6 * swap 6 5 * swap 5 2 * swap 1 6 * swap 6 5 * swap 5 2 := by apply
+--     sorry }
+--   { simp [cyclePieces, cycleImpl, PieceState.mul_def, ps_mul, Orient]
+--     sorry }
+--   { sorry }
+--   { sorry }
 
-#check Equiv.Perm.permGroup.mul_assoc
+-- #check Equiv.Perm.permGroup.mul_assoc

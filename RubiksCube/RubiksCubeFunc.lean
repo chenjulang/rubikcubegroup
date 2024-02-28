@@ -282,7 +282,15 @@ def Orient
 
 def Solved
 : RubiksSuperType
-:= 1
+where
+  fst := {
+    permute := 1
+    orient := 0
+  }
+  snd := {
+    permute := 1
+    orient := 0
+  }
 
 section FACE_TURNS
 
@@ -294,7 +302,7 @@ section FACE_TURNS
     | _, [] => 1 -- “_”指的是第一个元素。可以写成a吗???
     | a, (x :: xs) => (swap a x) * (cycleImpl x xs) -- “a”指的是第一个参数
 
-  def cyclePieces {α : Type*} [DecidableEq α]
+  def cyclePieces {α : Type*} [DecidableEq α] -- 这里如何文字上理解也是个问题，输入旧位置，得到新位置？
   : List α → Perm α
     | [] => 1
     | (x :: xs) => cycleImpl x xs
@@ -329,6 +337,44 @@ section FACE_TURNS
   -- #eval List.map (cyclePieces [0, 5, 8] : Perm (Fin 12)) (List.range 12)
   -- #eval (cyclePieces [0, 1, 2, 3] : Perm (Fin 12))
     -- 为了创建4循环(0,1,2,3)，就像上述那样写。
+
+  -- #eval (cyclePieces [2, 1, 0] : Perm (Fin 12))
+  --   -- 打印： ![2, 0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  --   -- 其实就是映射(0=>2,1=>0,2=>1)
+  --   -- {position 1 goto position 2, position 2 goto position 3, position 3 goto position 1}
+  -- #eval (cyclePieces [2, 1, 0] : Perm (Fin 12)).invFun
+  --   -- 打印： ![1, 2, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  --   -- 其实就是映射(0=>1,1=>2,2=>0)
+  -- #eval (1 : Perm (Fin 12))
+  --   -- 打印： ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  -- #eval (cyclePieces [2, 1, 0] : Perm (Fin 12)) 0 -- 2
+  -- #eval Orient 8 3 [(0, 2), (1, 0), (2, 1), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+  --   -- 打印： ![2, 0, 1, 0, 0, 0, 0, 0]
+
+  -- 在现实世界：
+  -- a1,a2,a3 <= 2
+  -- b1,b2,b3 <= 2
+  -- v(g) = (a1,a2,a3)
+  -- v(h) = (b1,b2,b3)
+  -- ρ(g) means  {position 1 goto position c1, position 2 goto position c2, position 3 goto position c3}
+    -- In lean : (0=>c1,1=>c2,2=>c3)   -- 因为lean只有映射，所以这里指的是输入旧位置，映射到的是新的排列位置。
+  -- ρ(g)^(-1) means  {position c1 goto position 1, position c2 goto position 2, position c3 goto position 3}
+    -- In lean : (c1=>0,c2=>1,c3=>3)  -- 这个permute映射文字意义是输入旧位置，得到新位置。
+  -- 一个排列ρ(g)^(-1)作用到数组v(h)上,结果是： (ρ(g)^(-1)b1,ρ(g)^(-1)b2,ρ(g)^(-1)b3)
+  -- 再加上v(g),结果是： (ρ(g)^(-1)b1+a1,ρ(g)^(-1)b2+a2,ρ(g)^(-1)b3+a3) ，
+  -- 也就是映射：(0=>ρ(g)^(-1)b1+a1, 1=>ρ(g)^(-1)b2+a2 , 2=>ρ(g)^(-1)b3+a3)
+
+  -- In Lean:
+  -- 只能使用 "a2.orient", "a1.permute" and "a1.orient"
+  -- a1.orient 是映射 (0=>a1,1=>a2,2=>a3)，
+  -- a2.orient 是映射 (0=>b1,1=>b2,2=>b3)，
+  -- a1.permute (0=>c1,1=>c2,2=>c3)
+
+
+
+
+
+
 
   -- 检查一下这些orient是否正确，完全不一样？我需要用TW算法重新定义吗？
   --而且方向数的点怎么定义的也要根据下面想一下
