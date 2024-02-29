@@ -172,7 +172,7 @@ section ValidityChecks
       --     · rfl
       --   }
       sorry
-      done
+      -- done
 
 
   lemma TPermValid : TPerm ∈ ValidCube :=
@@ -222,7 +222,6 @@ I do not have a proof that the solution algorithm in `SolutionAlgorithm.lean` wi
 but I am confident that this is the case (assuming no bugs in my concretely defined setup moves). -/
 
 -- 魔方第二基本定理的右推左部分：
---todo--
 
   lemma solved_reachable
   (x : RubiksSuperType)
@@ -232,7 +231,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     rw [h]
     exact Reachable.Solved
 
-
+--todo--
 theorem valid_reachable
 : ∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
 := by
@@ -283,9 +282,10 @@ theorem reachable_valid
       exact a_ih_1
       -- method 2:
       -- all_goals assumption
+  -- done
 
 /-- 魔方第二基本定理 -/
-theorem RubikCubeSecondBasicRule
+theorem RubikCube_BasicRule_2
 : ∀x : RubiksSuperType, Reachable x ↔ x ∈ ValidCube
 := by
   intro h
@@ -299,7 +299,17 @@ theorem RubikCubeSecondBasicRule
 -- instance {n : ℕ} {α : Type*} [DecidableEq α] : DecidableEq (Fin n → α) :=
 --   fun f g => Fintype.decidablePiFintype f g
 
---? Why do both of these pause forever?
+def swaptest :Perm (Fin 8) := (swap 1 2) * (swap 2 6) * (swap 6 5)*(swap 1 2)*(swap 2 6)*(swap 6 5)*(swap 1 2)*
+ (swap 2 6) * (swap 6 5) * (swap 1 2) * (swap 2 6) * (swap 6 5)
+lemma computeSwapTest (i:Fin 8): swaptest i = i
+  := by fin_cases i <;> rfl
+lemma SwapDef (i: Fin 8): ((swap 1 2)
+      ((swap 2 6)
+        ((swap 6 5)
+          ((swap 1 2)
+            ((swap 2 6)
+              ((swap 6 5) ((swap 1 2) ((swap 2 6) ((swap 6 5) ((swap 1 2) ((swap 2 6) ((swap 6 5) i)))))))))))) = i
+  := by fin_cases i <;> rfl
 lemma four_rs_eq_solved
 : (R * R * R * R) = Solved
 := by
@@ -313,41 +323,89 @@ lemma four_rs_eq_solved
     apply And.intro
     · ext i
       simp only [coe_mul, Function.comp_apply, coe_one, id_eq]
+      have h1 := SwapDef i
+      -- swapTest2_1
+      sorry
+      -- done
+    · -- orientTest2_1
+      sorry
+      -- done
+  · simp only [mul_one, coe_mul]
+    apply And.intro
+    · ext i
+      simp only [coe_mul, Function.comp_apply, coe_one, id_eq]
+      -- swapTest2_2
+      sorry
+      -- done
+    · -- orientTest2_2
+      sorry
+      -- done
+  -- done
 
-      -- 这里也是经过1到8检验，都会变回本身。
-  -- ring_nf
-  -- 如何让lean4简化这些permute的运算呢？
-  -- aesop
+-- def swapTest2_1 :Perm (Fin 8) := (swap 1 2) * (swap 2 6) * (swap 6 5)*(swap 1 2)*(swap 2 6)*(swap 6 5)*(swap 1 2)*
+--  (swap 2 6) * (swap 6 5) * (swap 1 2) * (swap 2 6) * (swap 6 5)
+-- def swapTest2_2 :Perm (Fin 12) := (swap 1 6)*(swap 6 9)*(swap 9 5)*(swap 1 6)*(swap 6 9)*(swap 9 5)*(swap 1 6)*(swap 6 9)*(swap 9 5)*
+--   (swap 1 6)*(swap 6 9)*(swap 9 5)
+-- def swapTest2 :Perm (Fin 12) := (swap 1 6)*(swap 6 9)*(swap 9 5)*(swap 1 6)*(swap 6 9)*(swap 9 5)*(swap 1 6)*(swap 6 9)*(swap 9 5)*
+--   (swap 1 6)*(swap 6 9)*(swap 9 5)
+-- #eval swapTest2 0 -- 0
+-- #eval swapTest2 1 -- 1
+-- #eval swapTest2 2 -- 2
+-- #eval swapTest2 3 -- 3
+-- #eval swapTest2 4 -- 4
+-- #eval swapTest2 5 -- 5
+-- #eval swapTest2 6 -- 6
+-- #eval swapTest2 7 -- 7
+-- #eval swapTest2 8 -- 8
+-- #eval swapTest2 9 -- 9
+-- #eval swapTest2 10 -- 10
+-- #eval swapTest2 11 -- 11
+-- def orientTest2_1 : Fin 8 → Fin 3 := ((Orient 8 3 [(1, 2), (2, 1), (5, 1), (6, 2)] ∘ ⇑(swap 1 2) ∘ ⇑(swap 2 6) ∘ ⇑(swap 6 5) +
+--             Orient 8 3 [(1, 2), (2, 1), (5, 1), (6, 2)]) ∘
+--           ⇑(swap 1 2) ∘ ⇑(swap 2 6) ∘ ⇑(swap 6 5) +
+--         Orient 8 3 [(1, 2), (2, 1), (5, 1), (6, 2)]) ∘
+--       ⇑(swap 1 2) ∘ ⇑(swap 2 6) ∘ ⇑(swap 6 5) +
+--     Orient 8 3 [(1, 2), (2, 1), (5, 1), (6, 2)]
+-- def orientTest2_2 : Fin 12 → Fin 2 := ((Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)] ∘ ⇑(swap 1 6) ∘ ⇑(swap 6 9) ∘ ⇑(swap 9 5) +
+--             Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)]) ∘
+--           ⇑(swap 1 6) ∘ ⇑(swap 6 9) ∘ ⇑(swap 9 5) +
+--         Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)]) ∘
+--       ⇑(swap 1 6) ∘ ⇑(swap 6 9) ∘ ⇑(swap 9 5) +
+--     Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)]
+-- def orientTest2 : Fin 12 → Fin 2 := ((Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)] ∘ ⇑(swap 1 6) ∘ ⇑(swap 6 9) ∘ ⇑(swap 9 5) +
+--             Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)]) ∘
+--           ⇑(swap 1 6) ∘ ⇑(swap 6 9) ∘ ⇑(swap 9 5) +
+--         Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)]) ∘
+--       ⇑(swap 1 6) ∘ ⇑(swap 6 9) ∘ ⇑(swap 9 5) +
+--     Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)]
+-- #eval orientTest2 0 -- 0
+-- #eval orientTest2 1 -- 0
+-- #eval orientTest2 2 -- 0
+-- #eval orientTest2 3 -- 0
+-- #eval orientTest2 4 -- 0
+-- #eval orientTest2 5 -- 0
+-- #eval orientTest2 6 -- 0
+-- #eval orientTest2 7 -- 0
+-- #eval orientTest2 8 -- 0
+-- #eval orientTest2 9 -- 0
+-- #eval orientTest2 10 -- 0
+-- #eval orientTest2 11 -- 0
 
---todo--
 
 lemma solved_is_solved
 : IsSolved (Solved)
 := by
   simp only [IsSolved, CornersSolved, EdgesSolved, Solved]
   apply And.intro
-  { apply And.intro
-    { apply Eq.refl }
-    { apply Eq.refl } }
-  { apply And.intro
-    { apply Eq.refl }
-    { apply Eq.refl } }
+  { simp only [and_self] }
+  { simp only [and_self]}
   done
 
--- -- 这个也是类似“four_rs_eq_solved”的证明，虽然也没给出，这里就不证明了
--- lemma four_rs_solved :
--- IsSolved (R * R * R * R)
--- := by
---   simp only [R, IsSolved, CornersSolved, EdgesSolved, Solved]
---   repeat (all_goals apply And.intro)
---   { simp only [cyclePieces, cycleImpl, PieceState.mul_def, ps_mul, Equiv.Perm.permGroup.mul_assoc]
---     -- have h : swap 1 6 * (swap 6 5 * swap 5 2) *
---     -- (swap 1 6 * (swap 6 5 * swap 5 2) * (swap 1 6 * (swap 6 5 * swap 5 2) * (swap 1 6 * (swap 6 5 * swap 5 2)))) = swap 1 6 * swap 6 5 * swap 5 2 *
---     -- swap 1 6 * swap 6 5 * swap 5 2 * swap 1 6 * swap 6 5 * swap 5 2 * swap 1 6 * swap 6 5 * swap 5 2 := by apply
---     sorry }
---   { simp [cyclePieces, cycleImpl, PieceState.mul_def, ps_mul, Orient]
---     sorry }
---   { sorry }
---   { sorry }
+lemma four_rs_solved :
+IsSolved (R * R * R * R)
+:= by
+  have h1:= four_rs_eq_solved
+  rw [h1]
+  exact solved_is_solved
 
 -- #check Equiv.Perm.permGroup.mul_assoc

@@ -2,7 +2,7 @@ import Lean
 import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.GroupTheory.Perm.Fin
 
-set_option maxHeartbeats 800000
+-- set_option maxHeartbeats 800000
 
 open Equiv Perm
 
@@ -174,8 +174,8 @@ section RubiksSuperGroup
       -- i取第1，则(a.permute i)就是第2
         -- 因此 a'.orient的第2项 = (-a.orient)的第1项
         -- 要想找到 a'.orient的第1项，则反推需要(a.permute i)就是第1，继续反推i取第3才对
-      -- i取第3，则(a.permute i)就是第1
-        -- a'.orient的第1项 = (-a.orient)的第2项
+      -- 正向检验： i取第3，则(a.permute i)就是第1
+        -- a'.orient的第1项 = (-a.orient)的第3项
         -- a'.orient的第n项 = (-a.orient)的第(ps.permute.invFun n)项
       orient := fun x => (- ps.orient) (ps.permute⁻¹ x)
     }
@@ -576,6 +576,7 @@ section RubiksGroup
           --这个是能证明的，耗时很长，但是需要用lean4 web版本。
             -- fin_cases x <;> aesop
             sorry
+            -- done
           constructor
           · intro h
             cases h with
