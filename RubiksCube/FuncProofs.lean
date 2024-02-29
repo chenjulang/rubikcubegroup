@@ -231,7 +231,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     rw [h]
     exact Reachable.Solved
 
---todo--
+--todo--先把手写的结构翻译成代码
 theorem valid_reachable
 : ∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
 := by
