@@ -221,7 +221,6 @@ two sets are in fact the same is equivalent to providing a solution algorithm fo
 I do not have a proof that the solution algorithm in `SolutionAlgorithm.lean` will solve any valid cube,
 but I am confident that this is the case (assuming no bugs in my concretely defined setup moves). -/
 
--- 魔方第二基本定理的右推左部分：
 
   lemma solved_reachable
   (x : RubiksSuperType)
@@ -232,13 +231,16 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     exact Reachable.Solved
 
 --todo--先把手写的结构翻译成代码
+-- 魔方第二基本定理的右推左部分：
 theorem valid_reachable
 : ∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
 := by
   intro x hvx
   simp [ValidCube] at hvx
-  -- 分类讨论小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
-  --
+  -- 分类讨论1得到小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
+  -- 分类讨论2得到小引理2:假设有状态g∈H,且∑(12在上 i=1) wi(g) = 0 (mod 2) ， 则=>,g能通过有限次作用G中的元素，得到新的性质：w(g)={0,0,...,0}。并且不改变角块的方向数。
+  -- 通用小引理4.6：假设n>=3，对于任意集合M，假设M包含Sn中全体3循环，则=>， M >= An
+
   -- x经过有限次操作变成了y
   set y : RubiksSuperType := sorry
   have h1 : y = Solved := sorry
