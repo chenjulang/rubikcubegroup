@@ -237,6 +237,8 @@ theorem valid_reachable
 := by
   intro x hvx
   simp [ValidCube] at hvx
+  -- 分类讨论小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
+  --
   -- x经过有限次操作变成了y
   set y : RubiksSuperType := sorry
   have h1 : y = Solved := sorry
