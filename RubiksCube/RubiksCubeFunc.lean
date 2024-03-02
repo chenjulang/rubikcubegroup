@@ -426,7 +426,34 @@ section FACE_TURNS
     | F' : FaceTurn F'
     | B' : FaceTurn B'
 
-  -- #check FaceTurn.U -- Prop
+  inductive FaceTurn_TWGroup1
+  : RubiksSuperType → Prop where
+    | U : FaceTurn_TWGroup1 U
+    | D : FaceTurn_TWGroup1 D
+    | R2 : FaceTurn_TWGroup1 R2
+    | L2 : FaceTurn_TWGroup1 L2
+    | F : FaceTurn_TWGroup1 F
+    | B : FaceTurn_TWGroup1 B
+
+  inductive FaceTurn_TWGroup2
+  : RubiksSuperType → Prop where
+    | U : FaceTurn_TWGroup2 U
+    | D : FaceTurn_TWGroup2 D
+    | R2 : FaceTurn_TWGroup2 R2
+    | L2 : FaceTurn_TWGroup2 L2
+    | F2 : FaceTurn_TWGroup2 F2
+    | B2 : FaceTurn_TWGroup2 B2
+
+  inductive FaceTurn_TWGroup3
+  : RubiksSuperType → Prop where
+    | U2 : FaceTurn_TWGroup3 U2
+    | D2 : FaceTurn_TWGroup3 D2
+    | R2 : FaceTurn_TWGroup3 R2
+    | L2 : FaceTurn_TWGroup3 L2
+    | F2 : FaceTurn_TWGroup3 F2
+    | B2 : FaceTurn_TWGroup3 B2
+
+  -- #check FaceTurn_TWGroup1.L2 -- Prop
 
   instance : ToString RubiksSuperType where
     toString : RubiksSuperType → String :=
@@ -682,6 +709,27 @@ section RubiksGroup
     | Solved : Reachable Solved
     | FT : ∀x : RubiksSuperType, FaceTurn x → Reachable x
     | mul : ∀x y : RubiksSuperType, Reachable x → Reachable y → Reachable (x * y)
+
+  inductive Reachable_TWGroup1
+  : RubiksSuperType → Prop
+  where
+    | Solved : Reachable_TWGroup1 Solved
+    | FT : ∀x : RubiksSuperType, FaceTurn_TWGroup1 x → Reachable_TWGroup1 x
+    | mul : ∀x y : RubiksSuperType, Reachable_TWGroup1 x → Reachable_TWGroup1 y → Reachable_TWGroup1 (x * y)
+
+  inductive Reachable_TWGroup2
+  : RubiksSuperType → Prop
+  where
+    | Solved : Reachable_TWGroup2 Solved
+    | FT : ∀x : RubiksSuperType, FaceTurn_TWGroup2 x → Reachable_TWGroup2 x
+    | mul : ∀x y : RubiksSuperType, Reachable_TWGroup2 x → Reachable_TWGroup2 y → Reachable_TWGroup2 (x * y)
+
+  inductive Reachable_TWGroup3
+  : RubiksSuperType → Prop
+  where
+    | Solved : Reachable_TWGroup3 Solved
+    | FT : ∀x : RubiksSuperType, FaceTurn_TWGroup3 x → Reachable_TWGroup3 x
+    | mul : ∀x y : RubiksSuperType, Reachable_TWGroup3 x → Reachable_TWGroup3 y → Reachable_TWGroup3 (x * y)
 
 end RubiksGroup
 

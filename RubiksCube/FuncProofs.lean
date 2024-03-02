@@ -252,7 +252,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   := by sorry
 
 
-  --todo
   -- 定理：closure_three_cycles_eq_alternating
   -- 定义：3循环： IsThreeCycle
   -- 通用小引理4.6：假设n>=3，对于任意集合M，假设M包含Sn中全体3循环，则=>， M >= An
@@ -580,6 +579,10 @@ instance TWGroup1_instance : Subgroup RubiksSuperType := {
 lemma TWGroup1_isSubGroupOf_RubiksGroup :
 TWGroup1 ⊂ RubiksGroup := by sorry
 
+theorem TWAlgorithm_TWGroup1_iff
+: ∀x : RubiksSuperType, Reachable_TWGroup1 x ↔ x ∈ TWGroup1
+:= by sorry
+
 -- 2.∀g∈ G1,
 -- g∈G2 (G2 = <L^2,R^2,F^2,B^2,U,D>)
 -- ↔
@@ -619,6 +622,10 @@ instance TWGroup2_instance : Subgroup RubiksSuperType := {
 }
 lemma TWGroup2_isSubGroupOf_TWGroup1 :
 TWGroup2 ⊂ TWGroup1 := by sorry
+
+theorem TWAlgorithm_TWGroup2_iff
+: ∀x : RubiksSuperType, Reachable_TWGroup2 x ↔ x ∈ TWGroup2
+:= by sorry
 
 -- 3.∀g∈ G2,
 -- g∈ G3 (<L^2,R^2,F^2,B^2,U^2,D^2>)
@@ -665,3 +672,7 @@ instance TWGroup3_instance : Subgroup RubiksSuperType := {
 }
 lemma TWGroup3_isSubGroupOf_TWGroup2 :
 TWGroup3 ⊂ TWGroup2 := by sorry
+
+theorem TWAlgorithm_TWGroup3_iff
+: ∀x : RubiksSuperType, Reachable_TWGroup3 x ↔ x ∈ TWGroup3
+:= by sorry
