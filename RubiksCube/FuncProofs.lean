@@ -1,12 +1,17 @@
 import RubiksCube.RubiksCubeFunc
 import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.GroupTheory.Perm.Fin
+import Mathlib.GroupTheory.SpecificGroups.Alternating
 
 open Equiv Perm
+open Equiv Equiv.Perm Subgroup Fintype
+open alternatingGroup
 -- set_option maxHeartbeats 4000000
 
 /- NOTE: ft_valid and reachable_valid will take a moment for Lean to process. -/
 -- 怎么缩短时间呢？
+
+variable (α : Type*) [Fintype α] [DecidableEq α]
 
 
 section ValidityChecks
@@ -230,7 +235,62 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     rw [h]
     exact Reachable.Solved
 
---todo--先把手写的结构翻译成代码
+  lemma lemma1
+  : ∀g : RubiksSuperType,
+  Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0
+  →
+  ∃ h ∈ RubiksGroup ,
+  (g * h).fst.orient = 0
+  := by sorry
+
+  lemma lemma2
+  : ∀g : RubiksSuperType,
+  Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.snd.orient = 0
+  →
+  ∃ h ∈ RubiksGroup ,
+  (g * h).snd.orient = 0
+  := by sorry
+
+
+  --todo
+  -- 定理：closure_three_cycles_eq_alternating
+  -- 定义：3循环： IsThreeCycle
+  -- 通用小引理4.6：假设n>=3，对于任意集合M，假设M包含Sn中全体3循环，则=>， M >= An
+  lemma lemma4_6
+  (M:Subgroup (Perm α)):
+  ∀ σ:Perm α,
+    IsThreeCycle σ
+    ∧
+    σ ∈ M
+  →
+  sorry
+  -- alternatingGroup α ⊂ M
+  -- failed to synthesize instance HasSSubset (Subgroup (Perm α))
+  := by sorry
+
+  lemma lemma3
+  :∃ g : RubiksSuperType,
+  Reachable g
+  ∧
+  ∀ x : RubiksSuperType,
+  Reachable x
+  ∧
+  IsThreeCycle x.1.permute
+  ∧
+  x.2.permute = 1
+  ∧
+  x.1.orient = 0
+  ∧
+  x.2.orient = 0
+
+  →
+
+  x * g = Solved
+  := by sorry
+
+-- 线索：1.mathlib的group theory 2.人工智能POE和AGI 3.MIL+其他课程+北大-关于群的描述
+-- Alternating.lean
+
 -- 魔方第二基本定理的右推左部分：
 theorem valid_reachable
 : ∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
@@ -240,8 +300,9 @@ theorem valid_reachable
   -- 分类讨论1得到小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
   -- 分类讨论2得到小引理2:假设有状态g∈H,且∑(12在上 i=1) wi(g) = 0 (mod 2) ， 则=>,g能通过有限次作用G中的元素，得到新的性质：w(g)={0,0,...,0}。并且不改变角块的方向数。
   -- 通用小引理4.6：假设n>=3，对于任意集合M，假设M包含Sn中全体3循环，则=>， M >= An
-  -- 小引理3***(最复杂的一个引理): 从已知的某些复合操作，能够覆盖所有的3循环。
-  -- 小引理11：由于小引理3，已覆盖所有3循环，在使用小引理4.6，因此可以得到 => 从已知的某些复合操作，能达到这个状态集合({A8},{A12},id,id)
+
+  -- 小引理3***(最复杂的一个引理): 从已知的某些复合操作，能够覆盖所有的棱3循环和角3循环（不改变棱和角的方向数）。
+  -- 小引理11：由于小引理3，已覆盖所有3循环，再使用小引理4.6，因此可以得到 => 从已知的某些复合操作，能达到这个状态集合({A8},{A12},id,id)
   -- ValidCube的条件1，限制了当前状态x的范围，所以可以进行2种分类讨论：1.（奇X奇) 2.(偶X偶）
   -- 存在一个复合操作，作用一次到状态集合（奇X奇)上的某个元素后，新状态会属于新的状态集合(偶X偶）
   -- 因为对x的2种分类讨论都归化到了状态集合(偶X偶），即({A8},{A12},?,?)
