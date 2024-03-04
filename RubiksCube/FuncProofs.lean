@@ -230,7 +230,6 @@ two sets are in fact the same is equivalent to providing a solution algorithm fo
 I do not have a proof that the solution algorithm in `SolutionAlgorithm.lean` will solve any valid cube,
 but I am confident that this is the case (assuming no bugs in my concretely defined setup moves). -/
 
-
   lemma solved_reachable
   (x : RubiksSuperType)
   (h : x = Solved)
@@ -238,6 +237,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   := by
     rw [h]
     exact Reachable.Solved
+
+  --todo--
 
   lemma lemma1
   : ∀g : RubiksSuperType,
