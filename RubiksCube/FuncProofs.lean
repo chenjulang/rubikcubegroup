@@ -10,6 +10,10 @@ open alternatingGroup
 
 /- NOTE: ft_valid and reachable_valid will take a moment for Lean to process. -/
 -- 怎么缩短时间呢？
+-- 线索：1.mathlib的group theory 2.人工智能POE和AGI 3.MIL+其他课程+北大-关于群的描述
+-- Alternating.lean
+
+
 
 variable (α : Type*) [Fintype α] [DecidableEq α]
 
@@ -262,10 +266,14 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     ∧
     σ ∈ M
   →
-  sorry
-  -- alternatingGroup α ⊂ M
-  -- failed to synthesize instance HasSSubset (Subgroup (Perm α))
-  := by sorry
+  ∀ al ∈ alternatingGroup α,
+  al ∈ M
+  := by
+    have h1:= closure { σ : Perm α | σ ∈ M}
+    sorry
+
+  -- #check alternatingGroup α
+
 
   -- 好像写错了，先不纠结,应该写成参数好一点
   lemma lemma3_1
@@ -339,10 +347,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (sign (g * x).1.permute = 1 ∧ 1 = sign (g * x).2.permute)
   := by sorry
 
--- 线索：1.mathlib的group theory 2.人工智能POE和AGI 3.MIL+其他课程+北大-关于群的描述
--- Alternating.lean
--- todo--
--- failed to synthesize 的问题通过再看一次北大的课应该可以解决。
+
 
 -- 魔方第二基本定理的右推左部分：
 theorem valid_reachable
@@ -446,10 +451,10 @@ lemma four_rs_eq_solved
   simp only [Prod.mk.injEq, PieceState.mk.injEq]
   simp only [cyclePieces,cycleImpl]
   apply And.intro
-  · simp only [mul_one, coe_mul, coe_fn_mk]
+  · simp only [mul_one, coe_fn_mk]
     apply And.intro
     · ext i
-      simp only [coe_mul, Function.comp_apply, coe_one, id_eq]
+      simp only [Perm.coe_mul, Function.comp_apply, Perm.coe_one, id_eq]
       have h1 := SwapDef i
       -- swapTest2_1
       sorry
@@ -457,10 +462,10 @@ lemma four_rs_eq_solved
     · -- orientTest2_1
       sorry
       -- done
-  · simp only [mul_one, coe_mul]
+  · simp only [mul_one, Perm.coe_mul]
     apply And.intro
     · ext i
-      simp only [coe_mul, Function.comp_apply, coe_one, id_eq]
+      simp only [Perm.coe_mul, Function.comp_apply, Perm.coe_one, id_eq]
       -- swapTest2_2
       sorry
       -- done
@@ -576,6 +581,7 @@ instance TWGroup1_instance : Subgroup RubiksSuperType := {
     -- 左乘逆=1不用证明
     -- 右乘逆=1不用证明
 }
+
 lemma TWGroup1_isSubGroupOf_RubiksGroup :
 TWGroup1 ⊂ RubiksGroup := by sorry
 
@@ -593,6 +599,11 @@ theorem TWAlgorithm_TWGroup1_iff
 -- }
 def remainsEdgeOrbit :RubiksSuperType → (List ℕ) → Prop := sorry
 def remainsCornerOrbit :RubiksSuperType → (List ℕ) → Prop := sorry
+
+/-- 这里先特指白色面中，和白色不一样的角块的（白色的）个数Count，Count是偶数个。
+    -- 集合{1-8}（根据c.1.permute来分析）中,位于前4个位置中，数一下1-4的个数，这个个数为Even。-/
+def CornerUpWrongColorCountEven :RubiksSuperType → Prop := sorry
+
 
 def TWGroup2 :
   Set RubiksSuperType
@@ -620,6 +631,7 @@ instance TWGroup2_instance : Subgroup RubiksSuperType := {
     -- 左乘逆=1不用证明
     -- 右乘逆=1不用证明
 }
+
 lemma TWGroup2_isSubGroupOf_TWGroup1 :
 TWGroup2 ⊂ TWGroup1 := by sorry
 
@@ -635,7 +647,7 @@ theorem TWAlgorithm_TWGroup2_iff
 --     2.角块有2个保持轨道：{1,3,6,8},{2,4,5,7}
 --     3.与这个白色面心块颜色不一样的角块的个数,记为Count,Count是偶数。这里先特指白色面中，和白色不一样的角块的（白色的）个数Count，Count是偶数个。
 -- }
-  -- 有一个额外的左推右的条件可以证明：
+  -- 这个先忽略：有一个额外的左推右的条件可以证明：
   --    (3错误的？.{1,3,6,8},{2,4,5,7}这两个角块的轨道中，不包含三轮换。
   --     换句话说，g的效果不能产生这些轨道内的3循环。
   --      换句话说，g不是单纯的棱块3循环（不变全体块的方向数，不变角块的位置）)
@@ -655,8 +667,8 @@ def TWGroup3 :
     remainsEdgeOrbit c {4,5,6,7} ∧ remainsEdgeOrbit c {0,2,8,10} ∧ remainsEdgeOrbit c {1,3,9,11}
     ∧
     remainsCornerOrbit c {0,2,5,7} ∧ remainsCornerOrbit c {1,3,4,6}
-    -- todo 这里先特指白色面中，和白色不一样的角块的（白色的）个数Count，Count是偶数个。
-    -- 集合{1-8}（根据c.1.permute来分析）中,位于前4个位置中，数一下1-4的个数，这个个数为Even。
+    ∧
+    CornerUpWrongColorCountEven c
   }
 
 instance TWGroup3_instance : Subgroup RubiksSuperType := {
@@ -670,6 +682,7 @@ instance TWGroup3_instance : Subgroup RubiksSuperType := {
     -- 左乘逆=1不用证明
     -- 右乘逆=1不用证明
 }
+
 lemma TWGroup3_isSubGroupOf_TWGroup2 :
 TWGroup3 ⊂ TWGroup2 := by sorry
 
