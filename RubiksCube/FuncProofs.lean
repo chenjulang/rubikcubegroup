@@ -252,7 +252,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   := G1Perm_element * G1Perm_element
   #eval G1Perm_element
   -- #eval toString G1Perm_element
-  #eval R'*D*D*R*B'*U
+  #eval R'*D*D*R*B'
+  #eval U
   -- U写错了,还有错的
 
 

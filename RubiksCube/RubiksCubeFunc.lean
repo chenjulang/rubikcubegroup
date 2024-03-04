@@ -358,8 +358,9 @@ section FACE_TURNS
   -- ,,,   :  :  :  :
   --   => [, , , ]  Orient X X [(, ), (, ), (, ), (, )]
 
-  #eval (cyclePieces [1, 4, 5, 0]: Perm (Fin 12))
-  -- [3,0,1,2]
+-- 问题来了：下面这个得不到想要的![3,0,1,2, 4, 5, 6, 7]
+  #eval (cyclePieces [3,0,1,2]: Perm (Fin 8))
+  -- ![1, 2, 3, 0, 4, 5, 6, 7]
 
   def U : RubiksSuperType :=
     ⟨
