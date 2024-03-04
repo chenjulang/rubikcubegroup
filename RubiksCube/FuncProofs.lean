@@ -8,8 +8,7 @@ open Equiv Equiv.Perm Subgroup Fintype
 open alternatingGroup
 -- set_option maxHeartbeats 4000000
 
-/- NOTE: ft_valid and reachable_valid will take a moment for Lean to process. -/
--- 怎么缩短时间呢？
+-- 注意：依赖文件RubiksCubeFunc改过的话，最好点一下这个文件的restrt File
 -- 线索：1.mathlib的group theory 2.人工智能POE和AGI 3.MIL+其他课程+北大-关于群的描述
 -- Alternating.lean
 
@@ -238,15 +237,34 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     rw [h]
     exact Reachable.Solved
 
-  --todo--
+  --todo:将orient和permute所指的块注释一下
+  --todo：G1Perm计算结果错了，为什么？
+  --todo：文字叙述分步，代码翻译--
+
+  def G1Perm_element : RubiksSuperType
+  := R' * D * D * R * B' * U * U * B
+  /-- g1:
+  方向：UFR和DBL以外的块的方向不变。
+  位置：UFR和DBL以外的块的位置不变。
+  可以保持UFR和DBL以外的块的方向和位置，只改变UFR和DBL的方向，
+  分别是UFR的方向数+2，DBL的方向数+1。 -/
+  def G1Perm : RubiksSuperType
+  := G1Perm_element * G1Perm_element
+  #eval G1Perm_element
+  -- #eval toString G1Perm_element
+  #eval R'*D*D*R*B'*U
+  -- U写错了,还有错的
+
+
 
   lemma lemma1
-  : ∀g : RubiksSuperType,
-  Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0
+  : ∀g : RubiksSuperType, -- RubiksSuperType即手写的H。
+  Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0 --角块方形数求和后，模3为0。
   →
   ∃ h ∈ RubiksGroup ,
   (g * h).fst.orient = 0
-  := by sorry
+  := by
+    sorry
 
   lemma lemma2
   : ∀g : RubiksSuperType,
@@ -547,9 +565,12 @@ IsSolved (R * R * R * R)
 
 
 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
------- 以下是TW算法部分，(因为新开一个文件有问题)：
+------ 以下是TW算法部分，(因为新开一个文件有点问题，先写在同一个文件吧)：
 ------ 每一个证明的右推左部分，其实就是还原的算法！！！
 ------
 ------

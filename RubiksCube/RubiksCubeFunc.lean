@@ -358,10 +358,13 @@ section FACE_TURNS
   -- ,,,   :  :  :  :
   --   => [, , , ]  Orient X X [(, ), (, ), (, ), (, )]
 
+  #eval (cyclePieces [1, 4, 5, 0]: Perm (Fin 12))
+  -- [3,0,1,2]
+
   def U : RubiksSuperType :=
     ⟨
-      {permute := cyclePieces [1, 2, 3, 0], orient := 0},
-      {permute := cyclePieces [1, 4, 5, 0], orient := 0}
+      {permute := cyclePieces [3,0,1,2], orient := 0},
+      {permute := cyclePieces [3,0,1,2], orient := 0}
     ⟩
   def D : RubiksSuperType :=
     ⟨
@@ -484,7 +487,8 @@ section FACE_TURNS
   --     {permute := cyclePieces [0, 1, 2, 3], orient := 0},
   --     {permute := cyclePieces [0, 1, 2, 3], orient := 0}
   --   ⟩
-  -- 举例使用：它会把这个RubiksSuperType类型的东西对比来得到字符串。
+  --举例使用：它会把这个RubiksSuperType类型的东西对比来得到字符串。
+  -- #eval aRubikSuperType
   -- #eval toString $ aRubikSuperType
 
 
