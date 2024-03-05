@@ -241,6 +241,8 @@ section RubiksSuperGroup
   abbrev CornerType := PieceState 8 3
   abbrev EdgeType := PieceState 12 2
 
+
+
   -- 由这样的集合：CornerType，定义了一个群
   instance RubiksCornerGroup :
   Group CornerType
@@ -404,6 +406,20 @@ section FACE_TURNS
   def L' := L⁻¹
   def F' := F⁻¹
   def B' := B⁻¹
+
+
+  def Corner_Absolute_Orient
+  : CornerType → Fin 8 → Fin 3
+  := fun x p => x.orient (x.permute.invFun p)
+  def Edge_Absolute_Orient
+  : EdgeType → Fin 12 → Fin 2
+  := fun x p => x.orient (x.permute.invFun p)
+
+  -- #eval Corner_Absolute_Orient U.1
+  -- #eval Edge_Absolute_Orient U.2
+  -- #eval Corner_Absolute_Orient F.1
+
+
 
   -- #check Multiplicative.coeToFun
 
