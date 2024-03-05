@@ -1,6 +1,7 @@
 import Lean
 import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.GroupTheory.Perm.Fin
+import Mathlib.Algebra.Module.Equiv
 
 -- set_option maxHeartbeats 800000
 
@@ -299,51 +300,39 @@ section FACE_TURNS
   /- These two functions (from kendfrey's repository) create a cycle permutation,
   which is useful for defining the rotation of any given face, as seen directly below. -/
   -- 为了方便定义每个操作的排列permute,然后定义的这两个东西：
-  def cycleImpl {α : Type*} [DecidableEq α]
-  : α → List α → Perm α
-    | _, [] => 1 -- “_”指的是第一个元素。可以写成a吗???
-    | a, (x :: xs) => (swap a x) * (cycleImpl x xs) -- “a”指的是第一个参数
+
+  -- def cycleImpl {α : Type*} [DecidableEq α]
+  -- : α → List α → Perm α
+  --   | _, [] => 1 -- “_”指的是第一个元素。可以写成a吗???
+  --   | a, (x :: xs) => (cycleImpl x xs) * (swap a x)  -- “a”指的是第一个参数
+
+  -- def cyclePieces {α : Type*} [DecidableEq α] -- 这里如何文字上理解也是个问题，输入旧位置，得到新位置？
+  -- : List α → Perm α
+  --   | [] => 1
+  --   | (x :: xs) => cycleImpl x xs
 
   def cyclePieces {α : Type*} [DecidableEq α] -- 这里如何文字上理解也是个问题，输入旧位置，得到新位置？
   : List α → Perm α
-    | [] => 1
-    | (x :: xs) => cycleImpl x xs
+  := fun list =>  List.formPerm list
 
-  -- 举例：cyclePieces [0, 1, 2, 3]
-  -- 进入cyclePieces， 则x即0，xs即[1,2,3] ， 然后是cycleImpl 0 [1,2,3]
-  -- 进入cycleImpl，则a即0，x即1，xs即[2,3], 总结果是(0,1) * (cycleImpl 1 [2,3])
-  -- 进入cycleImpl，则a即1，x即2，xs即[3], cycleImpl 1 [2,3]结果是(1,2) * (cycleImpl 2 [3])
-  -- 进入cycleImpl，则a即2，x即3，xs即[], cycleImpl 2 [3]结果是(2,3) * (cycleImpl 3 [])
-  -- 进入cycleImpl，则_即3，[]即[],cycleImpl 3 []结果是1，也就是不变。
-  -- 总结：(0,1) * (cycleImpl 1 [2,3])
-  --      = (0,1) * ((1,2) * (cycleImpl 2 [3]))
-  --      = (0,1) * ((1,2) * ((2,3) * (cycleImpl 3 [])))
-  --      = (0,1) * ((1,2) * ((2,3) * e))
-  --      = (0,1) * ((1,2) * (2,3))
-  -- permute的乘法是从右往左算的。***
-  -- 比如这里(1,2) * (2,3) 其实是等价于，(2,3).trans (1,2)
-  -- 也就是先看(2,3)，再看 (1,2)。1→ 1→ 2 ; 2→ 3→ 3; 3→ 2→ 1
-  --      = (0,1) * (2,3,1)
-  --      = (2,3,0,1)
-  --      = (0,1,2,3)
-  ---------
-  -- #eval (cyclePieces [1, 2] : Perm (Fin 12)) -- (1,2)
-  -- #eval (cyclePieces [2, 3] : Perm (Fin 12)) -- (2,3)
-  -- #eval (cyclePieces [1, 2] : Perm (Fin 12)) * (cyclePieces [2, 3] : Perm (Fin 12)) -- (1,2,3)
-  --   --  这个说明了(1,2) * (2,3) = (1,2,3)
-  ----------
-  -- #eval (cyclePieces [0, 1, 2, 3] : Perm (Fin 12)) -- 其实就是4循环(0,1,2,3)
-    -- ![1, 2, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11]
-  -- #eval List.map (cyclePieces [0, 1, 2, 3] : Perm (Fin 12)) (List.range 12)
-  -- #eval (cyclePieces [0, 5, 8] : Perm (Fin 12)) -- 其实就是3循环(0,5,8)
-  -- #eval List.map (cyclePieces [0, 5, 8] : Perm (Fin 12)) (List.range 12)
-  -- #eval (cyclePieces [0, 1, 2, 3] : Perm (Fin 12))
-    -- 为了创建4循环(0,1,2,3)，就像上述那样写。
+
+  -- -- 只用formPerm可以办到，但是输入时要转一下脑筋：
+  -- def lista : List (Fin 8) := [0,3,2,1] -- 这样写得到的Perm意思是：
+  --   --[0,3,2,1]表示： index输入0，得到3；输入3，得到2；输入2，得到1；输入1，得到0
+  -- -- 所以要表示[3,0,1,2]， 需要输入[0,3,2,1]
+  -- #eval List.formPerm lista
+
+
+  -- 举例说明Perm之间的乘法：，从右往左：
+  -- #eval ((swap 1 2):Perm (Fin 12)) -- 指的是输入index为1，得到2；输入index为2，得到1 -- ![0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  -- #eval ((swap 1 3):Perm (Fin 12)) -- 指的是输入index为1，得到3；输入index为3，得到1 -- ![0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  -- #eval (cyclePieces [1, 2] : Perm (Fin 12)) -- ![0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  -- #eval (cyclePieces [2, 3] : Perm (Fin 12)) -- ![0, 1, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11]
+  -- #eval (cyclePieces [1, 2] : Perm (Fin 12)) * (cyclePieces [2, 3] : Perm (Fin 12))
+  -- ![0, 2, 3, 1, 4, 5, 6, 7, 8, 9, 10, 11]
 
 
 
-  -- 检查一下这些orient是否正确，完全不一样？我需要用TW算法重新定义吗？
-  --而且方向数的点怎么定义的也要根据下面想一下
 
   -- 第1大括号"{}"内描述的是：角块
     -- permute描述的是位置，orient描述的是方向数。
@@ -358,15 +347,25 @@ section FACE_TURNS
   -- ,,,   :  :  :  :
   --   => [, , , ]  Orient X X [(, ), (, ), (, ), (, )]
 
--- 问题来了：下面这个得不到想要的![3,0,1,2, 4, 5, 6, 7]
-  #eval (cyclePieces [3,0,1,2]: Perm (Fin 8))
-  -- ![1, 2, 3, 0, 4, 5, 6, 7]
+  -- (a,b) -- input index a get b , index b get a
+  -- (b,c) -- index b get c , index c get b
+  -- (c,d) -- index c get d , index d get c
 
+
+
+
+  -- 这里注释一下下面每个位置对应的块是哪个，比如UFR这样的：
+  --   ({ permute := ![UFL, UFR, UBR, UBL, DFL, DFR, DBR, DBL],
+  --    orient := ![UFL, UFR, UBR, UBL, DFL, DFR, DBR, DBL] },
+  --  { permute := ![UF, UR, UB, UL, FL, FR, RB, LB, FD, RD, BD, LD],
+  --    orient := ![UF, UR, UB, UL, FL, FR, RB, LB, FD, RD, BD, LD] })
   def U : RubiksSuperType :=
     ⟨
-      {permute := cyclePieces [3,0,1,2], orient := 0},
-      {permute := cyclePieces [3,0,1,2], orient := 0}
+      {permute := cyclePieces [0,3,2,1], orient := 0},
+      -- ![3, 0, 1, 2, 4, 5, 6, 7]
+      {permute := cyclePieces [0,3,2,1], orient := 0}
     ⟩
+  -- #eval (cyclePieces [0,3,2,1]: Perm (Fin 8))
   def D : RubiksSuperType :=
     ⟨
       {permute := cyclePieces [4, 5, 6, 7], orient := 0},
@@ -390,10 +389,9 @@ section FACE_TURNS
   def B : RubiksSuperType :=
     ⟨
       {permute := cyclePieces [2, 3, 7,6 ], orient := Orient 8 3 [(2, 2), (3, 1), (6, 1), (7, 2)]},
-         -- 3,8,11,7   3:0  7:0  8:0  11:0
-         --   => [2, 7, 10,6 ]  Orient 12 2 [(2, 0), (6, 0), (7, 0), (10, 0)]
       {permute := cyclePieces [2, 7, 10,6 ], orient := Orient 12 2 [(2, 0), (6, 0), (7, 0), (10, 0)]}
     ⟩
+  -- #eval B^4 = Solved
   def U2 := U^2
   def D2 := D^2
   def R2 := R^2

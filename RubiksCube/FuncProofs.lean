@@ -237,8 +237,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     rw [h]
     exact Reachable.Solved
 
-  --todo:将orient和permute所指的块注释一下
-  --todo：G1Perm计算结果错了，为什么？
   --todo：文字叙述分步，代码翻译--
 
   def G1Perm_element : RubiksSuperType
@@ -254,7 +252,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- #eval toString G1Perm_element
   #eval R'*D*D*R*B'
   #eval U
-  -- U写错了,还有错的
 
 
 
