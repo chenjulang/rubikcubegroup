@@ -247,13 +247,22 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   可以保持UFR和DBL以外的块的方向和位置，只改变UFR和DBL的方向，
   分别是UFR的方向数+2，DBL的方向数+1。 -/
   def G1Perm : RubiksSuperType
-  := G1Perm_element * G1Perm_element
-  #eval G1Perm_element
-  -- #eval toString G1Perm_element
-  #eval R'*D*D*R*B'
-  #eval U
+  := G1Perm_element^2
+  -- #eval G1Perm
+--   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 2, 0, 0, 0, 0, 0, 1] },
+--  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
 
+  def UFL_index :Fin 8 := 1
+  def DFL_index :Fin 8 := 4
 
+    -- lemma lemma1_001
+    -- : ∀g : RubiksSuperType, -- RubiksSuperType即手写的H。
+    -- Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0 --角块方形数求和后，模3为0。
+    -- ∧ sorry
+    -- →
+    -- ∃ h ∈ RubiksGroup ,
+    -- (g * h).fst.orient = 0
+    -- := by sorry
 
   lemma lemma1
   : ∀g : RubiksSuperType, -- RubiksSuperType即手写的H。
@@ -262,7 +271,69 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   ∃ h ∈ RubiksGroup ,
   (g * h).fst.orient = 0
   := by
-    sorry
+    intro g hsum0;
+    let h := Solved;
+    by_cases (g.1.orient UFL_index)=0
+    {
+      let h1 := h;
+      -- 想一下如何处理重复代码，写一个新的函数，还是写一个新的have？
+      -- 证明中如何计算呢？
+      -- apply lemma1_001
+      -- exact { left := hsum0, right := h✝ }
+      sorry
+      -- done
+
+      -- by_cases (g.1.orient DFL_index)=0
+      -- {
+      --   let h := h;
+
+      -- }
+      -- { by_cases (g.1.orient DFL_index)=1
+      --   {
+      --     let h:=h*(F^2)*G1Perm*(F^2);
+      --   }
+      --   {
+      --     let h:=h*(F^2)*(G1Perm^2)*(F^2);
+      --   }
+      -- }
+    }
+    { by_cases (g.1.orient UFL_index)=1
+      { let h2 := h*F*G1Perm*F';
+        let g_new := g*h2
+        let test := (g*h2).1.orient UFL_index
+
+      }
+      { let h := h*F*(G1Perm^2)*F';
+      }
+    }
+
+  #eval U*D*R*R*B
+  -- 现在在UFL位置的是初始的UFR
+  def testActions := U*U*L*L*R*B*L*U*R*B
+  #eval (testActions).1.orient ((testActions).1.permute.invFun 0)
+  --要描述绝对量应该是
+  -- 小引理：绝对方向量A1 经过x→, 绝对方向量为A2， 和w(x)有什么关系，如何表达w(x):
+  --           σ(x)·(A1 + w(x)) = A2
+  --           所以,w(x) = (σ(x))^(-1)·A2 - A1
+  -- 因为(testActions).1.orient ((testActions).1.permute.invFun 0)结果是1，
+  -- 意味着UFL的绝对方向数是1，需要执行F*(G1Perm)*F'即可还原UFL的方向数。
+  def result1 := testActions * F*(G1Perm)*F'
+  #eval (result1).1.orient ((result1).1.permute.invFun 0) -- 0
+  def result2 := testActions * F*(G1Perm^2)*F'
+  #eval (result2).1.orient ((result2).1.permute.invFun 0) -- 0
+
+    --给出详细的步骤h，使得(g * h).1.orient = 0成立：
+      -- 1.首先还原F面的3个角块:UFL,DFL,DFR：
+        -- 1.还原UFL的方向数：分类讨论：
+          -- 1.UFL的方向数为0,h=h
+          -- 2.UFL的方向数为1,h=h*F*G1*F'
+          -- 3.UFL的方向数为2,h=h*F*(G1^2)*F'
+        -- 2.还原DFL的方向数：分类讨论：
+          -- 1.DFL的方向数为0,h=h
+          -- 2.DFL的方向数为1,h=h*F^2*G1*F^2
+          -- 3.DFL的方向数为2,h=h*F^2*(G1^2)*F^2
+
+    -- sorry
 
   lemma lemma2
   : ∀g : RubiksSuperType,
