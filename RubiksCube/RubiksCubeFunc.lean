@@ -32,7 +32,7 @@ section RubiksSuperGroup
   /- This PieceState structure is used to represent the entire state of both corner pieces and edge pieces.-/
   structure PieceState (pieces orientations: ℕ+) where
     permute : Perm (Fin pieces)
-    orient : Fin pieces → Fin orientations -- 这里应该不是增加量，是绝对量
+    orient : Fin pieces → Fin orientations -- 这里应该是增加量，不是绝对量
     deriving Repr, DecidableEq
 
 
