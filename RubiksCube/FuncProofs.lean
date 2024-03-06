@@ -223,6 +223,9 @@ section ValidityChecks
 
 end ValidityChecks
 
+
+section RubikCube_BasicRule_2
+
 /- This theorem shows that the set of valid cube states as defined in terms of permutations and orientations of
 the pieces contains all positions reachable with standard Rubik's cube moves. Further showing that these
 two sets are in fact the same is equivalent to providing a solution algorithm for any valid cube state.
@@ -455,7 +458,8 @@ theorem valid_reachable
   -- 分类讨论1得到小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
   -- 分类讨论2得到小引理2:假设有状态g∈H,且∑(12在上 i=1) wi(g) = 0 (mod 2) ， 则=>,g能通过有限次作用G中的元素，得到新的性质：w(g)={0,0,...,0}。并且不改变角块的方向数。
   -- 通用小引理4.6：假设n>=3，对于任意集合M，假设M包含Sn中全体3循环，则=>， M >= An
-  -- 小引理3***(最复杂的一个引理): 从已知的某些复合操作，能够覆盖所有的棱3循环（不改变方向数）；而且，从已知的某些复合操作，能够覆盖所有的角3循环（不改变方向数）。
+  -- 小引理3***(最复杂的一个引理): 从已知的某些复合操作，能够覆盖所有的棱3循环（不改变方向数）；
+      -- 而且，从已知的某些复合操作，能够覆盖所有的角3循环（不改变方向数）。
   -- 小引理11：由于小引理3，已覆盖所有3循环，再使用小引理4.6，因此可以得到 => 从已知的某些复合操作，能达到这个状态集合({A8},{A12},id,id)
   -- ValidCube的条件1，限制了当前状态x的范围，所以可以进行2种分类讨论：1.（奇X奇) 2.(偶X偶）
   -- 存在一个复合操作，作用一次到状态集合（奇X奇)上的某个元素后，新状态会属于新的状态集合(偶X偶）
@@ -640,6 +644,8 @@ IsSolved (R * R * R * R)
 -- #check Equiv.Perm.permGroup.mul_assoc
 
 
+end RubikCube_BasicRule_2
+
 
 
 
@@ -647,6 +653,7 @@ IsSolved (R * R * R * R)
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+section ThistlethwaiteAlgorithm
 
 ------ 以下是TW算法部分，(因为新开一个文件有点问题，先写在同一个文件吧)：
 ------ 每一个证明的右推左部分，其实就是还原的算法！！！
@@ -688,6 +695,8 @@ TWGroup1 ⊂ RubiksGroup := by sorry
 theorem TWAlgorithm_TWGroup1_iff
 : ∀x : RubiksSuperType, Reachable_TWGroup1 x ↔ x ∈ TWGroup1
 := by sorry
+  --todo
+  -- 左推右之前没用归纳法，用的是定义的cases就可以了，一样的意思。
 
 -- 2.∀g∈ G1,
 -- g∈G2 (G2 = <L^2,R^2,F^2,B^2,U,D>)
@@ -789,3 +798,6 @@ TWGroup3 ⊂ TWGroup2 := by sorry
 theorem TWAlgorithm_TWGroup3_iff
 : ∀x : RubiksSuperType, Reachable_TWGroup3 x ↔ x ∈ TWGroup3
 := by sorry
+
+
+end ThistlethwaiteAlgorithm
