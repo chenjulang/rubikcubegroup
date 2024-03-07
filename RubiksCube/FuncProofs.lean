@@ -550,10 +550,10 @@ lemma four_rs_eq_solved
   simp only [Prod.mk_mul_mk, PieceState.mul_def, ps_mul_assoc, Prod.mk_eq_one]
   simp only [ps_mul]
   simp only [Prod.mk.injEq, PieceState.mk.injEq]
-  simp only [cyclePieces,cycleImpl]
+  simp only [cyclePieces]
+  simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one, Perm.coe_mul]
   apply And.intro
-  · simp only [mul_one, coe_fn_mk]
-    apply And.intro
+  · apply And.intro
     · ext i
       simp only [Perm.coe_mul, Function.comp_apply, Perm.coe_one, id_eq]
       have h1 := SwapDef i
@@ -563,8 +563,7 @@ lemma four_rs_eq_solved
     · -- orientTest2_1
       sorry
       -- done
-  · simp only [mul_one, Perm.coe_mul]
-    apply And.intro
+  · apply And.intro
     · ext i
       simp only [Perm.coe_mul, Function.comp_apply, Perm.coe_one, id_eq]
       -- swapTest2_2
@@ -756,8 +755,8 @@ theorem TWAlgorithm_TWGroup2_iff
 --     2.角块有2个保持轨道：{1,3,6,8},{2,4,5,7}
 --     3.与这个白色面心块颜色不一样的角块的个数,记为Count,Count是偶数。这里先特指白色面中，和白色不一样的角块的（白色的）个数Count，Count是偶数个。
 -- }
-  -- 这个先忽略：有一个额外的左推右的条件可以证明：
-  --    (3错误的？.{1,3,6,8},{2,4,5,7}这两个角块的轨道中，不包含三轮换。
+  -- 这个先忽略：有一个额外的左推右的可以证明：
+  --    (4.{1,3,6,8},{2,4,5,7}这两个角块的轨道中，不包含三轮换。
   --     换句话说，g的效果不能产生这些轨道内的3循环。
   --      换句话说，g不是单纯的棱块3循环（不变全体块的方向数，不变角块的位置）)
 
