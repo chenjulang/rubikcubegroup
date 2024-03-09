@@ -267,33 +267,47 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   def DBR_index :Fin 8 := 6
   def DBL_index :Fin 8 := 7
 
+    --Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0 → Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * F * G1Perm * F').1.orient = 0
+    -- 这个结论是一个计算的结果吧？
+    -- lemma lemma_006
+
+    lemma lemma_005
+    :∀g : RubiksSuperType,
+    (Corner_Absolute_Orient g.1 UFL_index) = 1
+    →
+    (Corner_Absolute_Orient (g*F*G1Perm*F').1 UFL_index) = 0
+    := by
+      sorry
+
       -- todo--
     -- 这里还需要一个引理，这个引理要一般性一点：g和i如果中途相隔一个G中的元素h，也就是gh=i，则某个旧目标g可以达到，可以变成新目标i可以达到。
-    -- lemma lemma1_004_2reachableMove_Exist_same_property
-    -- (x : RubiksSuperType)
-    -- (y : RubiksSuperType)
-    -- (g : RubiksSuperType)
-    -- (gInG : g ∈ RubiksGroup)
-    -- (Gdiffer: x*g = y)
-    -- (someP2 : RubiksSuperType →  Prop)
-    -- (someP : (x:RubiksSuperType) → (y:RubiksSuperType) →  someP2 (x*y) ) --这里还要改一下
-    -- -- ∃ h ∈ RubiksGroup, (g * h).1.orient = 0
-    -- -- ↔
-    -- -- ∃ h ∈ RubiksGroup, (g*h2 * h).1.orient = 0
-    -- :
-    -- (∃ h∈ RubiksGroup , someP x h) -- ???
+    -- 举例：
+    -- ∃ h ∈ RubiksGroup, (g * h).1.orient = 0
     -- ↔
-    -- (∃ h∈ RubiksGroup , someP y h)
-    -- := by
-    --   constructor
-    --   {
-    --     intro h1
-    --     rw [Gdiffer.symm]
+    -- ∃ h ∈ RubiksGroup, (g*h2 * h).1.orient = 0
+    lemma lemma1_004_2reachableMove_Exist_same_property
+    (x : RubiksSuperType)
+    (y : RubiksSuperType)
+    (g : RubiksSuperType)
+    (gInG : g ∈ RubiksGroup)
+    (Gdiffer: x*g = y)
+    (someP2 : RubiksSuperType →  Prop)
+    (someP : (x:RubiksSuperType) → (y:RubiksSuperType) →  someP2 (x*y) ) --这里还要改一下
+    :
+    (∃ h∈ RubiksGroup , someP x h) -- ???
+    ↔
+    (∃ h∈ RubiksGroup , someP y h)
+    := by
+      sorry
+      -- constructor
+      -- {
+      --   intro h1
+      --   rw [Gdiffer.symm]
 
-    --   }
-    --   {
-    --     sorry
-    --   }
+      -- }
+      -- {
+      --   sorry
+      -- }
 
     lemma lemma1_003_7Corners_eq_8Corners : sorry := sorry
 
@@ -333,17 +347,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       --   }
       -- }
 
-    lemma lemma_a1
-    :∀g : RubiksSuperType,
-    (Corner_Absolute_Orient g.1 UFL_index) = 1
-    →
-    (Corner_Absolute_Orient (g*F*G1Perm*F').1 UFL_index) = 0
-    := by
-      sorry
 
-    --Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0 → Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * F * G1Perm * F').1.orient = 0
-    -- 这个结论是一个计算的结果吧？
-    -- lemma lemma_b
+
+
 
 
   lemma lemma1
@@ -760,7 +766,6 @@ end RubikCube_BasicRule_2
 -- theorem TWAlgorithm_TWGroup1_iff
 -- : ∀x : RubiksSuperType, Reachable_TWGroup1 x ↔ x ∈ TWGroup1
 -- := by sorry
---   --todo
 --   -- 左推右之前没用归纳法，用的是定义的cases就可以了，一样的意思。
 
 -- -- 2.∀g∈ G1,
