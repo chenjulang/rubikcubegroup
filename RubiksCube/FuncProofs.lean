@@ -232,11 +232,6 @@ two sets are in fact the same is equivalent to providing a solution algorithm fo
 I do not have a proof that the solution algorithm in `SolutionAlgorithm.lean` will solve any valid cube,
 but I am confident that this is the case (assuming no bugs in my concretely defined setup moves). -/
 
-
-
-
-
-
   lemma solved_reachable
   (x : RubiksSuperType)
   (h : x = Solved)
@@ -267,9 +262,18 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   def DBR_index :Fin 8 := 6
   def DBL_index :Fin 8 := 7
 
-    --Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0 → Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * F * G1Perm * F').1.orient = 0
+    --Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0
+    -- → Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * F * G1Perm * F').1.orient = 0
     -- 这个结论是一个计算的结果吧？
-    -- lemma lemma_006
+    lemma lemma_006
+    (g:RubiksSuperType)
+    :Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0
+    →
+    Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * F * G1Perm * F').1.orient = 0
+    := by
+      intro h1
+      sorry
+
 
     lemma lemma_005
     :∀g : RubiksSuperType,
@@ -279,12 +283,14 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     := by
       sorry
 
-      -- todo--
+      -- todo-- 优先解决命题有sorry的
     -- 这里还需要一个引理，这个引理要一般性一点：g和i如果中途相隔一个G中的元素h，也就是gh=i，则某个旧目标g可以达到，可以变成新目标i可以达到。
+    -- 关键是∃
     -- 举例：
-    -- ∃ h ∈ RubiksGroup, (g * h).1.orient = 0
+    -- h2∈ RubiksGroup,g∈ RubiksSuperType,
+    -- ∃ h1 ∈ RubiksGroup, (g * h1).1.orient = 0
     -- ↔
-    -- ∃ h ∈ RubiksGroup, (g*h2 * h).1.orient = 0
+    -- ∃ h2 ∈ RubiksGroup, (g*h2 * h2).1.orient = 0
     lemma lemma1_004_2reachableMove_Exist_same_property
     (x : RubiksSuperType)
     (y : RubiksSuperType)
@@ -448,6 +454,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
 
   -- 好像写错了，先不纠结,应该写成参数好一点
+  -- 下面31和32是最关键的
   lemma lemma31
   :∃ g : RubiksSuperType,
   Reachable g
