@@ -604,15 +604,10 @@ theorem valid_reachable
 
   -- 将目标Reachable x变成  ∃ y, (Reachable y) ∧ (x * y = Solved)
     -- x经过有限次操作变成了y， y就是复原状态e。
-  -- set y : RubiksSuperType := sorry
-  -- have h101 : Reachable y := sorry
-  -- have h102 : x * y = Solved := sorry
-  -- have h103 : x = Solved * y⁻¹
-  --   := by
-  --   rw [h102.symm]
-  --   rw [mul_assoc]
-  --   simp only [mul_right_inv, mul_one]
-  --   done
+    -- 所以其实上面的所有内容就是要找出这样的一个y。
+  let y : RubiksSuperType := sorry
+  have h101 : Reachable y := sorry
+  have h102 : x * y = Solved := sorry
 
   have h105 (y : RubiksSuperType):
   (Reachable y) ∧ (x * y = Solved)
@@ -629,17 +624,8 @@ theorem valid_reachable
     · exact Reachable.Solved
     · apply Reachable.inv
       exact hs.1
-  apply h105
-
-
-  -- have h104 : Reachable x
-  -- := by
-  --   rw [h103]
-  --   apply Reachable.mul
-  --   · exact Reachable.Solved
-  --   · apply Reachable.inv
-  --     exact h101
-  -- exact h104
+  apply h105 y
+  exact { left := h101, right := h102 }
   done
 
 
