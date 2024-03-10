@@ -283,38 +283,49 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     := by
       sorry
 
-      -- todo-- 优先解决命题有sorry的
+      -- 优先解决命题有sorry的
     -- 这里还需要一个引理，这个引理要一般性一点：g和i如果中途相隔一个G中的元素h，也就是gh=i，则某个旧目标g可以达到，可以变成新目标i可以达到。
     -- 关键是∃
     -- 举例：
-    -- h2∈ RubiksGroup,g∈ RubiksSuperType,
-    -- ∃ h1 ∈ RubiksGroup, (g * h1).1.orient = 0
-    -- ↔
-    -- ∃ h2 ∈ RubiksGroup, (g*h2 * h2).1.orient = 0
+    -- g∈ RubiksSuperType, h ∈ RubiksGroup,-- 大前提
+    -- (∃ x1 ∈ RubiksGroup, ((g) * x1).1.orient = 0)
+    -- →
+      -- (∃ x2 ∈ RubiksGroup, ((g*h) * x2).1.orient = 0)
+      -- ∧
+      -- ((g*h) * (h⁻¹*x1)).1.orient = 0
+
+    -- 另一个例子：
+    -- g∈ RubiksSuperType, h ∈ RubiksGroup,-- 大前提
+    -- (∃ x1 ∈ RubiksGroup, ((g) * x1).1.orient有且仅有4个分量是0 )
+    -- →
+      -- (∃ x2 ∈ RubiksGroup, ((g*h) * x2).1.orient有且仅有4个分量是0)
+      -- ∧
+      -- ((g*h) * (h⁻¹*x1)).1.orient有且仅有4个分量是0
+
+    -- 一般的例子：
+    -- g∈ RubiksSuperType, h ∈ RubiksGroup,-- 大前提
+    -- (∃ x1 ∈ RubiksGroup, ((g) * x1)作为参数插入某个命题A成立 )
+    -- →
+      -- (∃ x2 ∈ RubiksGroup, ((g*h) * x2)作为参数插入命题A成立)
+      -- ∧
+      -- ((g*h) * (h⁻¹*x1))作为参数插入命题A成立
+
     lemma lemma1_004_2reachableMove_Exist_same_property
-    (x : RubiksSuperType)
-    (y : RubiksSuperType)
     (g : RubiksSuperType)
     (gInG : g ∈ RubiksGroup)
-    (Gdiffer: x*g = y)
-    (someP2 : RubiksSuperType →  Prop)
-    (someP : (x:RubiksSuperType) → (y:RubiksSuperType) →  someP2 (x*y) ) --这里还要改一下
+    (h : RubiksSuperType)
+    (somePropA : RubiksSuperType →  Prop)
     :
-    (∃ h∈ RubiksGroup , someP x h) -- ???
-    ↔
-    (∃ h∈ RubiksGroup , someP y h)
+    ∃ x1:RubiksSuperType,
+    somePropA (g*h) -- “冒号”写成“属于号”就不行了，请注意
+    →
+      (∃ x2 ∈ RubiksGroup, somePropA ((g*h) * x2))
+      ∧
+      somePropA ((g*h) * (h⁻¹*x1))
     := by
       sorry
-      -- constructor
-      -- {
-      --   intro h1
-      --   rw [Gdiffer.symm]
 
-      -- }
-      -- {
-      --   sorry
-      -- }
-
+    -- todo
     lemma lemma1_003_7Corners_eq_8Corners : sorry := sorry
 
     -- ... ???这里省略了所有角块的引理lemma1_00X还没写
@@ -352,10 +363,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       --     sorry
       --   }
       -- }
-
-
-
-
 
 
   lemma lemma1
