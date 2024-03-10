@@ -275,7 +275,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       intro h1
       sorry
 
-
+    -- 又是一个需要计算的结论，可以用calc模式吗？
     lemma lemma_005
     :∀g : RubiksSuperType,
     (Corner_Absolute_Orient g.1 UFL_index) = 1
@@ -284,17 +284,14 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     := by
       sorry
 
-      -- 优先解决命题有sorry的
-    -- 这里还需要一个引理，这个引理要一般性一点：g和i如果中途相隔一个G中的元素h，也就是gh=i，则某个旧目标g可以达到，可以变成新目标i可以达到。
-    -- 关键是∃
-    -- 举例：
+    -- 这个引理要一般性一点：g和i如果中途相隔一个G中的元素h，也就是gh=i，则某个旧目标g可以达到，可以变成新目标i可以达到。
+    -- 一个举例：
     -- g∈ RubiksSuperType, h ∈ RubiksGroup,-- 大前提
     -- (∃ x1 ∈ RubiksGroup, ((g) * x1).1.orient = 0)
     -- →
       -- (∃ x2 ∈ RubiksGroup, ((g*h) * x2).1.orient = 0)
       -- ∧
       -- ((g*h) * (h⁻¹*x1)).1.orient = 0
-
     -- 另一个例子：
     -- g∈ RubiksSuperType, h ∈ RubiksGroup,-- 大前提
     -- (∃ x1 ∈ RubiksGroup, ((g) * x1).1.orient有且仅有4个分量是0 )
@@ -302,7 +299,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- (∃ x2 ∈ RubiksGroup, ((g*h) * x2).1.orient有且仅有4个分量是0)
       -- ∧
       -- ((g*h) * (h⁻¹*x1)).1.orient有且仅有4个分量是0
-
+    -- g和i如果中途相隔一个G中的元素h，也就是gh=i，则某个旧目标g可以达到，可以变成新目标i可以达到。
     -- 一般的例子：
     -- g∈ RubiksSuperType, h ∈ RubiksGroup,-- 大前提
     -- (∃ x1 ∈ RubiksGroup, ((g) * x1)作为参数插入某个命题A成立 )
@@ -310,7 +307,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- (∃ x2 ∈ RubiksGroup, ((g*h) * x2)作为参数插入命题A成立)
       -- ∧
       -- ((g*h) * (h⁻¹*x1))作为参数插入命题A成立
-
     lemma lemma1_004_2reachableMove_Exist_same_property
     (g : RubiksSuperType)
     (gInG : g ∈ RubiksGroup)
@@ -332,12 +328,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     --     F和B通过查v表可知，
     --     而g1则只需实际操作一次后，看到只修改了全体角块中2个角块的方向数，而且方向数一个+1，一个+2，所以也满足求和模3为0。
     -- 换句话说，初始状态经过上述{F，B和g1}任意操作后，增加v(X)的各个分量，因为每次操作变化后求和仍然是mod 3为0，因此还原7个以后仍然保持这个性质。
+    --
     -- 命题描述就是：
     -- 某状态g满足角方向数求和模3为0（其实等价于：角方向数增加量求和为0），
     -- 经过集合A（满足角方向数增加量求和为0）中的任意复合操作x1后，
     -- 且如果(g*x1)的角方向数增加量的前7个分量都为0，
     -- 则第8个分量也为0。
-
     -- expected token 这种错误可能是没open这个符号，比如求和∑,要open BigOperators
     lemma lemma1_003_7Corners_eq_8Corners
     (g : RubiksSuperType)
@@ -347,12 +343,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     ∧
     x1 ∈ SetA
     ∧
-    ∀ j : (Fin 7), (g*x1).1.orient j = 0 -- 这3个符号报错时 :,∈,in 三个都轮流试一下。
+    ∀ j : (Fin 7), (g*x1).1.orient j = 0 -- 注意：当这3个符号报错时 :,∈,in 三个都轮流试一下。
     →
     (g*x1).1.orient 7 = 0
     := sorry
 
-    -- ... ???这里省略了所有角块的引理lemma1_00X还没写
+    -- ...这里省略了所有角块的引理lemma1_00X还没写,后面写成lemma1_002_3,lemma1_002_4这样吧。
     lemma lemma1_002
     : ∀g : RubiksSuperType, -- RubiksSuperType即手写的H。
     Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0 --角块方形数求和后，模3为0。
@@ -362,8 +358,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (g * h).fst.orient = 0
     := by sorry
 
+    -- 还原UFL的方向数
     lemma lemma1_001
-    (g : RubiksSuperType): -- RubiksSuperType即手写的H。
+    (g : RubiksSuperType): -- RubiksSuperType即文字证明中的H。
     Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0 --角块方形数求和后，模3为0。
     ∧ (Corner_Absolute_Orient g.1 UFL_index) = 0
     →
@@ -388,13 +385,15 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       --   }
       -- }
 
-
+  -- 还原所有角块的方向数
   lemma lemma1
   : ∀g : RubiksSuperType, -- RubiksSuperType即手写的H。
   Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0 --角块方形数求和后，模3为0。
   →
   ∃ h ∈ RubiksGroup ,
   (g * h).fst.orient = 0
+  ∧
+  g.2.orient = (g * h).2.orient
   := by
     intro g hsum0;
     let h := Solved;
@@ -412,8 +411,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         -- let test := (g*h2).1.orient UFL_index
         -- 如何说明g*h2满足这个呢？：(Corner_Absolute_Orient g.1 UFL_index) = 0
           -- 也就是要证明：UFL方向数为1,操作后为0.
-        have la := lemma_a1 g ha1
-        have h2 := lemma1_001 (g * F * G1Perm * F')
+        -- have la := lemma_a1 g ha1
+        -- have h2 := lemma1_001 (g * F * G1Perm * F')
 
 
 
@@ -455,18 +454,20 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           -- 3.DFL的方向数为2,h=h*F^2*(G1^2)*F^2
         -- ...
 
-
+  -- 还原所有棱块的方向数
   lemma lemma2
   : ∀g : RubiksSuperType,
   Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.snd.orient = 0
   →
   ∃ h ∈ RubiksGroup ,
   (g * h).snd.orient = 0
+  ∧
+  g.1.orient = (g * h).1.orient
   := by sorry
 
 
-  -- 定理：closure_three_cycles_eq_alternating
-  -- 定义：3循环： IsThreeCycle
+    -- 涉及定理：closure_three_cycles_eq_alternating
+    -- 涉及定义：3循环： IsThreeCycle
   -- 通用小引理4.6：假设n>=3，对于任意集合M，假设M包含Sn中全体3循环，则=>， M >= An
   lemma lemma46
   (M:Subgroup (Perm α)):
@@ -484,8 +485,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- #check alternatingGroup α
 
 
-  -- 好像写错了，先不纠结,应该写成参数好一点
-  -- 下面31和32是最关键的
+  -- 应该写成参数好一点
+  -- 下面31和32是最关键的最重要的定理
+  -- 魔方群能生成所有角块的位置三循环（方向数不改变）。
   lemma lemma31
   :∃ g : RubiksSuperType,
   Reachable g
@@ -502,6 +504,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   x * g = Solved
   := by sorry
 
+  -- 魔方群能生成所有棱块的位置三循环（方向数不改变）。
   lemma lemma32
   :∃ g : RubiksSuperType,
   Reachable g
@@ -518,6 +521,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   x * g = Solved
   := by sorry
 
+  -- 其实就是lemma31和lemma32的简单结合，由于角块和棱块可以分别互不影响地完成，这个引理应该很容易证明。
   lemma lemma11
   :∃ g : RubiksSuperType,
   Reachable g
@@ -534,6 +538,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   x * g = Solved
   := by sorry
 
+  -- 右推左的限制条件1使得只能选这2种情况进行分类讨论。
   /-- 1.（奇X奇) 2.(偶X偶）-/
   lemma lemma12_condition1_restriction
   (x:RubiksSuperType)
@@ -545,6 +550,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (sign x.1.permute = 1 ∧ 1 = sign x.2.permute)
   := by sorry
 
+  -- 化归思想，所有lemma12_condition1_restriction中的情况1可以通过魔方群操作变成情况2。
   /-- （奇X奇) → (偶X偶）-/
   lemma lemma13_oddXoddToEvenXEven
   (g:RubiksSuperType)
@@ -558,15 +564,30 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   := by sorry
 
 
-
+-- todo-- 先把主定理用虚构的引理证明一下吧，即使是虚构的引理现在还是不太足够的。
 -- 魔方第二基本定理的右推左部分：
 theorem valid_reachable
 : ∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
 := by
   intro x hvx
   simp [ValidCube] at hvx
+  let currStat := x
   -- 分类讨论1得到小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
+  have h1 := lemma1 x hvx.2.1
+  obtain ⟨h1_2,h1_3,h1_4,h1_5⟩ := h1
+  let currStat := x * h1_2
+  let currStat_satisfy := h1_4
   -- 分类讨论2得到小引理2:假设有状态g∈H,且∑(12在上 i=1) wi(g) = 0 (mod 2) ， 则=>,g能通过有限次作用G中的元素，得到新的性质：w(g)={0,0,...,0}。并且不改变角块的方向数。
+  have h2 := lemma2 (x * h1_2)
+  have h2_2 := hvx.2.2
+  rw [h1_5] at h2_2
+  have h2 := lemma2 (x * h1_2) h2_2
+  obtain ⟨h2_3,h2_4,h2_5,h2_6⟩ := h2
+  have h2_7 := h1_4
+  rw [h2_6] at h2_7
+  let currStat := x * h1_2 * h2_3
+  let currStat_satisfy: ((x * h1_2 * h2_3).2.orient = 0) ∧ ((x * h1_2 * h2_3).1.orient = 0)
+    := { left := h2_5, right := h2_7 }
   -- 通用小引理4.6：假设n>=3，对于任意集合M，假设M包含Sn中全体3循环，则=>， M >= An
   -- 小引理3***(最复杂的一个引理): 从已知的某些复合操作，能够覆盖所有的棱3循环（不改变方向数）；
       -- 而且，从已知的某些复合操作，能够覆盖所有的角3循环（不改变方向数）。
@@ -590,7 +611,7 @@ theorem valid_reachable
   done
 
 
--- 魔方第二基本定理的左推右部分：
+-- 魔方第二基本定理的左推右部分：done
 theorem reachable_valid
 : ∀x : RubiksSuperType, Reachable x → x ∈ ValidCube
 := by
@@ -653,6 +674,8 @@ lemma SwapDef (i: Fin 8): ((swap 1 2)
             ((swap 2 6)
               ((swap 6 5) ((swap 1 2) ((swap 2 6) ((swap 6 5) ((swap 1 2) ((swap 2 6) ((swap 6 5) i)))))))))))) = i
   := by fin_cases i <;> rfl
+
+/-- done -/
 lemma four_rs_eq_solved
 : (R * R * R * R) = Solved
 := by
@@ -758,6 +781,7 @@ end RubikCube_BasicRule_2
 
 
 
+-- 下面的算法有时间再写一下，感觉是体力活～～
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
