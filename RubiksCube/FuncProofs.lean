@@ -588,8 +588,6 @@ theorem valid_reachable
   let currStat := x * h1_2 * h2_3
   let currStat_satisfy: ((x * h1_2 * h2_3).2.orient = 0) ∧ ((x * h1_2 * h2_3).1.orient = 0)
     := { left := h2_5, right := h2_7 }
-  -- 将目标Reachable x变成  ∃ y, (Reachable y) ∧ (x * y = Solved)
-
   -- 通用小引理4.6：假设n>=3，对于任意集合M，假设M包含Sn中全体3循环，则=>， M >= An
   -- 小引理3***(最复杂的一个引理): 从已知的某些复合操作，能够覆盖所有的棱3循环（不改变方向数）；
       -- 而且，从已知的某些复合操作，能够覆盖所有的角3循环（不改变方向数）。
@@ -604,24 +602,44 @@ theorem valid_reachable
   -- ValidCube的条件3, 然后使用小引理2，可以将({A8},{A12},0,?) 变成 ({A8},{A12},0,0)， 即({A8},{A12},id,id)
   -- 以上操作已经将状态x变成了这个状态集合里的某一个({A8},{A12},id,id)，因此直接使用小引理11，就可以直接证明x可以被复合得到。
 
-  -- x经过有限次操作变成了y， y就是复原状态e。
-  set y : RubiksSuperType := sorry
-  have h101 : Reachable y := sorry
-  have h102 : x * y = Solved := sorry
-  have h103 : x = Solved * y⁻¹
-    := by
-    rw [h102.symm]
-    rw [mul_assoc]
-    simp only [mul_right_inv, mul_one]
-    done
-  have h104 : Reachable x
+  -- 将目标Reachable x变成  ∃ y, (Reachable y) ∧ (x * y = Solved)
+    -- x经过有限次操作变成了y， y就是复原状态e。
+  -- set y : RubiksSuperType := sorry
+  -- have h101 : Reachable y := sorry
+  -- have h102 : x * y = Solved := sorry
+  -- have h103 : x = Solved * y⁻¹
+  --   := by
+  --   rw [h102.symm]
+  --   rw [mul_assoc]
+  --   simp only [mul_right_inv, mul_one]
+  --   done
+
+  have h105 (y : RubiksSuperType):
+  (Reachable y) ∧ (x * y = Solved)
+  → Reachable x
   := by
-    rw [h103]
+    intro hs
+    have h105_1 : x = Solved * y⁻¹
+      := by
+      rw [hs.2.symm]
+      rw [mul_assoc]
+      simp only [mul_right_inv, mul_one]
+    rw [h105_1]
     apply Reachable.mul
     · exact Reachable.Solved
     · apply Reachable.inv
-      exact h101
-  exact h104
+      exact hs.1
+  apply h105
+
+
+  -- have h104 : Reachable x
+  -- := by
+  --   rw [h103]
+  --   apply Reachable.mul
+  --   · exact Reachable.Solved
+  --   · apply Reachable.inv
+  --     exact h101
+  -- exact h104
   done
 
 
