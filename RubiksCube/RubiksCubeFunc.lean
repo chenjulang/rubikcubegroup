@@ -744,6 +744,7 @@ section RubiksGroup
     | Solved : Reachable Solved
     | FT : ∀x : RubiksSuperType, FaceTurn x → Reachable x
     | mul : ∀x y : RubiksSuperType, Reachable x → Reachable y → Reachable (x * y)
+    | inv :  ∀x : RubiksSuperType, Reachable x → Reachable x⁻¹
 
   inductive Reachable_TWGroup1
   : RubiksSuperType → Prop

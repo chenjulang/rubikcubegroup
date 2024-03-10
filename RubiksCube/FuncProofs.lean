@@ -588,12 +588,15 @@ theorem valid_reachable
   let currStat := x * h1_2 * h2_3
   let currStat_satisfy: ((x * h1_2 * h2_3).2.orient = 0) ∧ ((x * h1_2 * h2_3).1.orient = 0)
     := { left := h2_5, right := h2_7 }
+  -- 将目标Reachable x变成  ∃ y, (Reachable y) ∧ (x * y = Solved)
+
   -- 通用小引理4.6：假设n>=3，对于任意集合M，假设M包含Sn中全体3循环，则=>， M >= An
   -- 小引理3***(最复杂的一个引理): 从已知的某些复合操作，能够覆盖所有的棱3循环（不改变方向数）；
       -- 而且，从已知的某些复合操作，能够覆盖所有的角3循环（不改变方向数）。
   -- 小引理11：由于小引理3，已覆盖所有3循环，再使用小引理4.6，因此可以得到 => 从已知的某些复合操作，能达到这个状态集合({A8},{A12},id,id)
   -- ValidCube的条件1，限制了当前状态x的范围，所以可以进行2种分类讨论：1.（奇X奇) 2.(偶X偶）
   -- 存在一个复合操作，作用一次到状态集合（奇X奇)上的某个元素后，新状态会属于新的状态集合(偶X偶）
+
 
   -- 以下就不是引理了，直接四行推理了：
   -- 因为对x的2种分类讨论都归化到了状态集合(偶X偶），即({A8},{A12},?,?)
@@ -603,11 +606,22 @@ theorem valid_reachable
 
   -- x经过有限次操作变成了y， y就是复原状态e。
   set y : RubiksSuperType := sorry
-  have h1 : y = Solved := sorry
-  -- x经过有限次操作变成了y → Reachable y → Reachable x
-  have h2 : Reachable y → Reachable x := sorry
-  apply h2
-  exact solved_reachable y h1
+  have h101 : Reachable y := sorry
+  have h102 : x * y = Solved := sorry
+  have h103 : x = Solved * y⁻¹
+    := by
+    rw [h102.symm]
+    rw [mul_assoc]
+    simp only [mul_right_inv, mul_one]
+    done
+  have h104 : Reachable x
+  := by
+    rw [h103]
+    apply Reachable.mul
+    · exact Reachable.Solved
+    · apply Reachable.inv
+      exact h101
+  exact h104
   done
 
 
