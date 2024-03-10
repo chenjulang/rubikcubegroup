@@ -6,6 +6,7 @@ import Mathlib.GroupTheory.SpecificGroups.Alternating
 open Equiv Perm
 open Equiv Equiv.Perm Subgroup Fintype
 open alternatingGroup
+open BigOperators
 -- set_option maxHeartbeats 4000000
 
 -- 注意：依赖文件RubiksCubeFunc改过的话，最好点一下这个文件的restrt File
@@ -325,8 +326,31 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     := by
       sorry
 
-    -- todo
-    lemma lemma1_003_7Corners_eq_8Corners : sorry := sorry
+    -- 假设角块的方向数求和后，模3为0,假设8个角块的方向数中，有7个方向数被以上步骤还原为0以后，则=>,第8个角块的方向数也还原成0 ，为什么呢？：
+    -- 其实这里隐藏了一些条件，“以上步骤”里面每一个操作必须保持某个性质才行。
+    -- 还原操作涉及到的只有{F，B和g1},由于这3者之一，任意取一个记为X,都满足∑(8 i=1)v(X)_i=0 (mod 3)：
+    --     F和B通过查v表可知，
+    --     而g1则只需实际操作一次后，看到只修改了全体角块中2个角块的方向数，而且方向数一个+1，一个+2，所以也满足求和模3为0。
+    -- 换句话说，初始状态经过上述{F，B和g1}任意操作后，增加v(X)的各个分量，因为每次操作变化后求和仍然是mod 3为0，因此还原7个以后仍然保持这个性质。
+    -- 命题描述就是：
+    -- 某状态g满足角方向数求和模3为0（其实等价于：角方向数增加量求和为0），
+    -- 经过集合A（满足角方向数增加量求和为0）中的任意复合操作x1后，
+    -- 且如果(g*x1)的角方向数增加量的前7个分量都为0，
+    -- 则第8个分量也为0。
+
+    -- expected token 这种错误可能是没open这个符号，比如求和∑,要open BigOperators
+    lemma lemma1_003_7Corners_eq_8Corners
+    (g : RubiksSuperType)
+    (SetA : Set RubiksSuperType := {a: RubiksSuperType | ∑ i in (Finset.range 8), (a.1.orient) i = 0})
+    (x1: RubiksSuperType)
+    :∑ i in (Finset.range 8), (g.1.orient) i = 0
+    ∧
+    x1 ∈ SetA
+    ∧
+    ∀ j : (Fin 7), (g*x1).1.orient j = 0 -- 这3个符号报错时 :,∈,in 三个都轮流试一下。
+    →
+    (g*x1).1.orient 7 = 0
+    := sorry
 
     -- ... ???这里省略了所有角块的引理lemma1_00X还没写
     lemma lemma1_002

@@ -257,21 +257,21 @@ section RubiksSuperGroup
   : Group RubiksSuperType
   := by exact Prod.instGroup -- 应该就是笛卡尔积元素组成的群，第一种运算为：“每一个分量本身的运算，运算结果的某个分量就是这个分量的运算结果”。
 
-  instance : Mul (RubiksSuperType) where
-    mul a1 a2 := {
-      fst := {
-        permute := a2.1.permute * a1.1.permute
-        orient := (a2.1.orient ∘ a1.1.permute) + a1.1.orient
-      }
-      snd := {
-        permute := a2.2.permute * a1.2.permute
-        orient := (a2.2.orient ∘ a1.2.permute) + a1.2.orient
-      }
-    }
-
-  def aaa1:RubiksSuperType:=sorry
-  def aaa2:RubiksSuperType:=sorry
-  #check aaa1*aaa2
+  --这个好像没必要写耶：
+  -- instance : Mul (RubiksSuperType) where
+  --   mul a1 a2 := {
+  --     fst := {
+  --       permute := a2.1.permute * a1.1.permute
+  --       orient := (a2.1.orient ∘ a1.1.permute) + a1.1.orient
+  --     }
+  --     snd := {
+  --       permute := a2.2.permute * a1.2.permute
+  --       orient := (a2.2.orient ∘ a1.2.permute) + a1.2.orient
+  --     }
+  --   }
+  -- def aaa1:RubiksSuperType:=sorry
+  -- def aaa2:RubiksSuperType:=sorry
+  -- #check aaa1*aaa2
 
 end RubiksSuperGroup
 
