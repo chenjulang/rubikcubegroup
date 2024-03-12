@@ -569,17 +569,49 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   -- todo
   -- 对于任意g状态角块位置置换属于偶置换的状态，
-    -- 则存在操作x1使得(g*x1)的位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
-  -- lemma lemma14_
+    -- 则存在操作x1使得(g*x1)的角块位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
+  lemma lemma14
+  (g:RubiksSuperType)
+  (h1:g.1.permute ∈ alternatingGroup (Fin 8))
+  :∃ x1 : RubiksSuperType,
+  Reachable x1
+  ∧
+  (g*x1).1.permute = 1
+  ∧
+  (g*x1).2.permute = (g).2.permute
+  ∧
+  ((g*x1).1.orient = (g).1.orient ∧ (g*x1).2.orient = (g).2.orient )
+  := by sorry
 
   -- 对于任意g状态棱块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的棱块位置置换变成1，而且保持(g*x1)的角块位置不变，而且所有块的方向数不变。
-  -- lemma lemma15_
+  lemma lemma15
+  (g:RubiksSuperType)
+  (h1:g.2.permute ∈ alternatingGroup (Fin 12))
+  :∃ x1 : RubiksSuperType,
+  Reachable x1
+  ∧
+  (g*x1).2.permute = 1
+  ∧
+  (g*x1).1.permute = (g).1.permute
+  ∧
+  ((g*x1).1.orient = (g).1.orient ∧ (g*x1).2.orient = (g).2.orient )
+  := by sorry
 
   -- 就是lemma14+15的简单结合
   -- 对于任意g状态角块位置置换属于偶置换的状态，且棱块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的棱块位置置换变成1，而且角块位置置换变成1，而且所有块的方向数不变。
-  -- lemma lemma16_
+  lemma lemma16
+  (g:RubiksSuperType)
+  (h1:g.1.permute ∈ alternatingGroup (Fin 8))
+  (h2:g.2.permute ∈ alternatingGroup (Fin 12))
+  :∃ x1 : RubiksSuperType,
+  Reachable x1
+  ∧
+  ((g*x1).1.permute = 1 ∧ (g*x1).2.permute = 1)
+  ∧
+  ((g*x1).1.orient = (g).1.orient ∧ (g*x1).2.orient = (g).2.orient )
+  := by sorry
 
 
 -- 魔方第二基本定理的右推左部分：
@@ -620,7 +652,8 @@ theorem valid_reachable
     have h3_2_2 : (x * h1_2 * h2_3).2.permute ∈ alternatingGroup (Fin 12) := sorry
     -- todo
     -- 使用lemma16使得新状态获得保持旧属性：方向数不变，获取新属性：角块+棱块的位置都变成1。
-
+    have h3_2_3 := lemma16 (x * h1_2 * h2_3) h3_2_1 h3_2_2
+    --todo--
     -- 很明显新状态就是还原状态Solved了，也就是已知下面这个y。
     -- 所以还需要证明Reachable y即可。很明显因为都是G里面的6个元素之一FaceTurn，肯定是Reachable。
 
@@ -649,6 +682,10 @@ theorem valid_reachable
     exact { left := h101, right := h102 }
 
 
+
+
+
+
   -- 所以其实上面的所有内容就是要找出这样的一个y：
     -- (Reachable y) ∧ (x * y = Solved)
 
@@ -675,6 +712,7 @@ theorem valid_reachable
   --     exact hs.1
   -- apply h105 y
   -- exact { left := h101, right := h102 }
+  sorry
   done
 
 
@@ -713,7 +751,35 @@ theorem reachable_valid
       exact a_ih_1
       -- method 2:
       -- all_goals assumption
-  | inv c hc => sorry
+  | inv c hc hc2 =>
+    simp only [Solved, ValidCube]
+    simp only [Set.mem_setOf_eq, Prod.fst_inv, PieceState.inv_def, Prod.snd_inv]
+    apply And.intro
+    {
+      simp only [ps_inv]
+      simp only [ValidCube] at hc2
+      simp only [map_inv, Int.units_inv_eq_self]
+      obtain ⟨hc3,hc4⟩:= hc2
+      exact hc3
+    }
+    { apply And.intro
+      {
+        simp only [ps_inv]
+        simp only [Pi.neg_apply, Finset.sum_neg_distrib, neg_eq_zero]
+        simp only [ValidCube] at hc2
+        obtain ⟨hc3,hc4,hc5⟩:= hc2
+        -- hc4 -- 很明显的重排求和不变
+        sorry
+        done
+      }
+      { simp only [ps_inv]
+        simp only [Pi.neg_apply, Finset.sum_neg_distrib, neg_eq_zero]
+        simp only [ValidCube] at hc2
+        obtain ⟨hc3,hc4,hc5⟩:= hc2
+        -- hc5 -- 很明显的重排求和不变
+        sorry
+        done
+      }
   --
 
 /-- 魔方第二基本定理 -/

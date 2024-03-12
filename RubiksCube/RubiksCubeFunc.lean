@@ -55,6 +55,7 @@ section RubiksSuperGroup
     }
 
 
+
   @[simp] -- 这个同时代表了手写证明中的ρ和σ的同态性质
   theorem permute_mul {p o : ℕ+} (a1 a2 : PieceState p o)
   -- 这里可以写*，来代替ps_mul
@@ -180,6 +181,15 @@ section RubiksSuperGroup
         -- a'.orient的第n项 = (-a.orient)的第(ps.permute.invFun n)项
       orient := fun x => (- ps.orient) (ps.permute⁻¹ x)
     }
+
+  instance {p o : ℕ+} : Neg (PieceState p o) where
+    neg := fun
+      | .mk permute orient => {
+        permute := permute⁻¹
+        orient := fun x => (- orient) (permute⁻¹ x)
+      }
+
+
 
   -- 定义右的逆，证明左也成立：
 
@@ -999,5 +1009,6 @@ section SolutionState
   instance {c} : Decidable (CornersSolved c) := by apply And.decidable
   instance {c} : Decidable (EdgesSolved c) := by apply And.decidable
   instance {c} : Decidable (IsSolved c) := by apply And.decidable
+
 
 end SolutionState
