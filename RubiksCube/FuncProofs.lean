@@ -385,7 +385,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       --   }
       -- }
 
-  -- 还原所有角块的方向数
+  -- 还原所有角块的方向数，且不改变全体棱块的方向数，且不改变所有块的位置。
   lemma lemma1
   : ∀g : RubiksSuperType, -- RubiksSuperType即手写的H。
   Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0 --角块方形数求和后，模3为0。
@@ -394,6 +394,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g * h).fst.orient = 0
   ∧
   g.2.orient = (g * h).2.orient
+  ∧
+  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
   := by
     intro g hsum0;
     let h := Solved;
@@ -454,7 +456,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           -- 3.DFL的方向数为2,h=h*F^2*(G1^2)*F^2
         -- ...
 
-  -- 还原所有棱块的方向数
+  -- 还原所有棱块的方向数,且不改变全体角块的方向数，且不改变所有块的位置。
   lemma lemma2
   : ∀g : RubiksSuperType,
   Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.snd.orient = 0
@@ -463,6 +465,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g * h).snd.orient = 0
   ∧
   g.1.orient = (g * h).1.orient
+  ∧
+  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
   := by sorry
 
 
@@ -523,10 +527,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   -- 其实就是lemma31和lemma32的简单结合，由于角块和棱块可以分别互不影响地完成，这个引理应该很容易证明。
   lemma lemma11
-  :∃ g : RubiksSuperType,
-  Reachable g
-  ∧
-  ∀ x : RubiksSuperType,
+  :∀ x : RubiksSuperType,
   IsThreeCycle x.2.permute
   ∧
   IsThreeCycle x.1.permute
@@ -535,6 +536,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   ∧
   x.2.orient = 0
   →
+  ∃ g : RubiksSuperType,
+  Reachable g
+  ∧
   x * g = Solved
   := by sorry
 
@@ -563,8 +567,21 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (sign (g * x).1.permute = 1 ∧ 1 = sign (g * x).2.permute)
   := by sorry
 
+  -- todo
+  -- 对于任意g状态角块位置置换属于偶置换的状态，
+    -- 则存在操作x1使得(g*x1)的位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
+  -- lemma lemma14_
 
--- todo-- 先把主定理用虚构的引理证明一下吧，即使是虚构的引理现在还是不太足够的。两边逼近。
+  -- 对于任意g状态棱块位置置换属于偶置换的状态，
+    -- 则存在操作x1使得(g*x1)的棱块位置置换变成1，而且保持(g*x1)的角块位置不变，而且所有块的方向数不变。
+  -- lemma lemma15_
+
+  -- 就是lemma14+15的简单结合
+  -- 对于任意g状态角块位置置换属于偶置换的状态，且棱块位置置换属于偶置换的状态，
+    -- 则存在操作x1使得(g*x1)的棱块位置置换变成1，而且角块位置置换变成1，而且所有块的方向数不变。
+  -- lemma lemma16_
+
+
 -- 魔方第二基本定理的右推左部分：
 theorem valid_reachable
 : ∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
@@ -574,7 +591,7 @@ theorem valid_reachable
   let currStat := x
   -- 分类讨论1得到小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
   have h1 := lemma1 x hvx.2.1
-  obtain ⟨h1_2,h1_3,h1_4,h1_5⟩ := h1
+  obtain ⟨h1_2,h1_3,h1_4,h1_5,h1_6,h1_7⟩ := h1
   let currStat := x * h1_2
   let currStat_satisfy := h1_4
   -- 分类讨论2得到小引理2:假设有状态g∈H,且∑(12在上 i=1) wi(g) = 0 (mod 2) ， 则=>,g能通过有限次作用G中的元素，得到新的性质：w(g)={0,0,...,0}。并且不改变角块的方向数。
@@ -582,12 +599,12 @@ theorem valid_reachable
   have h2_2 := hvx.2.2
   rw [h1_5] at h2_2
   have h2 := lemma2 (x * h1_2) h2_2
-  obtain ⟨h2_3,h2_4,h2_5,h2_6⟩ := h2
-  have h2_7 := h1_4
-  rw [h2_6] at h2_7
+  obtain ⟨h2_3,h2_4,h2_5,h2_6,h2_7,h2_8⟩ := h2
+  have h2_8 := h1_4
+  rw [h2_6] at h2_8
   let currStat := x * h1_2 * h2_3
   let currStat_satisfy: ((x * h1_2 * h2_3).2.orient = 0) ∧ ((x * h1_2 * h2_3).1.orient = 0)
-    := { left := h2_5, right := h2_7 }
+    := { left := h2_5, right := h2_8 }
   -- ValidCube的条件1，限制了当前状态x的范围，所以可以进行2种分类讨论：1.（奇X奇) 2.(偶X偶）
   have h3 := hvx.1
   rw [lemma12_condition1_restriction] at h3
@@ -599,38 +616,65 @@ theorem valid_reachable
     sorry
   | inr h3_2 =>
     -- 根据h3_2推出x.1,x.2属于偶置换
-    -- 根据定理：closure_three_cycles_eq_alternating，
-      --要得到任意偶置换只需要满足：能凭空得到所有3循环即可。
-    -- lemma11说的就是能凭空得到所有3循环即可
-    sorry
+    have h3_2_1 : (x * h1_2 * h2_3).1.permute ∈ alternatingGroup (Fin 8) := sorry
+    have h3_2_2 : (x * h1_2 * h2_3).2.permute ∈ alternatingGroup (Fin 12) := sorry
+    -- todo
+    -- 使用lemma16使得新状态获得保持旧属性：方向数不变，获取新属性：角块+棱块的位置都变成1。
+
+    -- 很明显新状态就是还原状态Solved了，也就是已知下面这个y。
+    -- 所以还需要证明Reachable y即可。很明显因为都是G里面的6个元素之一FaceTurn，肯定是Reachable。
+
+    -- 将目标Reachable x变成  ∃ y, (Reachable y) ∧ (x * y = Solved)
+    -- x经过有限次操作变成了y， y就是复原状态e。
+    let y : RubiksSuperType := sorry
+    have h101 : Reachable y := sorry
+    have h102 : x * y = Solved := sorry
+
+    have h105 (y : RubiksSuperType):
+    (Reachable y) ∧ (x * y = Solved)
+    → Reachable x
+    := by
+      intro hs
+      have h105_1 : x = Solved * y⁻¹
+        := by
+        rw [hs.2.symm]
+        rw [mul_assoc]
+        simp only [mul_right_inv, mul_one]
+      rw [h105_1]
+      apply Reachable.mul
+      · exact Reachable.Solved
+      · apply Reachable.inv
+        exact hs.1
+    apply h105 y
+    exact { left := h101, right := h102 }
 
 
   -- 所以其实上面的所有内容就是要找出这样的一个y：
     -- (Reachable y) ∧ (x * y = Solved)
 
-  -- 将目标Reachable x变成  ∃ y, (Reachable y) ∧ (x * y = Solved)
-    -- x经过有限次操作变成了y， y就是复原状态e。
-  let y : RubiksSuperType := sorry
-  have h101 : Reachable y := sorry
-  have h102 : x * y = Solved := sorry
+  -- -- 将目标Reachable x变成  ∃ y, (Reachable y) ∧ (x * y = Solved)
+  --   -- x经过有限次操作变成了y， y就是复原状态e。
+  -- let y : RubiksSuperType := sorry
+  -- have h101 : Reachable y := sorry
+  -- have h102 : x * y = Solved := sorry
 
-  have h105 (y : RubiksSuperType):
-  (Reachable y) ∧ (x * y = Solved)
-  → Reachable x
-  := by
-    intro hs
-    have h105_1 : x = Solved * y⁻¹
-      := by
-      rw [hs.2.symm]
-      rw [mul_assoc]
-      simp only [mul_right_inv, mul_one]
-    rw [h105_1]
-    apply Reachable.mul
-    · exact Reachable.Solved
-    · apply Reachable.inv
-      exact hs.1
-  apply h105 y
-  exact { left := h101, right := h102 }
+  -- have h105 (y : RubiksSuperType):
+  -- (Reachable y) ∧ (x * y = Solved)
+  -- → Reachable x
+  -- := by
+  --   intro hs
+  --   have h105_1 : x = Solved * y⁻¹
+  --     := by
+  --     rw [hs.2.symm]
+  --     rw [mul_assoc]
+  --     simp only [mul_right_inv, mul_one]
+  --   rw [h105_1]
+  --   apply Reachable.mul
+  --   · exact Reachable.Solved
+  --   · apply Reachable.inv
+  --     exact hs.1
+  -- apply h105 y
+  -- exact { left := h101, right := h102 }
   done
 
 
@@ -669,7 +713,8 @@ theorem reachable_valid
       exact a_ih_1
       -- method 2:
       -- all_goals assumption
-  -- done
+  | inv c hc => sorry
+  --
 
 /-- 魔方第二基本定理 -/
 theorem RubikCube_BasicRule_2
