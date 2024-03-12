@@ -564,7 +564,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   := by sorry
 
 
--- todo-- 先把主定理用虚构的引理证明一下吧，即使是虚构的引理现在还是不太足够的。
+-- todo-- 先把主定理用虚构的引理证明一下吧，即使是虚构的引理现在还是不太足够的。两边逼近。
 -- 魔方第二基本定理的右推左部分：
 theorem valid_reachable
 : ∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
@@ -588,23 +588,28 @@ theorem valid_reachable
   let currStat := x * h1_2 * h2_3
   let currStat_satisfy: ((x * h1_2 * h2_3).2.orient = 0) ∧ ((x * h1_2 * h2_3).1.orient = 0)
     := { left := h2_5, right := h2_7 }
-  -- 通用小引理4.6：假设n>=3，对于任意集合M，假设M包含Sn中全体3循环，则=>， M >= An
-  -- 小引理3***(最复杂的一个引理): 从已知的某些复合操作，能够覆盖所有的棱3循环（不改变方向数）；
-      -- 而且，从已知的某些复合操作，能够覆盖所有的角3循环（不改变方向数）。
-  -- 小引理11：由于小引理3，已覆盖所有3循环，再使用小引理4.6，因此可以得到 => 从已知的某些复合操作，能达到这个状态集合({A8},{A12},id,id)
   -- ValidCube的条件1，限制了当前状态x的范围，所以可以进行2种分类讨论：1.（奇X奇) 2.(偶X偶）
-  -- 存在一个复合操作，作用一次到状态集合（奇X奇)上的某个元素后，新状态会属于新的状态集合(偶X偶）
+  have h3 := hvx.1
+  rw [lemma12_condition1_restriction] at h3
+  cases h3 with
+  | inl h3_1 =>
+    -- 某个过程，存在一个复合操作，作用一次到状态集合（奇X奇)上的某个元素后，新状态会属于新的状态集合(偶X偶），归化成inr
+    -- lemma13_oddXoddToEvenXEven
+    -- 和inr一样的证明过程
+    sorry
+  | inr h3_2 =>
+    -- 根据h3_2推出x.1,x.2属于偶置换
+    -- 根据定理：closure_three_cycles_eq_alternating，
+      --要得到任意偶置换只需要满足：能凭空得到所有3循环即可。
+    -- lemma11说的就是能凭空得到所有3循环即可
+    sorry
 
 
-  -- 以下就不是引理了，直接四行推理了：
-  -- 因为对x的2种分类讨论都归化到了状态集合(偶X偶），即({A8},{A12},?,?)
-  -- ValidCube的条件2, 然后使用小引理1，可以将({A8},{A12},?,?) 变成 ({A8},{A12},0,?)
-  -- ValidCube的条件3, 然后使用小引理2，可以将({A8},{A12},0,?) 变成 ({A8},{A12},0,0)， 即({A8},{A12},id,id)
-  -- 以上操作已经将状态x变成了这个状态集合里的某一个({A8},{A12},id,id)，因此直接使用小引理11，就可以直接证明x可以被复合得到。
+  -- 所以其实上面的所有内容就是要找出这样的一个y：
+    -- (Reachable y) ∧ (x * y = Solved)
 
   -- 将目标Reachable x变成  ∃ y, (Reachable y) ∧ (x * y = Solved)
     -- x经过有限次操作变成了y， y就是复原状态e。
-    -- 所以其实上面的所有内容就是要找出这样的一个y。
   let y : RubiksSuperType := sorry
   have h101 : Reachable y := sorry
   have h102 : x * y = Solved := sorry
