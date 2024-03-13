@@ -6,8 +6,9 @@ open Equiv Perm
 
 instance (n : Nat) : Repr (Perm (Fin n)) :=
     ⟨reprPrec ∘ Equiv.toFun⟩
-instance (n : Nat) : DecidableEq (Perm (Fin n)) :=
-  λ a b => mk.injEq a.toFun a.invFun _ _ b.toFun b.invFun _ _ ▸ inferInstance
+-- instance (n : Nat) : DecidableEq (Perm (Fin n)) :=
+--   λ a b => mk.injEq a.toFun a.invFun _ _ b.toFun b.invFun _ _ ▸ inferInstance
+instance (n : Nat) : DecidableEq (Perm (Fin n)) := inferInstance
 
 structure PieceState (pieces orientations: ℕ+) where
   permute : Perm (Fin pieces)
@@ -190,11 +191,12 @@ def G1Perm : RubiksSuperType
 
 #eval (F * G1Perm * F').1.permute = 1 -- true
 
+set_option maxRecDepth 2000
 lemma Test001
 :(F * G1Perm * F').1.permute = 1
 := by
   -- rfl
-  -- decide
+  decide
   -- norm_num
   -- apply?
-  sorry
+  -- sorry

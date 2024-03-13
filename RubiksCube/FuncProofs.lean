@@ -8,6 +8,8 @@ open Equiv Equiv.Perm Subgroup Fintype
 open alternatingGroup
 open BigOperators
 -- set_option maxHeartbeats 4000000
+set_option maxRecDepth 4000
+
 
 -- 注意：依赖文件RubiksCubeFunc改过的话，最好点一下这个文件的restrt File
 -- 线索：1.mathlib的group theory 2.人工智能POE和AGI 3.MIL+其他课程+北大-关于群的描述
@@ -266,6 +268,17 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   def DBR_index :Fin 8 := 6
   def DBL_index :Fin 8 := 7
 
+
+    lemma lemma1_007:(F * G1Perm^2 * F').1.permute = 1
+    := by
+      decide
+      done
+
+    lemma lemma1_006:(F * G1Perm * F').1.permute = 1
+    := by
+      decide
+      done
+
     --Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0
     -- → Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * F * G1Perm * F').1.orient = 0
     -- 这个结论是一个计算的结果吧？
@@ -455,18 +468,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         := by
           have _h2_1: (g.1.orient + moveAction2.1.orient ∘ ⇑g.1.permute) (g.1.permute⁻¹ UFL_index) = 0 := h2_1.trans h2_2
           simp only [Corner_Absolute_Orient]
-          -- 其实就是 _h2_1 , 要我写那么详细，哎～
-          have _h2_2: (F * G1Perm * F').1.permute = 1
-            :=
-            -- done -- 这个直接看计算结果就知道了。
-            sorry
           have _h2_3: (g * (F * G1Perm * F')).1.permute = (g).1.permute
             := by
             simp only [Prod.fst_mul]
             rw [permute_mul]
             rw [← Prod.fst_mul]
             rw [← Prod.fst_mul]
-            rw [_h2_2]
+            rw [lemma1_006]
             rfl
           rw [_h2_3]
           have _h2_4: (g.1.orient + moveAction2.1.orient ∘ ⇑g.1.permute) = (g * (F * G1Perm * F')).1.orient
@@ -574,7 +582,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           done
         have h3: (Corner_Absolute_Orient (g*moveAction3).1 UFL_index) = 0
         := by
+          have _h3_1: (g.1.orient + moveAction3.1.orient ∘ g.1.permute) (g.1.permute⁻¹ UFL_index) = 0 := h3_1.trans h3_2
           simp only [Corner_Absolute_Orient]
+          -- have _h3_2: (F * G1Perm^2 * F').1.permute = 1
+          -- 下面用lemma1_007代替
+          -- todo-
           simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, invFun_as_coe]
           sorry
         simp only [Prod.fst_mul, Prod.snd_mul]
@@ -963,11 +975,12 @@ theorem reachable_valid
         simp only [Pi.neg_apply, Finset.sum_neg_distrib, neg_eq_zero]
         simp only [ValidCube] at hc2
         obtain ⟨hc3,hc4,hc5⟩:= hc2
-        -- hc5 -- 很明显的重排求和不变
+        -- hc5 很明显的重排求和不变
         sorry
         done
       }
-  --
+    }
+
 
 /-- 魔方第二基本定理 -/
 theorem RubikCube_BasicRule_2

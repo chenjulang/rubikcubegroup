@@ -4,6 +4,7 @@ import Mathlib.GroupTheory.Perm.Fin
 import Mathlib.Algebra.Module.Equiv
 
 -- set_option maxHeartbeats 800000
+set_option maxRecDepth 2000
 
 open Equiv Perm
 
@@ -16,8 +17,8 @@ section RubiksSuperGroup
   -- 该实例声明的右侧是一个匿名构造子，它使用了函数合成操作符 (∘) 来组合两个函数：reprPrec 和 Equiv.toFun。reprPrec 是一个内置函数，用于将值转换为字符串的表示形式，而 Equiv.toFun 是一个类型为 Equiv α β → α → β 的函数，它将一个等价关系 Equiv 转换为一个函数。
   -- 因此，整个实例声明的含义是，对于类型 Perm (Fin n)，我们可以使用函数合成的方式将其转换为字符串表示形式。这意味着在打印输出或调试信息中，Perm (Fin n) 类型的值将以字符串的形式显示。
 
-  instance (n : Nat) : DecidableEq (Perm (Fin n)) :=
-    λ a b => mk.injEq a.toFun a.invFun _ _ b.toFun b.invFun _ _ ▸ inferInstance
+  -- instance (n : Nat) : DecidableEq (Perm (Fin n)) :=
+  --   λ a b => mk.injEq a.toFun a.invFun _ _ b.toFun b.invFun _ _ ▸ inferInstance
   -- 这个实例声明表明对于任意的 n : Nat，类型 Perm (Fin n) 具有 DecidableEq 实例。
   -- 在 Lean 中，DecidableEq 是一个类型类，用于定义两个值之间的可决等价性。它提供了一个决策过程，可以确定两个值是否相等。
   -- 该实例声明的右侧是一个 lambda 函数，它接受两个参数 a 和 b，表示要比较的两个 Perm (Fin n) 类型的值。函数体的逻辑如下：
@@ -28,6 +29,8 @@ section RubiksSuperGroup
   -- 因此，整个实例声明的含义是，我们可以通过构造相应的等式来判断两个 Perm (Fin n) 类型的值是否相等。这个等式的构造基于 a 和 b 的函数表示形式以及其逆函数表示形式。inferInstance 函数用于自动推断所需的实例。
   -- 这个实例声明的效果是，当你在 Lean 中使用 = 运算符来比较两个 Perm (Fin n) 类型的值时，Lean 将使用这个实例提供的决策过程来判断它们是否相等。
   -- #check ▸
+
+  instance (n : Nat) : DecidableEq (Perm (Fin n)) := inferInstance
 
   /- This PieceState structure is used to represent the entire state of both corner pieces and edge pieces.-/
   structure PieceState (pieces orientations: ℕ+) where
