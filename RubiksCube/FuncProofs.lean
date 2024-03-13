@@ -266,7 +266,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     --Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0
     -- → Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * F * G1Perm * F').1.orient = 0
     -- 这个结论是一个计算的结果吧？
-    lemma lemma_006
+    lemma lemma1_006
     (g:RubiksSuperType)
     :Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0
     →
@@ -276,7 +276,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       sorry
 
     -- 又是一个需要计算的结论，可以用calc模式吗？
-    lemma lemma_005
+    lemma lemma1_005
     :∀g : RubiksSuperType,
     (Corner_Absolute_Orient g.1 UFL_index) = 1
     →
@@ -349,7 +349,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     := sorry
 
     -- ...这里省略了所有角块的引理lemma1_00X还没写,后面写成lemma1_002_3,lemma1_002_4这样吧。
-    lemma lemma1_002
+    lemma lemma1_002_DFL
     : ∀g : RubiksSuperType, -- RubiksSuperType即手写的H。
     Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0 --角块方形数求和后，模3为0。
     ∧ (Corner_Absolute_Orient g.1 UFL_index) = 0 ∧ (Corner_Absolute_Orient g.1 DFL_index) = 0
@@ -358,14 +358,19 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (g * h).fst.orient = 0
     := by sorry
 
-    -- 还原UFL的方向数
-    lemma lemma1_001
-    (g : RubiksSuperType): -- RubiksSuperType即文字证明中的H。
-    Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0 --角块方形数求和后，模3为0。
-    ∧ (Corner_Absolute_Orient g.1 UFL_index) = 0
-    →
+    -- 任意H中的状态，满足角块方向数求和后模3为0,UFL的方向数为0
+      -- 则=>存在G中操作h，(g*h)还原所有角块的方向数，且不改变全体棱块的方向数，且不改变所有块的位置。
+    lemma lemma1_001_UFL
+    (g : RubiksSuperType) -- RubiksSuperType即文字证明中的H。
+    (h1: Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0) --角块方形数求和后，模3为0。
+    (h2: (Corner_Absolute_Orient g.1 UFL_index) = 0)
+    :
     ∃ h ∈ RubiksGroup ,
     (g * h).fst.orient = 0
+     ∧
+    (g).2.orient = (g * h).2.orient
+    ∧
+    ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
     := by sorry
       -- intro g hs
       -- have hsum0 := hs.1
@@ -385,7 +390,22 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       --   }
       -- }
 
-  -- 还原所有角块的方向数，且不改变全体棱块的方向数，且不改变所有块的位置。
+
+  -- (ps_mul g.1 lemma1_calc2).orient
+  --     ((ps_mul g.1 lemma1_calc2).permute.symm UFL_index) =
+  --   0
+  def g:RubiksSuperType:= sorry
+  def lemma1_condition : g.1.orient (g.1.permute.invFun UFL_index) = 1 := sorry
+  def lemma1_calc1 := ps_mul G1Perm.1 F'.1
+  def lemma1_calc2 := ps_mul F.1 lemma1_calc1
+  -- def lemma1_calc3 := ps_mul g.1 lemma1_calc2
+  #eval lemma1_calc1 -- { permute := ![4, 0, 2, 3, 5, 1, 6, 7], orient := ![2, 0, 0, 0, 1, 2, 0, 1] }
+  #eval lemma1_calc2 -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 0, 1] }
+  #eval F*G1Perm*F'
+  #eval (ps_mul F.1 (ps_mul G1Perm.1 F'.1)).orient UFL_index = 2
+
+  -- 任意H中的状态，满足角块方向数求和后模3为0,
+    -- 则=>存在G中操作h，(g*h)还原所有角块的方向数，且不改变全体棱块的方向数，且不改变所有块的位置。
   lemma lemma1
   : ∀g : RubiksSuperType, -- RubiksSuperType即手写的H。
   Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0 --角块方形数求和后，模3为0。
@@ -393,49 +413,61 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   ∃ h ∈ RubiksGroup ,
   (g * h).fst.orient = 0
   ∧
-  g.2.orient = (g * h).2.orient
+  (g).2.orient = (g * h).2.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
   := by
-    intro g hsum0;
-    let h := Solved;
+    intro g hsum0
+    let h := Solved
     by_cases ha0 : (Corner_Absolute_Orient g.1 UFL_index)=0
     {
-      let h1 := h;
-      -- 想一下如何处理重复代码，写一个新的函数，还是写一个新的have？
-      -- 证明中如何计算呢？
-      apply lemma1_001
-      exact { left := hsum0, right := ha0 }
+      let moveAction1 := Solved
+      have h1 := lemma1_001_UFL g hsum0 ha0
+      exact h1
     }
     { by_cases ha1: (Corner_Absolute_Orient g.1 UFL_index) = 1
-      { let h2 := h*F*G1Perm*F';
-        -- let g_new := g*h2
-        -- let test := (g*h2).1.orient UFL_index
-        -- 如何说明g*h2满足这个呢？：(Corner_Absolute_Orient g.1 UFL_index) = 0
+      { let moveAction2 := F*G1Perm*F';
+        -- 如何说明g*moveAction2满足这个呢？：(Corner_Absolute_Orient (g*moveAction2).1 UFL_index) = 0
           -- 也就是要证明：UFL方向数为1,操作后为0.
-        -- have la := lemma_a1 g ha1
-        -- have h2 := lemma1_001 (g * F * G1Perm * F')
+        -- 关键引理证明1
+        have h2_1: (g.1.orient + moveAction2.1.orient ∘ g.1.permute) (g.1.permute⁻¹ UFL_index)
+        = g.1.orient (g.1.permute⁻¹ UFL_index) + moveAction2.1.orient (UFL_index)
+        := by
+          simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Pi.add_apply,
+            Function.comp_apply, apply_inv_self]
+          done
+        have h2: (Corner_Absolute_Orient (g*moveAction2).1 UFL_index) = 0
+        := by
+          simp only [Corner_Absolute_Orient]
+          simp only [Corner_Absolute_Orient] at ha1
+          simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, invFun_as_coe]
+          -- todo-- 这个要放出来，下面有用。
+          -- 关键引理证明2
+          have h2_2: g.1.orient (g.1.permute⁻¹ UFL_index) + moveAction2.1.orient (UFL_index) = 0
+          := by
+            simp at ha1
+            simp only [Inv.inv]
+            rw [ha1]
+            simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc]
+            have h2_2_1: (ps_mul F.1 (ps_mul G1Perm.1 F'.1)).orient UFL_index = 2
+            := by rfl
+            rw [h2_2_1]
+            rfl
+            done
+          sorry
+        simp only [Prod.fst_mul, Prod.snd_mul]
+        have h2_3 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * moveAction2).1.orient = 0
+          := by sorry
+        have h2_4 := lemma1_001_UFL (g * moveAction2) h2_3 h2
+        obtain ⟨h2_4_1,h2_4_2,h2_4_3,h2_4_4,h2_4_5,h2_4_6⟩ := h2_4
+        use (moveAction2 * h2_4_1)
+        apply And.intro
+        {simp only;sorry}
+        apply And.intro
+        {}
 
 
-
-        -- use (F*G1Perm*F')
-        -- constructor
-        -- {
-        --   simp only [G1Perm,G1Perm_element,RubiksGroup]
-        --   -- 符合操作属于rubiksGroup
-        --   simp only [mem_mk]
-        --   -- 证明属于符合操作即可。
-        --   sorry
-        -- }
-        -- {
-
-        -- }
-        -- 这里还需要一个引理，这个引理要一般性一点：g和i如果中途相隔一个G中的元素h，也就是gh=i，则某个旧目标g可以达到，可以变成新目标i可以达到。
-
-        -- constructor
-        -- · exact hsum0
-        -- ·
-
+        -- hsum0 h2
         sorry
       }
       { let h := h*F*(G1Perm^2)*F';
@@ -841,6 +873,7 @@ lemma four_rs_eq_solved
       sorry
       -- done
   -- done
+
 
 -- def swapTest2_1 :Perm (Fin 8) := (swap 1 2) * (swap 2 6) * (swap 6 5)*(swap 1 2)*(swap 2 6)*(swap 6 5)*(swap 1 2)*
 --  (swap 2 6) * (swap 6 5) * (swap 1 2) * (swap 2 6) * (swap 6 5)

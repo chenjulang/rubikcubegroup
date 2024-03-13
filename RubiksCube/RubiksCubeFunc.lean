@@ -323,11 +323,15 @@ where
     orient := 0
   }
 
--- inductive Solved2
+-- def Solved2
+-- : RubiksSuperType → Prop :=
+--   fun x => (x.1.permute=1 ∧ x.2.permute=1 ∧ x.1.orient=0 ∧ x.2.orient=0)
+
+-- inductive Solved3
 -- : RubiksSuperType → Prop
 -- where
---   | Solved : Solved2 Solved
---   | AllSatisfy :  ∀x : RubiksSuperType, (x.1.permute=1 ∧ x.2.permute=1 ∧ x.1.orient=0 ∧ x.2.orient=0 → Solved2 x) → Solved2 x
+--   | Solved : Solved3 Solved
+--   | AllSatisfy :  ∀x : RubiksSuperType, (x.1.permute=1 ∧ x.2.permute=1 ∧ x.1.orient=0 ∧ x.2.orient=0) → Solved3 x
 
 lemma Solved_iff
 (x: RubiksSuperType)
