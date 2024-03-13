@@ -424,7 +424,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
         -- 如何说明g*moveAction2满足这个呢？：(Corner_Absolute_Orient (g*moveAction2).1 UFL_index) = 0
           -- 也就是要证明：UFL方向数为1,操作后为0.
-        -- 关键引理证明1
+        -- 关键引理证明1:先找出从ha1发掘出的这个索引有什么用。
         have h2_1: (g.1.orient + moveAction2.1.orient ∘ g.1.permute) (g.1.permute⁻¹ UFL_index)
         = g.1.orient (g.1.permute⁻¹ UFL_index) + moveAction2.1.orient (UFL_index)
         := by
@@ -433,7 +433,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           done
         simp only [Corner_Absolute_Orient] at ha1
         simp at ha1
-        -- 关键引理证明2
+        -- 关键引理证明2：先找出从ha1发掘出的这个索引有什么用。原来已知的是这样的。
         have h2_2: g.1.orient (g.1.permute⁻¹ UFL_index) + moveAction2.1.orient (UFL_index) = 0
         := by
           simp only [Inv.inv]
@@ -446,9 +446,35 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           done
         have h2: (Corner_Absolute_Orient (g*moveAction2).1 UFL_index) = 0
         := by
+          have _h2_1: (g.1.orient + moveAction2.1.orient ∘ ⇑g.1.permute) (g.1.permute⁻¹ UFL_index) = 0 := h2_1.trans h2_2
           simp only [Corner_Absolute_Orient]
-          simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, invFun_as_coe]
-          sorry
+          -- 其实就是 _h2_1 , 要我写那么详细，哎～
+          -- todo
+          have _h2_2: (F * G1Perm * F').1.permute = 1
+            := by
+            -- done -- 这个直接看计算结果就知道了。
+            sorry
+          have _h2_3: (g * (F * G1Perm * F')).1.permute = (g).1.permute
+            := by
+            simp only [Prod.fst_mul]
+            rw [permute_mul]
+            rw [← Prod.fst_mul]
+            rw [← Prod.fst_mul]
+            rw [_h2_2]
+            rfl
+          rw [_h2_3]
+          have _h2_4: (g.1.orient + moveAction2.1.orient ∘ ⇑g.1.permute) = (g * (F * G1Perm * F')).1.orient
+            := by
+            have _h2_4_1 := PieceState.mul_def g.1 (F * G1Perm * F').1
+            simp only [ps_mul] at _h2_4_1
+            simp only [← Prod.fst_mul] at _h2_4_1
+            rw [_h2_4_1]
+            simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc]
+            rw [add_comm]
+            done
+          rw [← _h2_4]
+          exact _h2_1
+          done
         simp only [Prod.fst_mul, Prod.snd_mul]
         have h2_3 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * moveAction2).1.orient = 0
           := by sorry
@@ -538,7 +564,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         have h3_3 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * moveAction3).1.orient = 0
           := by sorry
         have h3_4 := lemma1_001_UFL (g * moveAction3) h3_3 h3
-        --todo
         obtain ⟨h3_4_1,h3_4_2,h3_4_3,h3_4_4,h3_4_5,h3_4_6⟩ := h3_4
         use (moveAction3 * h3_4_1)
         apply And.intro
