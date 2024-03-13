@@ -323,6 +323,43 @@ where
     orient := 0
   }
 
+-- inductive Solved2
+-- : RubiksSuperType → Prop
+-- where
+--   | Solved : Solved2 Solved
+--   | AllSatisfy :  ∀x : RubiksSuperType, (x.1.permute=1 ∧ x.2.permute=1 ∧ x.1.orient=0 ∧ x.2.orient=0 → Solved2 x) → Solved2 x
+
+lemma Solved_iff
+(x: RubiksSuperType)
+:
+(Solved = x)
+↔
+(x.1.permute=1 ∧ x.2.permute=1 ∧ x.1.orient=0 ∧ x.2.orient=0)
+:= by
+  constructor
+  · simp only [Solved]
+    intro x
+    cases x
+    apply And.intro
+    { rfl}
+    { apply And.intro
+      {rfl}
+      apply And.intro
+      {rfl}
+      {rfl}
+    }
+  · intro hx
+    obtain ⟨hx1,hx2,hx3,hx4⟩:= hx
+    simp only [Solved]
+    congr
+    {exact id hx1.symm}
+    {exact id hx3.symm}
+    {exact id hx2.symm}
+    {exact id hx4.symm}
+    done
+
+
+
 section FACE_TURNS
 
   /- These two functions (from kendfrey's repository) create a cycle permutation,

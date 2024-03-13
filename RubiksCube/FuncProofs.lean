@@ -650,19 +650,51 @@ theorem valid_reachable
     -- 根据h3_2推出x.1,x.2属于偶置换
     have h3_2_1 : (x * h1_2 * h2_3).1.permute ∈ alternatingGroup (Fin 8) := sorry
     have h3_2_2 : (x * h1_2 * h2_3).2.permute ∈ alternatingGroup (Fin 12) := sorry
-    -- todo
     -- 使用lemma16使得新状态获得保持旧属性：方向数不变，获取新属性：角块+棱块的位置都变成1。
     have h3_2_3 := lemma16 (x * h1_2 * h2_3) h3_2_1 h3_2_2
-    --todo--
     -- 很明显新状态就是还原状态Solved了，也就是已知下面这个y。
+    obtain ⟨h3_2_4,h3_2_5,h3_2_6,h3_2_7,h3_2_8⟩ := h3_2_3
+    obtain ⟨h3_2_9,h3_2_10⟩ := h3_2_6
+    rw [h2_5] at h3_2_8
+    rw [h2_8] at h3_2_7
+    let currStat := x * h1_2 * h2_3 * h3_2_4
+    let currStat_satisfy: (x * h1_2 * h2_3 * h3_2_4).1.orient = 0 ∧ (x * h1_2 * h2_3 * h3_2_4).2.orient = 0
+    ∧ (x * h1_2 * h2_3 * h3_2_4).1.permute = 1 ∧ (x * h1_2 * h2_3 * h3_2_4).2.permute = 1 :=
+    {
+      left := h3_2_7
+      right := {
+        left := h3_2_8
+        right := {
+          left := h3_2_9
+          right := h3_2_10
+        }
+      }
+    }
     -- 所以还需要证明Reachable y即可。很明显因为都是G里面的6个元素之一FaceTurn，肯定是Reachable。
-
     -- 将目标Reachable x变成  ∃ y, (Reachable y) ∧ (x * y = Solved)
     -- x经过有限次操作变成了y， y就是复原状态e。
-    let y : RubiksSuperType := sorry
+    --todo
+    let y : RubiksSuperType := h1_2 * h2_3 * h3_2_4
     have h101 : Reachable y := sorry
-    have h102 : x * y = Solved := sorry
-
+    have h102 : x * y = Solved
+      := by
+      simp only [y]
+      have h102_1 := Solved_iff (x * h1_2 * h2_3 * h3_2_4)
+      rw [← mul_assoc]
+      rw [← mul_assoc]
+      have hh : x * h1_2 * h2_3 * h3_2_4 = (x * h1_2 * h2_3 * h3_2_4)
+      := by exact rfl
+      rw [hh]
+      simp only [RubiksSuperType]
+      symm
+      apply h102_1.2
+      apply And.intro
+      {exact h3_2_9}
+      apply And.intro
+      {exact h3_2_10}
+      apply And.intro
+      {exact h3_2_7}
+      {exact h3_2_8}
     have h105 (y : RubiksSuperType):
     (Reachable y) ∧ (x * y = Solved)
     → Reachable x
@@ -680,38 +712,7 @@ theorem valid_reachable
         exact hs.1
     apply h105 y
     exact { left := h101, right := h102 }
-
-
-
-
-
-
-  -- 所以其实上面的所有内容就是要找出这样的一个y：
-    -- (Reachable y) ∧ (x * y = Solved)
-
-  -- -- 将目标Reachable x变成  ∃ y, (Reachable y) ∧ (x * y = Solved)
-  --   -- x经过有限次操作变成了y， y就是复原状态e。
-  -- let y : RubiksSuperType := sorry
-  -- have h101 : Reachable y := sorry
-  -- have h102 : x * y = Solved := sorry
-
-  -- have h105 (y : RubiksSuperType):
-  -- (Reachable y) ∧ (x * y = Solved)
-  -- → Reachable x
-  -- := by
-  --   intro hs
-  --   have h105_1 : x = Solved * y⁻¹
-  --     := by
-  --     rw [hs.2.symm]
-  --     rw [mul_assoc]
-  --     simp only [mul_right_inv, mul_one]
-  --   rw [h105_1]
-  --   apply Reachable.mul
-  --   · exact Reachable.Solved
-  --   · apply Reachable.inv
-  --     exact hs.1
-  -- apply h105 y
-  -- exact { left := h101, right := h102 }
+    done
   sorry
   done
 
