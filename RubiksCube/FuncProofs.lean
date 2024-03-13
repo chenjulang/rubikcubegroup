@@ -538,6 +538,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       { have ha2: Corner_Absolute_Orient g.1 UFL_index = 2
           := by
           -- 怎么使用排除法呢？很明显是对的,非0，1,就是2
+          -- Kyle Miller: You can use the generalize tactic in your original goal to turn Corner_Absolute_Orient g.1 UFL_index into a, and then
+          -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
+          --   fin_cases a <;> simp at *
+          -- Kyle Miller: There's also this magic:
+          -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
+          --   match a with
+          --   | 2 => rfl
           -- done
           sorry
         let moveAction3 := h*F*(G1Perm^2)*F'

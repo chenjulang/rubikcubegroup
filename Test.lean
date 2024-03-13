@@ -25,8 +25,93 @@ instance {p o : ℕ+} : Mul (PieceState p o) where
     orient := (a2.orient ∘ a1.permute) + a1.orient
   }
 
+theorem permute_mul {p o : ℕ+} (a1 a2 : PieceState p o)
+: (a1 * a2).permute = a2.permute * a1.permute
+:= by rfl
+theorem orient_mul {p o : ℕ+} (a1 a2 : PieceState p o)
+: (a1 * a2).orient = (a2.orient ∘ a1.permute) + a1.orient
+:= by rfl
+
+lemma ps_mul_assoc {p o : ℕ+} :
+  ∀ (a b c : PieceState p o),
+  ps_mul (ps_mul a b) c = ps_mul a (ps_mul b c)
+  := by
+    intro a b c
+    simp only [ps_mul]
+    -- simp only [invFun_as_coe]
+    simp only [PieceState.mk.injEq] -- 两同类型对象相等，等价于，各分量相等。
+    apply And.intro
+    · simp only [Perm.mul_def]
+      simp only [Equiv.trans_assoc] -- A.trans B 指的是映射先看A，再看B
+    · simp only [coe_mul]
+      rw [← add_assoc]
+      simp only [add_left_inj]
+      rfl
+    done
+
+lemma ps_one_mul {p o : ℕ+} :
+  ∀ (a : PieceState p o),
+  ps_mul {permute := 1, orient := 0} a  =  a
+  := by
+    intro a
+    simp only [ps_mul]
+    simp only [mul_one]
+    simp only [coe_one, Function.comp_id, add_zero]
+    done
+
+lemma ps_mul_one {p o : ℕ+} :
+∀ (a : PieceState p o),
+ps_mul a {permute := 1, orient := 0} = a := by
+  intro a
+  simp only [ps_mul]
+  simp only [one_mul, one_symm, coe_one, Function.comp_id, add_zero]
+  simp only [Pi.zero_comp, zero_add]
+  done
+
+def ps_inv {p o : ℕ+}
+  : PieceState p o → PieceState p o
+  :=
+    fun ps =>
+    {
+      permute := ps.permute⁻¹
+      orient := fun x => (- ps.orient) (ps.permute⁻¹ x)
+    }
+instance {p o : ℕ+} : Neg (PieceState p o) where
+    neg := fun
+      | .mk permute orient => {
+        permute := permute⁻¹
+        orient := fun x => (- orient) (permute⁻¹ x)
+      }
+
+lemma ps_mul_left_inv {p o : ℕ+} :
+  ∀ (a : PieceState p o),
+  ps_mul (ps_inv a) a = {permute := 1, orient := 0}
+  := by
+    intro a
+    simp only [ps_inv]
+    simp only [ps_mul]
+    simp only [invFun_as_coe, PieceState.mk.injEq, true_and]
+    simp only [mul_right_inv, true_and]
+    have h1 : a.permute⁻¹.symm = a.permute := by rfl
+    have h2 : ((-a.orient) ∘ a.permute) ∘ a.permute.symm = (-a.orient)
+      := by exact (comp_symm_eq a.permute (-a.orient) ((-a.orient) ∘ ⇑a.permute)).mpr rfl
+    simp only [Pi.neg_apply]
+    exact neg_eq_iff_add_eq_zero.mp rfl
+
+instance PieceGroup (p o: ℕ+) :
+  Group (PieceState p o) := {
+    mul := ps_mul -- 第一种运算，记为*
+    mul_assoc := ps_mul_assoc -- *的结合律
+    one := {permute := 1, orient := 0} -- *的单位1
+    one_mul := ps_one_mul -- 1 * ? = ?
+    mul_one := ps_mul_one -- ? * 1 = ?
+    inv := ps_inv -- (?)⁻¹ = ps_inv p o
+    mul_left_inv := ps_mul_left_inv -- (?)⁻¹ * (?) = 单位1
+  }
+
 abbrev CornerType := PieceState 8 3
 abbrev EdgeType := PieceState 12 2
+
 
 abbrev RubiksSuperType := CornerType × EdgeType
 
@@ -103,4 +188,13 @@ def G1Perm_element : RubiksSuperType
 def G1Perm : RubiksSuperType
   := G1Perm_element^2
 
-#eval (F*G1Perm*F').1.permute
+#eval (F * G1Perm * F').1.permute = 1 -- true
+
+lemma Test001
+:(F * G1Perm * F').1.permute = 1
+:= by
+  -- rfl
+  -- decide
+  -- norm_num
+  -- apply?
+  sorry
