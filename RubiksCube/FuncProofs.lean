@@ -21,6 +21,7 @@ variable (α : Type*) [Fintype α] [DecidableEq α]
 section ValidityChecks
 
   --例子：
+  @[simp]
   lemma RValid : R ∈ ValidCube :=
     by
       simp only [R, ValidCube]
@@ -33,6 +34,7 @@ section ValidityChecks
       done
 
 
+  @[simp]
   lemma ft_valid
   : ∀x : RubiksSuperType,
   FaceTurn x → x ∈ ValidCube
@@ -183,7 +185,7 @@ section ValidityChecks
       sorry
       -- done
 
-
+  @[simp]
   lemma TPermValid : TPerm ∈ ValidCube :=
     by
       simp only [TPerm]
@@ -205,7 +207,7 @@ section ValidityChecks
       { apply FaceTurn.F' }
       done
 
-
+  @[simp]
   lemma CornerTwistInvalid : CornerTwist ∉ ValidCube
   := by
       simp only [CornerTwist, ValidCube]
@@ -215,6 +217,7 @@ section ValidityChecks
       exact Fin.pos_iff_ne_zero.mp Nat.le.refl
       done
 
+  @[simp]
   lemma EdgeFlipInvalid : EdgeFlip ∉ ValidCube :=
     by
       simp only [EdgeFlip, ValidCube]
@@ -232,7 +235,7 @@ the pieces contains all positions reachable with standard Rubik's cube moves. Fu
 two sets are in fact the same is equivalent to providing a solution algorithm for any valid cube state.
 I do not have a proof that the solution algorithm in `SolutionAlgorithm.lean` will solve any valid cube,
 but I am confident that this is the case (assuming no bugs in my concretely defined setup moves). -/
-
+  @[simp]
   lemma solved_reachable
   (x : RubiksSuperType)
   (h : x = Solved)
@@ -266,23 +269,26 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     --Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0
     -- → Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * F * G1Perm * F').1.orient = 0
     -- 这个结论是一个计算的结果吧？
-    lemma lemma1_006
+    lemma lemma1_005
     (g:RubiksSuperType)
     :Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0
     →
-    Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * F * G1Perm * F').1.orient = 0
+    Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * (F * G1Perm * F')).1.orient = 0
     := by
+      -- #eval F*G1Perm*F'
+      -- ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 0, 1] },
+      -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
       intro h1
-      sorry
+      simp only [Prod.fst_mul]
+      have h2: F.1 * G1Perm.1 * F'.1 = (F * G1Perm * F').1 := by exact rfl
+      simp only [h2]
+      simp only [PieceState.mul_def,ps_mul]
 
-    -- 又是一个需要计算的结论，可以用calc模式吗？
-    lemma lemma1_005
-    :∀g : RubiksSuperType,
-    (Corner_Absolute_Orient g.1 UFL_index) = 1
-    →
-    (Corner_Absolute_Orient (g*F*G1Perm*F').1 UFL_index) = 0
-    := by
+      -- 直接看计算结果就知道了
+      -- (F * G1Perm * F').1.orient = ![2, 0, 0, 0, 0, 0, 0, 1]，求和模3也为0
+      -- (F * G1Perm * F').1.orient ∘ ⇑g.1.permute ，只是重新排列了，求和模3也为0
       sorry
+      -- done
 
     -- 这个引理要一般性一点：g和i如果中途相隔一个G中的元素h，也就是gh=i，则某个旧目标g可以达到，可以变成新目标i可以达到。
     -- 一个举例：
@@ -391,11 +397,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- }
 
 
-  #eval F*G1Perm*F'
+  #eval (F*G1Perm*F').1.permute = 1
   #eval F*(G1Perm^2)*F'
 
   -- 任意H中的状态，满足角块方向数求和后模3为0,
     -- 则=>存在G中操作h，(g*h)还原所有角块的方向数，且不改变全体棱块的方向数，且不改变所有块的位置。
+  @[simp]
   lemma lemma1
   : ∀g : RubiksSuperType, -- RubiksSuperType即手写的H。
   Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0 --角块方形数求和后，模3为0。
@@ -449,9 +456,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           have _h2_1: (g.1.orient + moveAction2.1.orient ∘ ⇑g.1.permute) (g.1.permute⁻¹ UFL_index) = 0 := h2_1.trans h2_2
           simp only [Corner_Absolute_Orient]
           -- 其实就是 _h2_1 , 要我写那么详细，哎～
-          -- todo
           have _h2_2: (F * G1Perm * F').1.permute = 1
-            := by
+            :=
             -- done -- 这个直接看计算结果就知道了。
             sorry
           have _h2_3: (g * (F * G1Perm * F')).1.permute = (g).1.permute
@@ -477,7 +483,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           done
         simp only [Prod.fst_mul, Prod.snd_mul]
         have h2_3 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * moveAction2).1.orient = 0
-          := by sorry
+          := by
+          have h2_3_1 := lemma1_005 g hsum0
+          simp only [moveAction2]
+          exact h2_3_1
+          done
         have h2_4 := lemma1_001_UFL (g * moveAction2) h2_3 h2
         obtain ⟨h2_4_1,h2_4_2,h2_4_3,h2_4_4,h2_4_5,h2_4_6⟩ := h2_4
         use (moveAction2 * h2_4_1)
@@ -979,7 +989,7 @@ lemma SwapDef (i: Fin 8): ((swap 1 2)
               ((swap 6 5) ((swap 1 2) ((swap 2 6) ((swap 6 5) ((swap 1 2) ((swap 2 6) ((swap 6 5) i)))))))))))) = i
   := by fin_cases i <;> rfl
 
-/-- done -/
+@[simp]
 lemma four_rs_eq_solved
 : (R * R * R * R) = Solved
 := by
@@ -1061,7 +1071,7 @@ lemma four_rs_eq_solved
 -- #eval orientTest2 10 -- 0
 -- #eval orientTest2 11 -- 0
 
-
+@[simp]
 lemma solved_is_solved
 : IsSolved (Solved)
 := by
@@ -1071,6 +1081,7 @@ lemma solved_is_solved
   { simp only [and_self]}
   done
 
+@[simp]
 lemma four_rs_solved :
 IsSolved (R * R * R * R)
 := by

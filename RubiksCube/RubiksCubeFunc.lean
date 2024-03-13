@@ -333,6 +333,7 @@ where
 --   | Solved : Solved3 Solved
 --   | AllSatisfy :  ∀x : RubiksSuperType, (x.1.permute=1 ∧ x.2.permute=1 ∧ x.1.orient=0 ∧ x.2.orient=0) → Solved3 x
 
+@[simp]
 lemma Solved_iff
 (x: RubiksSuperType)
 :
