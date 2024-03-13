@@ -391,18 +391,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- }
 
 
-  -- (ps_mul g.1 lemma1_calc2).orient
-  --     ((ps_mul g.1 lemma1_calc2).permute.symm UFL_index) =
-  --   0
-  def g:RubiksSuperType:= sorry
-  def lemma1_condition : g.1.orient (g.1.permute.invFun UFL_index) = 1 := sorry
-  def lemma1_calc1 := ps_mul G1Perm.1 F'.1
-  def lemma1_calc2 := ps_mul F.1 lemma1_calc1
-  -- def lemma1_calc3 := ps_mul g.1 lemma1_calc2
-  #eval lemma1_calc1 -- { permute := ![4, 0, 2, 3, 5, 1, 6, 7], orient := ![2, 0, 0, 0, 1, 2, 0, 1] }
-  #eval lemma1_calc2 -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 0, 1] }
   #eval F*G1Perm*F'
-  #eval (ps_mul F.1 (ps_mul G1Perm.1 F'.1)).orient UFL_index = 2
 
   -- 任意H中的状态，满足角块方向数求和后模3为0,
     -- 则=>存在G中操作h，(g*h)还原所有角块的方向数，且不改变全体棱块的方向数，且不改变所有块的位置。
@@ -423,10 +412,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     {
       let moveAction1 := Solved
       have h1 := lemma1_001_UFL g hsum0 ha0
-      exact h1
+      use Solved
+      apply And.intro
+      {exact { left := rfl, right := { left := rfl, right := rfl } }}
     }
     { by_cases ha1: (Corner_Absolute_Orient g.1 UFL_index) = 1
-      { let moveAction2 := F*G1Perm*F';
+      { let moveAction2 := F*G1Perm*F'
         -- 如何说明g*moveAction2满足这个呢？：(Corner_Absolute_Orient (g*moveAction2).1 UFL_index) = 0
           -- 也就是要证明：UFL方向数为1,操作后为0.
         -- 关键引理证明1
@@ -436,24 +427,23 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Pi.add_apply,
             Function.comp_apply, apply_inv_self]
           done
+        simp only [Corner_Absolute_Orient] at ha1
+        simp at ha1
+        -- 关键引理证明2
+        have h2_2: g.1.orient (g.1.permute⁻¹ UFL_index) + moveAction2.1.orient (UFL_index) = 0
+        := by
+          simp only [Inv.inv]
+          rw [ha1]
+          simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc]
+          have h2_2_1: (ps_mul F.1 (ps_mul G1Perm.1 F'.1)).orient UFL_index = 2
+          := by rfl
+          rw [h2_2_1]
+          rfl
+          done
         have h2: (Corner_Absolute_Orient (g*moveAction2).1 UFL_index) = 0
         := by
           simp only [Corner_Absolute_Orient]
-          simp only [Corner_Absolute_Orient] at ha1
           simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, invFun_as_coe]
-          -- todo-- 这个要放出来，下面有用。
-          -- 关键引理证明2
-          have h2_2: g.1.orient (g.1.permute⁻¹ UFL_index) + moveAction2.1.orient (UFL_index) = 0
-          := by
-            simp at ha1
-            simp only [Inv.inv]
-            rw [ha1]
-            simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc]
-            have h2_2_1: (ps_mul F.1 (ps_mul G1Perm.1 F'.1)).orient UFL_index = 2
-            := by rfl
-            rw [h2_2_1]
-            rfl
-            done
           sorry
         simp only [Prod.fst_mul, Prod.snd_mul]
         have h2_3 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * moveAction2).1.orient = 0
@@ -464,11 +454,45 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         apply And.intro
         {simp only;sorry}
         apply And.intro
-        {}
-
-
-        -- hsum0 h2
-        sorry
+        { rw [← Prod.fst_mul]
+          rw [← mul_assoc]
+          exact h2_4_3
+        }
+        apply And.intro
+        { rw [← Prod.snd_mul]
+          rw [← mul_assoc]
+          rw [← h2_4_4]
+          --这个是直接计算结果，因为后者moveAction2的orient全零 --
+          have h2_4_4_1: g.2.orient = (g * moveAction2).2.orient
+            := by
+            -- #eval F*G1Perm*F'
+            -- ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 0, 1] },
+            -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
+            sorry
+          exact h2_4_4_1
+        }
+        apply And.intro
+        { rw [← Prod.fst_mul]
+          rw [← mul_assoc]
+          rw [← h2_4_5]
+          --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
+          have h2_4_5_1:g.1.permute = (g * moveAction2).1.permute
+            := by
+            -- done
+            sorry
+          exact h2_4_5_1
+        }
+        { rw [← Prod.snd_mul]
+          rw [← mul_assoc]
+          rw [← h2_4_6]
+          --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
+          have h2_4_6_1: g.2.permute = (g * moveAction2).2.permute
+            := by
+            -- done
+            sorry
+          exact h2_4_6_1
+        }
+        done
       }
       { let h := h*F*(G1Perm^2)*F';
         -- 如何说明g*h2满足这个呢？：(Corner_Absolute_Orient g.1 UFL_index) = 0
@@ -599,7 +623,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (sign (g * x).1.permute = 1 ∧ 1 = sign (g * x).2.permute)
   := by sorry
 
-  -- todo
   -- 对于任意g状态角块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的角块位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
   lemma lemma14
@@ -705,7 +728,6 @@ theorem valid_reachable
     -- 所以还需要证明Reachable y即可。很明显因为都是G里面的6个元素之一FaceTurn，肯定是Reachable。
     -- 将目标Reachable x变成  ∃ y, (Reachable y) ∧ (x * y = Solved)
     -- x经过有限次操作变成了y， y就是复原状态e。
-    --todo
     let y : RubiksSuperType := h1_2 * h2_3 * h3_2_4
     have h101 : Reachable y := sorry
     have h102 : x * y = Solved
