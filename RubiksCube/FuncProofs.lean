@@ -269,6 +269,26 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   def DBL_index :Fin 8 := 7
 
 
+    lemma lemma1_008
+    (g:RubiksSuperType)
+    :Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0
+    →
+    Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * (F * G1Perm^2 * F')).1.orient = 0
+    := by
+      -- #eval F*G1Perm*F'
+      -- ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 0, 1] },
+      -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
+      intro h1
+      simp only [Prod.fst_mul]
+      have h2: F.1 * (G1Perm^2).1 * F'.1 = (F * G1Perm^2 * F').1 := by exact rfl
+      simp only [h2]
+      simp only [PieceState.mul_def,ps_mul]
+      -- 直接看计算结果就知道了
+      -- (F * G1Perm * F').1.orient = ![2, 0, 0, 0, 0, 0, 0, 1]，求和模3也为0
+      -- (F * G1Perm * F').1.orient ∘ ⇑g.1.permute ，只是重新排列了，求和模3也为0
+      sorry
+      -- done
+
     lemma lemma1_007:(F * G1Perm^2 * F').1.permute = 1
     := by
       decide
@@ -296,12 +316,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       have h2: F.1 * G1Perm.1 * F'.1 = (F * G1Perm * F').1 := by exact rfl
       simp only [h2]
       simp only [PieceState.mul_def,ps_mul]
-
       -- 直接看计算结果就知道了
       -- (F * G1Perm * F').1.orient = ![2, 0, 0, 0, 0, 0, 0, 1]，求和模3也为0
       -- (F * G1Perm * F').1.orient ∘ ⇑g.1.permute ，只是重新排列了，求和模3也为0
       sorry
       -- done
+
 
     -- 这个引理要一般性一点：g和i如果中途相隔一个G中的元素h，也就是gh=i，则某个旧目标g可以达到，可以变成新目标i可以达到。
     -- 一个举例：
@@ -413,6 +433,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   #eval (F*G1Perm*F').1.permute = 1
   #eval F*(G1Perm^2)*F'
 
+  -- done
   -- 任意H中的状态，满足角块方向数求和后模3为0,
     -- 则=>存在G中操作h，(g*h)还原所有角块的方向数，且不改变全体棱块的方向数，且不改变所有块的位置。
   @[simp]
@@ -477,7 +498,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             rw [lemma1_006]
             rfl
           rw [_h2_3]
-          have _h2_4: (g.1.orient + moveAction2.1.orient ∘ ⇑g.1.permute) = (g * (F * G1Perm * F')).1.orient
+          have _h2_4: (g.1.orient + moveAction2.1.orient ∘ g.1.permute) = (g * (F * G1Perm * F')).1.orient
             := by
             have _h2_4_1 := PieceState.mul_def g.1 (F * G1Perm * F').1
             simp only [ps_mul] at _h2_4_1
@@ -489,6 +510,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           rw [← _h2_4]
           exact _h2_1
           done
+        -- todo
         simp only [Prod.fst_mul, Prod.snd_mul]
         have h2_3 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * moveAction2).1.orient = 0
           := by
@@ -555,7 +577,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           --   | 2 => rfl
           -- done
           sorry
-        let moveAction3 := h*F*(G1Perm^2)*F'
+        let moveAction3 := F*(G1Perm^2)*F'
         -- #eval F*(G1Perm^2)*F'
         -- ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![1, 0, 0, 0, 0, 0, 0, 2] },
         -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
@@ -575,7 +597,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           simp only [Inv.inv]
           rw [ha2]
           simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc]
-          have h3_2_1: (ps_mul Solved.1 (ps_mul F.1 (ps_mul (G1Perm ^ 2).1 F'.1))).orient UFL_index = 1
+          have h3_2_1: (ps_mul F.1 (ps_mul (G1Perm ^ 2).1 F'.1)).orient UFL_index = 1
           := by rfl
           rw [h3_2_1]
           rfl
@@ -586,12 +608,35 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           simp only [Corner_Absolute_Orient]
           -- have _h3_2: (F * G1Perm^2 * F').1.permute = 1
           -- 下面用lemma1_007代替
-          -- todo-
-          simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, invFun_as_coe]
-          sorry
+          -- simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, invFun_as_coe]
+          have _h3_3: (g * (F * G1Perm^2  * F')).1.permute = (g).1.permute
+            := by
+            simp only [Prod.fst_mul]
+            rw [permute_mul]
+            rw [← Prod.fst_mul]
+            rw [← Prod.fst_mul]
+            rw [lemma1_007]
+            rfl
+          rw [_h3_3]
+          have _h3_4: (g.1.orient + moveAction3.1.orient ∘ g.1.permute) = (g * (F * G1Perm^2 * F')).1.orient
+            := by
+            have _h3_4_1 := PieceState.mul_def g.1 (F * G1Perm^2 * F').1
+            simp only [ps_mul] at _h3_4_1
+            simp only [← Prod.fst_mul] at _h3_4_1
+            rw [_h3_4_1]
+            simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc]
+            rw [add_comm]
+            done
+          rw [← _h3_4]
+          exact _h3_1
+          done
         simp only [Prod.fst_mul, Prod.snd_mul]
         have h3_3 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * moveAction3).1.orient = 0
-          := by sorry
+          := by
+          have h3_3_1 := lemma1_008 g hsum0
+          simp only [moveAction3]
+          exact h3_3_1
+          done
         have h3_4 := lemma1_001_UFL (g * moveAction3) h3_3 h3
         obtain ⟨h3_4_1,h3_4_2,h3_4_3,h3_4_4,h3_4_5,h3_4_6⟩ := h3_4
         use (moveAction3 * h3_4_1)
@@ -623,9 +668,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         { rw [← Prod.fst_mul]
           rw [← mul_assoc]
           rw [← h3_4_5]
-          --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
           have h3_4_5_1:g.1.permute = (g * moveAction3).1.permute
             := by
+            --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
             -- done
             sorry
           exact h3_4_5_1
@@ -633,16 +678,16 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         { rw [← Prod.snd_mul]
           rw [← mul_assoc]
           rw [← h3_4_6]
-          --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
           have h3_4_6_1: g.2.permute = (g * moveAction3).2.permute
             := by
+            --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
             -- done
             sorry
           exact h3_4_6_1
         }
-        sorry
       }
     }
+    done
 
       --给出详细的步骤h，使得(g * h).1.orient = 0成立：
       -- 1.首先还原F面的3个角块:UFL,DFL,DFR：
