@@ -430,8 +430,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- }
 
 
-  #eval (F*G1Perm*F').1.permute = 1
-  #eval F*(G1Perm^2)*F'
+  -- #eval (F*G1Perm*F').1.permute = 1
+  -- #eval F*(G1Perm^2)*F'
 
   -- done
   -- 任意H中的状态，满足角块方向数求和后模3为0,
@@ -510,7 +510,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           rw [← _h2_4]
           exact _h2_1
           done
-        -- todo
         simp only [Prod.fst_mul, Prod.snd_mul]
         have h2_3 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * moveAction2).1.orient = 0
           := by
