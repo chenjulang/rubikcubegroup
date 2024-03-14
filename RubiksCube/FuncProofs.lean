@@ -18,9 +18,6 @@ variable (α : Type*) [Fintype α] [DecidableEq α]
 
 
 section ValidityChecks
-
-
-
   --例子：
   @[simp]
   lemma RValid : R ∈ ValidCube :=
@@ -267,6 +264,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   def DBR_index :Fin 8 := 6
   def DBL_index :Fin 8 := 7
 
+  section lemma1TrashCode
+
+
     lemma lemma1_012
     (g:RubiksSuperType)
     :Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0
@@ -433,6 +433,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- (g*x1).1.orient 7 = 0
     -- := sorry
 
+    -- 由于前几个角块的证明过分类似，还没找到复写代码的巧妙方法，直接跳到最后一个引理进行证明，看看如何收尾即可。
     lemma lemma1_007_UFR_and008DBL
     (g : RubiksSuperType) -- RubiksSuperType即手写的H。
     (h1: Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0)
@@ -448,7 +449,20 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
     ∧
     (Corner_Absolute_Orient g.1 DBL_index) = 0
-    := by sorry
+    := by
+      let h := Solved
+      --todo
+      by_cases ha0 : (Corner_Absolute_Orient g.1 DBL_index)=0
+      {
+        let moveAction1 := Solved
+        -- have h1 := lemma1_002_DFL g hsum0 ({
+        --   left := hCAO_UFL_0
+        --   right := ha0
+        -- })
+        -- obtain ⟨h1_1,h1_2,h1_3,h1_4,h1_5,h1_6⟩ := h1
+        -- use h1_1
+        -- done
+      }
 
     lemma lemma1_006_DBR
     (g : RubiksSuperType) -- RubiksSuperType即手写的H。
@@ -1052,6 +1066,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           -- 3.DFL的方向数为2,h=h*F^2*(G1^2)*F^2
         -- ...
 
+  end lemma1TrashCode
+
   -- 还原所有棱块的方向数,且不改变全体角块的方向数，且不改变所有块的位置。
   lemma lemma2
   : ∀g : RubiksSuperType,
@@ -1245,7 +1261,7 @@ theorem valid_reachable
     -- 根据h3_2推出x.1,x.2属于偶置换
     have h3_2_1 : (x * h1_2 * h2_3).1.permute ∈ alternatingGroup (Fin 8) := sorry
     have h3_2_2 : (x * h1_2 * h2_3).2.permute ∈ alternatingGroup (Fin 12) := sorry
-    -- 使用lemma16使得新状态获得保持旧属性：方向数不变，获取新属性：角块+棱块的位置都变成1。
+    -- 使用lemma16使得新状态保持旧属性：方向数不变，获取新属性：角块+棱块的位置都变成1。
     have h3_2_3 := lemma16 (x * h1_2 * h2_3) h3_2_1 h3_2_2
     -- 很明显新状态就是还原状态Solved了，也就是已知下面这个y。
     obtain ⟨h3_2_4,h3_2_5,h3_2_6,h3_2_7,h3_2_8⟩ := h3_2_3
