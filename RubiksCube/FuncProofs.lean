@@ -391,7 +391,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- ∧
       -- ((g*h) * (h⁻¹*x1))作为参数插入命题A成立
     /-- 这个引理理应频繁使用的，不知道为什么这里没用到？感觉应该可以比较抽象的解决很多重复代码。 -/
-    lemma lemma1_004_2reachableMove_Exist_same_property
+    lemma lemma1_2reachableMove_Exist_same_property
     (g : RubiksSuperType)
     (h : RubiksSuperType)
     (hInG : h ∈ RubiksGroup)
@@ -406,6 +406,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     := by
       sorry
 
+    -- 这个应该可以去掉，暂时保留注释：
     -- 假设角块的方向数求和后，模3为0,假设8个角块的方向数中，有7个方向数被以上步骤还原为0以后，则=>,第8个角块的方向数也还原成0 ，为什么呢？：
     -- 其实这里隐藏了一些条件，“以上步骤”里面每一个操作必须保持某个性质才行。
     -- 还原操作涉及到的只有{F，B和g1},由于这3者之一，任意取一个记为X,都满足∑(8 i=1)v(X)_i=0 (mod 3)：
@@ -419,21 +420,90 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- 且如果(g*x1)的角方向数增加量的前7个分量都为0，
     -- 则第8个分量也为0。
     -- expected token 这种错误可能是没open这个符号，比如求和∑,要open BigOperators
-    lemma lemma1_003_7Corners_eq_8Corners
-    (g : RubiksSuperType)
-    (SetA : Set RubiksSuperType := {a: RubiksSuperType | ∑ i in (Finset.range 8), (a.1.orient) i = 0})
-    (x1: RubiksSuperType)
-    :∑ i in (Finset.range 8), (g.1.orient) i = 0
-    ∧
-    x1 ∈ SetA
-    ∧
-    ∀ j : (Fin 7), (g*x1).1.orient j = 0 -- 注意：当这3个符号报错时 :,∈,in 三个都轮流试一下。
-    →
-    (g*x1).1.orient 7 = 0
-    := sorry
+    -- lemma lemma1_008_7Corners_eq_8Corners
+    -- (g : RubiksSuperType)
+    -- (SetA : Set RubiksSuperType := {a: RubiksSuperType | ∑ i in (Finset.range 8), (a.1.orient) i = 0})
+    -- (x1: RubiksSuperType)
+    -- :∑ i in (Finset.range 8), (g.1.orient) i = 0
+    -- ∧
+    -- x1 ∈ SetA
+    -- ∧
+    -- ∀ j : (Fin 7),  (g*x1).1.orient j = 0 -- 注意：当这3个符号报错时 :,∈,in 三个都轮流试一下。
+    -- →
+    -- (g*x1).1.orient 7 = 0
+    -- := sorry
 
-    -- ... 已完成7个的时候，就要用到上面的lemma1_003_7Corners_eq_8Corners
-    -- ...这里省略了所有角块的引理lemma1_00X还没写,后面写成lemma1_002_3,lemma1_002_4这样吧。
+    lemma lemma1_007_UFR_and008DBL
+    (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+    (h1: Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0)
+    (h2: (Corner_Absolute_Orient g.1 UFL_index) = 0 ∧ (Corner_Absolute_Orient g.1 DFL_index) = 0 ∧ (Corner_Absolute_Orient g.1 DFR_index) = 0
+      ∧ (Corner_Absolute_Orient g.1 UBL_index) = 0 ∧ (Corner_Absolute_Orient g.1 UBR_index) = 0 ∧ (Corner_Absolute_Orient g.1 DBR_index) = 0
+      ∧ (Corner_Absolute_Orient g.1 UFR_index) = 0)
+    :
+    ∃ h ∈ RubiksGroup ,
+    (g * h).fst.orient = 0
+    ∧
+    (g).2.orient = (g * h).2.orient
+    ∧
+    ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+    ∧
+    (Corner_Absolute_Orient g.1 DBL_index) = 0
+    := by sorry
+
+    lemma lemma1_006_DBR
+    (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+    (h1: Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0)
+    (h2: (Corner_Absolute_Orient g.1 UFL_index) = 0 ∧ (Corner_Absolute_Orient g.1 DFL_index) = 0 ∧ (Corner_Absolute_Orient g.1 DFR_index) = 0
+      ∧ (Corner_Absolute_Orient g.1 UBL_index) = 0 ∧ (Corner_Absolute_Orient g.1 UBR_index) = 0 ∧ (Corner_Absolute_Orient g.1 DBR_index) = 0)
+    :
+    ∃ h ∈ RubiksGroup ,
+    (g * h).fst.orient = 0
+    ∧
+    (g).2.orient = (g * h).2.orient
+    ∧
+    ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+    := by sorry
+
+    lemma lemma1_005_UBR
+    (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+    (h1: Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0)
+    (h2: (Corner_Absolute_Orient g.1 UFL_index) = 0 ∧ (Corner_Absolute_Orient g.1 DFL_index) = 0 ∧ (Corner_Absolute_Orient g.1 DFR_index) = 0
+      ∧ (Corner_Absolute_Orient g.1 UBL_index) = 0 ∧ (Corner_Absolute_Orient g.1 UBR_index) = 0)
+    :
+    ∃ h ∈ RubiksGroup ,
+    (g * h).fst.orient = 0
+    ∧
+    (g).2.orient = (g * h).2.orient
+    ∧
+    ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+    := by sorry
+
+    lemma lemma1_004_UBL
+    (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+    (h1: Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0)
+    (h2: (Corner_Absolute_Orient g.1 UFL_index) = 0 ∧ (Corner_Absolute_Orient g.1 DFL_index) = 0 ∧ (Corner_Absolute_Orient g.1 DFR_index) = 0
+      ∧ (Corner_Absolute_Orient g.1 UBL_index) = 0)
+    :
+    ∃ h ∈ RubiksGroup ,
+    (g * h).fst.orient = 0
+    ∧
+    (g).2.orient = (g * h).2.orient
+    ∧
+    ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+    := by sorry
+
+    lemma lemma1_003_DFR
+    (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+    (h1: Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0)
+    (h2: (Corner_Absolute_Orient g.1 UFL_index) = 0 ∧ (Corner_Absolute_Orient g.1 DFL_index) = 0 ∧ (Corner_Absolute_Orient g.1 DFR_index) = 0)
+    :
+    ∃ h ∈ RubiksGroup ,
+    (g * h).fst.orient = 0
+    ∧
+    (g).2.orient = (g * h).2.orient
+    ∧
+    ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+    := by sorry
 
     lemma lemma1_002_DFL
     (g : RubiksSuperType) -- RubiksSuperType即手写的H。
