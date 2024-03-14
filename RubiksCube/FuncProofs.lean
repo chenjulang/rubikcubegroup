@@ -283,9 +283,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       have h2: F.1 * (G1Perm^2).1 * F'.1 = (F * G1Perm^2 * F').1 := by exact rfl
       simp only [h2]
       simp only [PieceState.mul_def,ps_mul]
+      -- Goal: ∑ x in {0, 1, 2, 3, 4, 5, 6, 7}, ((F * G1Perm ^ 2 * F').1.orient ∘ ⇑g.1.permute + g.1.orient) x = 0
       -- 直接看计算结果就知道了
       -- (F * G1Perm * F').1.orient = ![2, 0, 0, 0, 0, 0, 0, 1]，求和模3也为0
       -- (F * G1Perm * F').1.orient ∘ ⇑g.1.permute ，只是重新排列了，求和模3也为0
+      -- g.1.orient的话由h1知道也是求和为0。
       sorry
       -- done
 
@@ -316,9 +318,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       have h2: F.1 * G1Perm.1 * F'.1 = (F * G1Perm * F').1 := by exact rfl
       simp only [h2]
       simp only [PieceState.mul_def,ps_mul]
+      -- Goal: ∑ x in {0, 1, 2, 3, 4, 5, 6, 7}, ((F * G1Perm * F').1.orient ∘ g.1.permute + g.1.orient) x = 0
       -- 直接看计算结果就知道了
       -- (F * G1Perm * F').1.orient = ![2, 0, 0, 0, 0, 0, 0, 1]，求和模3也为0
       -- (F * G1Perm * F').1.orient ∘ ⇑g.1.permute ，只是重新排列了，求和模3也为0
+      -- g.1.orient的话由h1知道也是求和为0。
       sorry
       -- done
 
@@ -346,14 +350,15 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- (∃ x2 ∈ RubiksGroup, ((g*h) * x2)作为参数插入命题A成立)
       -- ∧
       -- ((g*h) * (h⁻¹*x1))作为参数插入命题A成立
+    /-- 这个引理理应频繁使用的，不知道为什么这里没用到？感觉应该可以比较抽象的解决很多重复代码。 -/
     lemma lemma1_004_2reachableMove_Exist_same_property
     (g : RubiksSuperType)
-    (gInG : g ∈ RubiksGroup)
     (h : RubiksSuperType)
+    (hInG : h ∈ RubiksGroup)
     (somePropA : RubiksSuperType →  Prop)
     :
-    ∃ x1:RubiksSuperType,
-    somePropA (g*h) -- “冒号”写成“属于号”就不行了，请注意
+    ∃ x1:RubiksGroup,
+    somePropA ((g) * x1) -- “冒号”写成“属于号”就不行了，请注意
     →
       (∃ x2 ∈ RubiksGroup, somePropA ((g*h) * x2))
       ∧
@@ -387,21 +392,25 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (g*x1).1.orient 7 = 0
     := sorry
 
+    -- ... 已完成7个的时候，就要用到上面的lemma1_003_7Corners_eq_8Corners
     -- ...这里省略了所有角块的引理lemma1_00X还没写,后面写成lemma1_002_3,lemma1_002_4这样吧。
+
     lemma lemma1_002_DFL
-    : ∀g : RubiksSuperType, -- RubiksSuperType即手写的H。
-    Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0 --角块方形数求和后，模3为0。
-    ∧ (Corner_Absolute_Orient g.1 UFL_index) = 0 ∧ (Corner_Absolute_Orient g.1 DFL_index) = 0
-    →
+    (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+    (h1: Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0)
+    (h2: (Corner_Absolute_Orient g.1 UFL_index) = 0 ∧ (Corner_Absolute_Orient g.1 DFL_index) = 0)
+    :
     ∃ h ∈ RubiksGroup ,
     (g * h).fst.orient = 0
     := by sorry
 
-    -- 任意H中的状态，满足角块方向数求和后模3为0,UFL的方向数为0
+    -- lemma1的主要证明依赖本引理lemma1_001_UFL，本引理主要证明依赖lemma1_002_DFL
+    -- 任意H中的状态，满足：角块方向数求和后模3为0,UFL的方向数为0
       -- 则=>存在G中操作h，(g*h)还原所有角块的方向数，且不改变全体棱块的方向数，且不改变所有块的位置。
+    -- 思路：还原DFL的方向数后，使用lemma1_002_DFL即可。
     lemma lemma1_001_UFL
-    (g : RubiksSuperType) -- RubiksSuperType即文字证明中的H。
-    (h1: Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0) --角块方形数求和后，模3为0。
+    (g : RubiksSuperType)
+    (h1: Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0)
     (h2: (Corner_Absolute_Orient g.1 UFL_index) = 0)
     :
     ∃ h ∈ RubiksGroup ,
@@ -411,6 +420,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     ∧
     ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
     := by sorry
+      --todo
       -- intro g hs
       -- have hsum0 := hs.1
       -- have UFL0 := hs.2
@@ -454,9 +464,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     {
       let moveAction1 := Solved
       have h1 := lemma1_001_UFL g hsum0 ha0
-      use Solved
-      apply And.intro
-      {exact { left := rfl, right := { left := rfl, right := rfl } }}
+      obtain ⟨h1_1,h1_2,h1_3,h1_4,h1_5,h1_6⟩ := h1
+      use h1_1
+      done
     }
     { by_cases ha1: (Corner_Absolute_Orient g.1 UFL_index) = 1
       { let moveAction2 := F*G1Perm*F'
@@ -523,8 +533,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         apply And.intro
         {simp only;
           -- 这个就是因为是reachable，也是validcube，所以也是属于rubiksgroup
+          sorry
           --done
-          sorry}
+        }
         apply And.intro
         { rw [← Prod.fst_mul]
           rw [← mul_assoc]
@@ -537,8 +548,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           --这个是直接计算结果，因为后者moveAction2的orient全零 --
           have h2_4_4_1: g.2.orient = (g * moveAction2).2.orient
             := by
-            -- done
             sorry
+            -- done
           exact h2_4_4_1
         }
         apply And.intro
@@ -548,8 +559,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
           have h2_4_5_1:g.1.permute = (g * moveAction2).1.permute
             := by
-            -- done
             sorry
+            -- done
           exact h2_4_5_1
         }
         { rw [← Prod.snd_mul]
@@ -558,8 +569,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
           have h2_4_6_1: g.2.permute = (g * moveAction2).2.permute
             := by
-            -- done
             sorry
+            -- done
           exact h2_4_6_1
         }
         done
@@ -642,8 +653,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         apply And.intro
         {simp only;
           -- 这个就是因为是reachable，也是validcube，所以也是属于rubiksgroup
+          sorry
           --done
-          sorry}
+        }
         apply And.intro
         { rw [← Prod.fst_mul]
           rw [← mul_assoc]
