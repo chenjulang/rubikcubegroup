@@ -677,6 +677,7 @@ section RubiksGroup
       --   sorry
       -- · exact h2
       ---
+      -- todo -- 下面一长串提取出来吧：
       . apply Finset.sum_bijective
         . exact a.1.permute.bijective
         . intro i
@@ -699,25 +700,67 @@ section RubiksGroup
             cases h with
             | inl h =>
               have h0 : a.1.permute i = a.1.permute 0
-                := by exact congrArg (⇑a.1.permute) h
+                := by exact congrArg (a.1.permute) h
               rw [h0]
               clear h0
               have lem1 := hhh1 (a.1.permute 0)
               exact lem1
             | inr h => cases h with
-            | inl h => sorry
+            | inl h =>
+              have h0 : a.1.permute i = a.1.permute 1
+                := by exact congrArg (a.1.permute) h
+              rw [h0]
+              clear h0
+              have lem1 := hhh1 (a.1.permute 1)
+              exact lem1
             | inr h => cases h with
-            | inl h => sorry
+            | inl h =>
+              have h0 : a.1.permute i = a.1.permute 2
+                := by exact congrArg (a.1.permute) h
+              rw [h0]
+              clear h0
+              have lem1 := hhh1 (a.1.permute 2)
+              exact lem1
             | inr h => cases h with
-            | inl h => sorry
+            | inl h =>
+              have h0 : a.1.permute i = a.1.permute 3
+                := by exact congrArg (a.1.permute) h
+              rw [h0]
+              clear h0
+              have lem1 := hhh1 (a.1.permute 3)
+              exact lem1
             | inr h => cases h with
-            | inl h => sorry
+            | inl h =>
+              have h0 : a.1.permute i = a.1.permute 4
+                := by exact congrArg (a.1.permute) h
+              rw [h0]
+              clear h0
+              have lem1 := hhh1 (a.1.permute 4)
+              exact lem1
             | inr h => cases h with
-            | inl h => sorry
+            | inl h =>
+              have h0 : a.1.permute i = a.1.permute 5
+                := by exact congrArg (a.1.permute) h
+              rw [h0]
+              clear h0
+              have lem1 := hhh1 (a.1.permute 5)
+              exact lem1
             | inr h => cases h with
-            | inl h => sorry
-            | inr h => sorry
-          · sorry
+            | inl h =>
+              have h0 : a.1.permute i = a.1.permute 6
+                := by exact congrArg (a.1.permute) h
+              rw [h0]
+              clear h0
+              have lem1 := hhh1 (a.1.permute 6)
+              exact lem1
+            | inr h =>
+              have h0 : a.1.permute i = a.1.permute 7
+                := by exact congrArg (a.1.permute) h
+              rw [h0]
+              clear h0
+              have lem1 := hhh1 (a.1.permute 7)
+              exact lem1
+          · exact fun a ↦ hhh1 i
         · exact fun i a_1 ↦ rfl
       · exact h2
     }

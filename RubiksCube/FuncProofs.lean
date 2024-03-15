@@ -266,18 +266,18 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   def DBR_index :Fin 8 := 6
   def DBL_index :Fin 8 := 7
   -- 棱块的排位：12个
-  def UF :Fin 12 := 0
-  def UR :Fin 12 := 1
-  def UB :Fin 12 := 2
-  def UL :Fin 12 := 3
-  def FL :Fin 12 := 4
-  def FR :Fin 12 := 5
-  def RB :Fin 12 := 6
-  def LB :Fin 12 := 7
-  def FD :Fin 12 := 8
-  def RD :Fin 12 := 9
-  def BD :Fin 12 := 10
-  def LD :Fin 12 := 11
+  def UF_index :Fin 12 := 0
+  def UR_index:Fin 12 := 1
+  def UB_index :Fin 12 := 2
+  def UL_index :Fin 12 := 3
+  def FL_index :Fin 12 := 4
+  def FR_index :Fin 12 := 5
+  def RB_index :Fin 12 := 6
+  def LB_index :Fin 12 := 7
+  def FD_index :Fin 12 := 8
+  def RD_index :Fin 12 := 9
+  def BD_index :Fin 12 := 10
+  def LD_index :Fin 12 := 11
 
 
 
@@ -1115,6 +1115,23 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   section lemma2TrashCode
 
+  -- 任意H中的状态，满足：棱块方向数求和后模3为0,UFL的方向数为0
+      -- 则=>存在G中操作h，(g*h)还原所有棱块的方向数，且不改变全体角块的方向数，且不改变所有块的位置。
+  lemma lemma1_002_UR
+  (g : RubiksSuperType)
+  (hsum0: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.snd.orient = 0)
+  (h_EAO_UR_0: (Edge_Absolute_Orient g.2 UR_index) = 0)
+  :
+  ∃ h ∈ RubiksGroup ,
+  (g * h).2.orient = 0
+  ∧
+  (g).1.orient = (g * h).1.orient
+  ∧
+  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  := by
+    sorry
+
+
   -- 还原所有棱块的方向数,且不改变全体角块的方向数，且不改变所有块的位置。
   lemma lemma2
   : ∀g : RubiksSuperType,
@@ -1127,6 +1144,16 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
   := by
+    intro g hsum0
+    let h:= Solved
+    by_cases ha0 : (Edge_Absolute_Orient g.2 UR_index)=0
+    {
+      let moveAction1 := Solved
+      have h1 := lemma1_002_UR g hsum0 ha0
+      obtain ⟨h1_1,h1_2,h1_3,h1_4,h1_5,h1_6⟩ := h1
+      use h1_1
+      done
+    }
     -- todo
     sorry
 
