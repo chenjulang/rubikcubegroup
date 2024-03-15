@@ -255,6 +255,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 2, 0, 0, 0, 0, 0, 1] },
   --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
 
+  -- 说白了，只需要倒腾这20个块就能还原，不多也不少：
+  -- 角块的排位：8个
   def UFL_index :Fin 8 := 0
   def UFR_index :Fin 8 := 1
   def UBR_index :Fin 8 := 2
@@ -263,6 +265,21 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   def DFR_index :Fin 8 := 5
   def DBR_index :Fin 8 := 6
   def DBL_index :Fin 8 := 7
+  -- 棱块的排位：12个
+  def UF :Fin 12 := 0
+  def UR :Fin 12 := 1
+  def UB :Fin 12 := 2
+  def UL :Fin 12 := 3
+  def FL :Fin 12 := 4
+  def FR :Fin 12 := 5
+  def RB :Fin 12 := 6
+  def LB :Fin 12 := 7
+  def FD :Fin 12 := 8
+  def RD :Fin 12 := 9
+  def BD :Fin 12 := 10
+  def LD :Fin 12 := 11
+
+
 
   section lemma1TrashCode
 
@@ -1095,6 +1112,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   end lemma1TrashCode
 
+
+  section lemma2TrashCode
+
   -- 还原所有棱块的方向数,且不改变全体角块的方向数，且不改变所有块的位置。
   lemma lemma2
   : ∀g : RubiksSuperType,
@@ -1106,7 +1126,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   g.1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
-  := by sorry
+  := by
+    -- todo
+    sorry
+
+  end lemma2TrashCode
 
 
     -- 涉及定理：closure_three_cycles_eq_alternating
@@ -1257,6 +1281,7 @@ theorem valid_reachable
 : ∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
 := by
   intro x hvx
+  have xIsValid := hvx -- 后面被拆散了，先保留一个。
   simp [ValidCube] at hvx
   let currStat := x
   -- 分类讨论1得到小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
@@ -1280,7 +1305,8 @@ theorem valid_reachable
   rw [lemma12_condition1_restriction] at h3
   cases h3 with
   | inl h3_1 =>
-    -- 某个过程，存在一个复合操作，作用一次到状态集合（奇X奇)上的某个元素后，新状态会属于新的状态集合(偶X偶），归化成inr
+    -- 某个过程，存在一个复合操作，作用一次到状态集合（奇X奇)上的某个元素后，
+    -- 新状态会属于新的状态集合(偶X偶），归化成inr
     -- lemma13_oddXoddToEvenXEven
     -- 和inr一样的证明过程
     sorry
@@ -1350,7 +1376,8 @@ theorem valid_reachable
     apply h105 y
     exact { left := h101, right := h102 }
     done
-  sorry
+  -- 这里为啥还要证明已知的x ∈ ValidCube？原来是假设被拆散用了...
+  exact hvx
   done
 
 
@@ -1419,7 +1446,7 @@ theorem reachable_valid
         done
       }
     }
-
+  done
 
 /-- 魔方第二基本定理 -/
 theorem RubikCube_BasicRule_2
