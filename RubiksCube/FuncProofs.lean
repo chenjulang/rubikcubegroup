@@ -390,7 +390,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- (∃ x2 ∈ RubiksGroup, ((g*h) * x2)作为参数插入命题A成立)
       -- ∧
       -- ((g*h) * (h⁻¹*x1))作为参数插入命题A成立
-    /-- 这个引理理应频繁使用的，不知道为什么这里没用到？感觉应该可以比较抽象的解决很多重复代码。 -/
+    /-- 这个引理理应频繁使用的，不知道为什么这里没用到呢？感觉应该可以比较抽象的解决很多重复代码。 -/
     lemma lemma1_2reachableMove_Exist_same_property
     (g : RubiksSuperType)
     (h : RubiksSuperType)
@@ -434,6 +434,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- := sorry
 
     -- 由于前几个角块的证明过分类似，还没找到复写代码的巧妙方法，直接跳到最后一个引理进行证明，看看如何收尾即可。
+    -- 想不到引理1最后一步这么简单，推出矛盾即可。
     lemma lemma1_007_UFR_and008DBL
     (g : RubiksSuperType) -- RubiksSuperType即手写的H。
     (h1: Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0)
@@ -451,18 +452,44 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (Corner_Absolute_Orient g.1 DBL_index) = 0
     := by
       let h := Solved
-      --todo
+      have h_CAO_DBL_is0: Corner_Absolute_Orient g.1 DBL_index = 0
+      := by
+        -- 用h1 , h2即可
+        sorry
+        -- done
       by_cases ha0 : (Corner_Absolute_Orient g.1 DBL_index)=0
       {
-        let moveAction1 := Solved
-        -- have h1 := lemma1_002_DFL g hsum0 ({
-        --   left := hCAO_UFL_0
-        --   right := ha0
-        -- })
-        -- obtain ⟨h1_1,h1_2,h1_3,h1_4,h1_5,h1_6⟩ := h1
-        -- use h1_1
-        -- done
+        let moveAction1 : RubiksSuperType := 1
+        use moveAction1
+        simp only [moveAction1]
+        rw [mul_one]
+        sorry
+        -- done -- 很明显了
       }
+      { by_cases ha1: (Corner_Absolute_Orient g.1 DBL_index) = 1
+        {
+          -- 这时候要推出矛盾才行，换句话说，这种情况是不成立的；换句话说，不需要被讨论的。
+          -- 应该也是明显的，矛盾点在h1+h2可以推出Corner_Absolute_Orient g.1 DBL_index 只能= 0
+          -- Corner_Absolute_Orient g.1 DBL_index 只能= 0与ha1矛盾
+          exact (ha0 h_CAO_DBL_is0).elim
+        }
+        { have ha2: Corner_Absolute_Orient g.1 DBL_index = 2
+            := by
+            -- 怎么使用排除法呢？很明显是对的,非0，1,就是2
+            -- Kyle Miller: You can use the generalize tactic in your original goal to turn Corner_Absolute_Orient g.1 UFL_index into a, and then
+            -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
+            --   fin_cases a <;> simp at *
+            -- Kyle Miller: There's also this magic:
+            -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
+            --   match a with
+            --   | 2 => rfl
+            -- done
+            sorry
+          -- 这里矛盾点在哪呢？一开始的分类讨论非0就能和0推出矛盾，所以不需要考虑当前情况。
+          exact (ha0 h_CAO_DBL_is0).elim
+        }
+      }
+      done
 
     lemma lemma1_006_DBR
     (g : RubiksSuperType) -- RubiksSuperType即手写的H。
