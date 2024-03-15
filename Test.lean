@@ -202,6 +202,6 @@ lemma Test002
 (borient : Fin 3 → Fin 2)
 (h2: Finset.sum {0, 1, 2} borient = 0)
 : (Finset.sum {0, 1, 2} fun x ↦ borient (apermute x)) = 0
-:= by sorry
--- Equiv.sum_comp
+:= by
+  have h1:= Equiv.sum_comp apermute
 -- Finset.sum_equiv
