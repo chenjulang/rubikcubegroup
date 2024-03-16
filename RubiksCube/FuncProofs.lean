@@ -1125,7 +1125,21 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   section lemma2TrashCode
 
-  lemma lemma2_008
+  lemma lemma2_006
+  (g:RubiksSuperType)
+  :Finset.sum {0, 1, 2, 3, 4, 5, 6, 7,8,9,10,11} g.2.orient = 0
+  →
+  Finset.sum {0, 1, 2, 3, 4, 5, 6, 7,8,9,10,11} (g * (R * G2Perm * R')).2.orient = 0
+  := by
+    sorry -- 计算结果可知
+    -- done
+
+  lemma lemma2_005:(R * G2Perm * R').2.permute = 1
+  := by
+    decide
+    done
+
+  lemma lemma2_004
   (g:RubiksSuperType)
   :Finset.sum {0, 1, 2, 3, 4, 5, 6, 7,8,9,10,11} g.2.orient = 0
   →
@@ -1149,9 +1163,24 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   lemma lemma2_003:(G2Perm).2.permute = 1 := by decide
 
-  -- 任意H中的状态，满足：棱块方向数求和后模3为0,UFL的方向数为0
-      -- 则=>存在G中操作h，(g*h)还原所有棱块的方向数，且不改变全体角块的方向数，且不改变所有块的位置。
-  lemma lemma2_002_UR
+  --todo
+  lemma lemma2_002_FR
+  (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+  (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
+  (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0)
+  :
+  ∃ h ∈ RubiksGroup ,
+  (g * h).2.orient = 0
+  ∧
+  (g).1.orient = (g * h).1.orient
+  ∧
+  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  := by sorry
+
+  -- 任意H中的状态，满足：棱块方向数求和后模2为0,UR的方向数为0
+    -- 则=>存在G中操作h，(g*h)还原所有棱块的方向数，且不改变全体角块的方向数，且不改变所有块的位置。
+  -- 思路：还原FR
+  lemma lemma2_001_UR
   (g : RubiksSuperType)
   (hsum0: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.snd.orient = 0)
   (h_EAO_UR_0: (Edge_Absolute_Orient g.2 UR_index) = 0)
@@ -1163,7 +1192,137 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
   := by
-    sorry
+    let h := Solved
+    by_cases ha0 : (Edge_Absolute_Orient g.2 FR_index)=0
+    {
+      let moveAction1 := Solved
+      have h1 := lemma2_002_FR g hsum0 ({
+        left := h_EAO_UR_0
+        right := ha0
+      })
+      obtain ⟨h1_1,h1_2,h1_3,h1_4,h1_5,h1_6⟩ := h1
+      use h1_1
+      done
+    }
+    { have ha2: (Edge_Absolute_Orient g.2 FR_index) = 1
+        := by
+        -- 怎么使用排除法呢？很明显是对的,非0，1,就是2
+        -- Kyle Miller: You can use the generalize tactic in your original goal to turn Corner_Absolute_Orient g.1 UFL_index into a, and then
+        -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
+        --   fin_cases a <;> simp at *
+        -- Kyle Miller: There's also this magic:
+        -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
+        --   match a with
+        --   | 2 => rfl
+        -- done
+        sorry
+      let moveAction3 := (R)*(G2Perm)*(R')
+      have h3_1: (g.2.orient + moveAction3.2.orient ∘ g.2.permute) (g.2.permute⁻¹ FR_index)
+      = g.2.orient (g.2.permute⁻¹ FR_index) + moveAction3.2.orient (FR_index)
+      := by
+        simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Pi.add_apply,
+          Function.comp_apply, apply_inv_self]
+        done
+      simp only [Edge_Absolute_Orient] at ha2
+      simp at ha2
+      have h3_2: g.2.orient (g.2.permute⁻¹ FR_index) + moveAction3.2.orient (FR_index) = 0
+      := by
+        simp only [Inv.inv]
+        rw [ha2]
+        simp only [Prod.snd_mul, PieceState.mul_def, ps_mul_assoc]
+        have h3_2_1: (ps_mul R.2 (ps_mul G2Perm.2 R'.2)).orient FR_index = 1
+        := by rfl
+        -- rw [h3_2_1] -- 不写也可以
+        rfl
+        done
+      have h3: (Edge_Absolute_Orient (g*moveAction3).2 FR_index) = 0
+      := by
+        have _h3_1: (g.2.orient + moveAction3.2.orient ∘ g.2.permute) (g.2.permute⁻¹ FR_index) = 0 := h3_1.trans h3_2
+        simp only [Edge_Absolute_Orient]
+        -- have _h3_2: (F^2 * G1Perm^2 * F^2).2.permute = 1
+        -- 下面用lemma1_00?代替
+        have _h3_3: (g * (R * G2Perm * R')).2.permute = (g).2.permute
+          := by
+          simp only [Prod.snd_mul]
+          rw [permute_mul]
+          rw [← Prod.snd_mul]
+          rw [← Prod.snd_mul]
+          rw [lemma2_005]
+          rfl
+        rw [_h3_3]
+        have _h3_4: (g.2.orient + moveAction3.2.orient ∘ g.2.permute) = (g * (R * G2Perm * R')).2.orient
+          := by
+          have _h3_4_1 := PieceState.mul_def g.2 (R * G2Perm * R').2
+          simp only [ps_mul] at _h3_4_1
+          simp only [← Prod.snd_mul] at _h3_4_1
+          rw [_h3_4_1]
+          simp only [Prod.snd_mul, PieceState.mul_def, ps_mul_assoc]
+          rw [add_comm]
+          done
+        rw [← _h3_4]
+        exact _h3_1
+        done
+      simp only [Prod.fst_mul, Prod.snd_mul]
+      have h3_3 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11} (g * moveAction3).2.orient = 0
+        := by
+        have h3_3_1 := lemma2_006 g hsum0
+        simp only [moveAction3]
+        exact h3_3_1
+        done
+      have h_b_3:Edge_Absolute_Orient (g * moveAction3).2 UR_index = 0
+        := by sorry --待办
+      have h3_4 := lemma2_002_FR (g * moveAction3) h3_3 {
+        left := h_b_3
+        right := h3
+      }
+      obtain ⟨h3_4_1,h3_4_2,h3_4_3,h3_4_4,h3_4_5,h3_4_6⟩ := h3_4
+      use (moveAction3 * h3_4_1)
+      apply And.intro
+      {simp only;
+        -- 这个就是因为是reachable，也是validcube，所以也是属于rubiksgroup
+        sorry
+        --done
+      }
+      apply And.intro
+      { rw [← Prod.snd_mul]
+        rw [← mul_assoc]
+        exact h3_4_3
+      }
+      apply And.intro
+      { rw [← Prod.fst_mul]
+        rw [← mul_assoc]
+        rw [← h3_4_4]
+        --这个是直接计算结果，因为后者moveAction2的orient全零 --
+        have h3_4_4_1: g.1.orient = (g * moveAction3).1.orient
+          := by
+          -- done
+          sorry
+        exact h3_4_4_1
+      }
+      apply And.intro
+      { rw [← Prod.fst_mul]
+        rw [← mul_assoc]
+        rw [← h3_4_5]
+        have h3_4_5_1:g.1.permute = (g * moveAction3).1.permute
+          := by
+          --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
+          -- done
+          sorry
+        exact h3_4_5_1
+      }
+      { rw [← Prod.snd_mul]
+        rw [← mul_assoc]
+        rw [← h3_4_6]
+        have h3_4_6_1: g.2.permute = (g * moveAction3).2.permute
+          := by
+          --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
+          -- done
+          sorry
+        exact h3_4_6_1
+      }
+    }
+    done
+
 
 
   -- 还原所有棱块的方向数,且不改变全体角块的方向数，且不改变所有块的位置。
@@ -1253,14 +1412,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       simp only [Prod.fst_mul, Prod.snd_mul]
       have h3_3 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7,8,9,10,11} (g * moveAction3).2.orient = 0
         := by
-        have h3_3_1 := lemma2_008 g hsum0
+        have h3_3_1 := lemma2_004 g hsum0
         simp only [moveAction3]
         exact h3_3_1
         done
-      have h3_4 := lemma2_002_UR (g * moveAction3) h3_3 h3
+      have h3_4 := lemma2_001_UR (g * moveAction3) h3_3 h3
       obtain ⟨h3_4_1,h3_4_2,h3_4_3,h3_4_4,h3_4_5,h3_4_6⟩ := h3_4
       use (moveAction3 * h3_4_1)
-      -- todo
       apply And.intro
       {simp only;
         -- 这个就是因为是reachable，也是validcube，所以也是属于rubiksgroup
