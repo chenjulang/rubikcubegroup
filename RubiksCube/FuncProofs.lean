@@ -264,6 +264,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- #eval G2Perm
   --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
   --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
+  -- 如何定义G2的“L,R,F,B”变式呢？直接推算，还是写一个函数映射呢？ todo
+
 
   -- 说白了，只需要倒腾这20个块就能还原，不多也不少：
   -- 角块的排位：8个
@@ -1164,6 +1166,142 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   lemma lemma2_003:(G2Perm).2.permute = 1 := by decide
 
   --todo
+  lemma lemma2_010_UL_and_011_UF
+  (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+  (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
+  (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 UB_index) = 0 ∧ (Edge_Absolute_Orient g.2 BD_index) = 0 ∧ (Edge_Absolute_Orient g.2 LB_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 LD_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 FL_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 FD_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 UL_index) = 0)
+  :
+  ∃ h ∈ RubiksGroup,
+  (g * h).2.orient = 0
+  ∧
+  (g).1.orient = (g * h).1.orient
+  ∧
+  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  ∧
+  (Edge_Absolute_Orient g.2 UF_index) = 0
+  := by sorry
+
+  lemma lemma2_009_FD
+  (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+  (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
+  (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 UB_index) = 0 ∧ (Edge_Absolute_Orient g.2 BD_index) = 0 ∧ (Edge_Absolute_Orient g.2 LB_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 LD_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 FL_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 FD_index) = 0)
+  :
+  ∃ h ∈ RubiksGroup,
+  (g * h).2.orient = 0
+  ∧
+  (g).1.orient = (g * h).1.orient
+  ∧
+  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  := by sorry
+
+  lemma lemma2_008_FL
+  (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+  (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
+  (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 UB_index) = 0 ∧ (Edge_Absolute_Orient g.2 BD_index) = 0 ∧ (Edge_Absolute_Orient g.2 LB_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 LD_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 FL_index) = 0)
+  :
+  ∃ h ∈ RubiksGroup,
+  (g * h).2.orient = 0
+  ∧
+  (g).1.orient = (g * h).1.orient
+  ∧
+  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  := by sorry
+
+  lemma lemma2_007_LD
+  (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+  (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
+  (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 UB_index) = 0 ∧ (Edge_Absolute_Orient g.2 BD_index) = 0 ∧ (Edge_Absolute_Orient g.2 LB_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 LD_index) = 0)
+  :
+  ∃ h ∈ RubiksGroup,
+  (g * h).2.orient = 0
+  ∧
+  (g).1.orient = (g * h).1.orient
+  ∧
+  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  := by sorry
+
+  lemma lemma2_006_LB
+  (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+  (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
+  (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 UB_index) = 0 ∧ (Edge_Absolute_Orient g.2 BD_index) = 0 ∧ (Edge_Absolute_Orient g.2 LB_index) = 0)
+  :
+  ∃ h ∈ RubiksGroup,
+  (g * h).2.orient = 0
+  ∧
+  (g).1.orient = (g * h).1.orient
+  ∧
+  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  := by sorry
+
+  lemma lemma2_005_BD
+  (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+  (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
+  (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 UB_index) = 0 ∧ (Edge_Absolute_Orient g.2 BD_index) = 0)
+  :
+  ∃ h ∈ RubiksGroup ,
+  (g * h).2.orient = 0
+  ∧
+  (g).1.orient = (g * h).1.orient
+  ∧
+  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  := by sorry
+
+  lemma lemma2_004_UB
+  (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+  (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
+  (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0
+  ∧ (Edge_Absolute_Orient g.2 UB_index) = 0)
+  :
+  ∃ h ∈ RubiksGroup ,
+  (g * h).2.orient = 0
+  ∧
+  (g).1.orient = (g * h).1.orient
+  ∧
+  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  := by sorry
+
+  lemma lemma2_003_RB
+  (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+  (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
+  (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0)
+  :
+  ∃ h ∈ RubiksGroup ,
+  (g * h).2.orient = 0
+  ∧
+  (g).1.orient = (g * h).1.orient
+  ∧
+  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  := by sorry
+
+  lemma lemma2_002_RD
+  (g : RubiksSuperType) -- RubiksSuperType即手写的H。
+  (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
+  (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0)
+  :
+  ∃ h ∈ RubiksGroup ,
+  (g * h).2.orient = 0
+  ∧
+  (g).1.orient = (g * h).1.orient
+  ∧
+  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  := by sorry
+
   lemma lemma2_002_FR
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
   (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
