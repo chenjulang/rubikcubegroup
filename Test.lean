@@ -3,6 +3,8 @@ import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.GroupTheory.Perm.Fin
 import Mathlib.Algebra.Module.Equiv
 open Equiv Perm
+open BigOperators
+
 
 -- set_option maxRecDepth 2000
 
@@ -197,11 +199,62 @@ open Equiv Perm
 -- :(F * G1Perm * F').1.permute = 1
 -- := by decide
 
+
+-- @[to_additive]
+-- lemma _root_.Equiv.prod_comp (e : ι ≃ κ) (g : κ → α)
+-- : ∏ i, g (e i) = ∏ i, g i
+-- :=
+--   prod_equiv e _ _ fun _ ↦ rfl
+
 lemma Test002
 (apermute : Perm (Fin 3))
-(borient : Fin 3 → Fin 2)
+(borient : (Fin 3) → Fin 2)
 (h2: Finset.sum {0, 1, 2} borient = 0)
 : (Finset.sum {0, 1, 2} fun x ↦ borient (apermute x)) = 0
 := by
-  have h1:= Equiv.sum_comp apermute
+  have h1:= Equiv.sum_comp apermute borient -- 常见错误：因为没有输入足够的参数 typeclass instance problem is stuck, it is often due to metavariables
+  -- AddCommMonoid ?m.1493
+  -- have sumEq :  ∑ i : Fin 3 ,i =  ∑ i in {0, 1, 2},i := by
+  --   simp only [Finset.mem_insert,false_or, implies_true, Finset.sum_insert_of_eq_zero_if_not_mem]
+  --   decide -- rfl
+  have sumEq2 : ∑ i : Fin 3, borient (apermute i) = ∑ x in {0, 1, 2}, borient (apermute x) := rfl
+  rw [← sumEq2]
+  clear sumEq2
+  rw [h1]
+  clear h1
+  have sumEq1 : ∑ i : Fin 3, borient i = Finset.sum {0, 1, 2} borient := rfl
+  rw [sumEq1]
+  exact h2
+  done
 -- Finset.sum_equiv
+
+
+lemma Test003
+(apermute : Perm (Fin 12))
+(borient : (Fin 12) → Fin 2)
+(h2: Finset.sum {0, 1, 2,3,4,5,6,7,8,9,10,11} borient = 0)
+: (Finset.sum {0, 1, 2,3,4,5,6,7,8,9,10,11} fun x ↦ borient (apermute x)) = 0
+:= by
+  have h1:= Equiv.sum_comp apermute borient -- 常见错误：因为没有输入足够的参数 typeclass instance problem is stuck, it is often due to metavariables
+  have sumEq2 : ∑ i : Fin 12, borient (apermute i) = ∑ x in {0, 1, 2,3,4,5,6,7,8,9,10,11}, borient (apermute x) := rfl
+  rw [← sumEq2]
+  clear sumEq2
+  rw [h1]
+  clear h1
+  have sumEq1 : ∑ i : Fin 12, borient i = Finset.sum {0, 1, 2,3,4,5,6,7,8,9,10,11} borient := rfl
+  rw [sumEq1]
+  exact h2
+  done
+
+
+
+  -- intro x
+  -- induction n
+  -- simp at x
+  -- rename_i i j
+  -- have h: 2 * Nat.succ i + 1 = 2 * i + 1 + 2 := by linarith
+  -- rw [h] at x
+  -- rw [Nat.mod_eq_sub_mod] at x
+  -- simp at x
+  -- exact j x
+  -- linarith

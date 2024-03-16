@@ -4,9 +4,11 @@ import Mathlib.GroupTheory.Perm.Fin
 import Mathlib.Algebra.Module.Equiv
 
 -- set_option maxHeartbeats 800000
-set_option maxRecDepth 2000
+set_option maxRecDepth 4000
+
 
 open Equiv Perm
+open BigOperators
 
 section RubiksSuperGroup
 
@@ -282,9 +284,6 @@ section RubiksSuperGroup
   --       orient := (a2.2.orient ∘ a1.2.permute) + a1.2.orient
   --     }
   --   }
-  -- def aaa1:RubiksSuperType:=sorry
-  -- def aaa2:RubiksSuperType:=sorry
-  -- #check aaa1*aaa2
 
 end RubiksSuperGroup
 
@@ -626,6 +625,24 @@ section RubiksGroup
     Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) c.snd.orient = 0
   }
 
+    @[simp]
+    lemma mul_mem'_permuteRemainsSum
+    (apermute : Perm (Fin 12))
+    (borient : (Fin 12) → Fin 2)
+    (h2: Finset.sum {0, 1, 2,3,4,5,6,7,8,9,10,11} borient = 0)
+    : (Finset.sum {0, 1, 2,3,4,5,6,7,8,9,10,11} fun x ↦ borient (apermute x)) = 0
+    := by
+      have h1:= Equiv.sum_comp apermute borient -- 常见错误：因为没有输入足够的参数 typeclass instance problem is stuck, it is often due to metavariables
+      have sumEq2 : ∑ i : Fin 12, borient (apermute i) = ∑ x in {0, 1, 2,3,4,5,6,7,8,9,10,11}, borient (apermute x) := rfl
+      rw [← sumEq2]
+      clear sumEq2
+      rw [h1]
+      clear h1
+      have sumEq1 : ∑ i : Fin 12, borient i = Finset.sum {0, 1, 2,3,4,5,6,7,8,9,10,11} borient := rfl
+      rw [sumEq1]
+      exact h2
+      done
+
   @[simp]
   lemma mul_mem' {a b : RubiksSuperType}
   -- {i1 i2 i3 i4 i5 i6 i7 i8: Fin 8}
@@ -669,12 +686,10 @@ section RubiksGroup
       -- refine Equiv.Perm.prod_comp
       -- apply h2
       -- rw [Finset.sum_range_succ]
-      -- sorry
       trans Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} b.1.orient
       -- apply Perm.sum_comp
       -- · intro x1
       --   simp only [ne_eq, Finset.coe_insert, Finset.coe_singleton]
-      --   sorry
       -- · exact h2
       ---
       -- todo -- 下面一长串提取出来吧：
@@ -692,6 +707,7 @@ section RubiksGroup
             := by
             intro x
           --这个是能证明的，耗时很长，但是需要用lean4 web版本。
+          -- this line can prove , but needs a moment
             -- fin_cases x <;> aesop
             sorry
             -- done
@@ -778,7 +794,8 @@ section RubiksGroup
       rw [h1]
       clear h1
       simp only [add_zero]
-      sorry
+      apply mul_mem'_permuteRemainsSum
+      exact h2
     }
 
   -- #check Finset.sum
@@ -799,6 +816,24 @@ section RubiksGroup
 
 
   @[simp]
+  lemma inv_mem'_permuteRemainsSum
+    (apermute : Perm (Fin 8))
+    (borient : (Fin 8) → Fin 3)
+    (h2: Finset.sum {0, 1, 2,3,4,5,6,7} borient = 0)
+    : (Finset.sum {0, 1, 2,3,4,5,6,7} fun x ↦ borient (apermute x)) = 0
+    := by
+      have h1:= Equiv.sum_comp apermute borient -- 常见错误：因为没有输入足够的参数 typeclass instance problem is stuck, it is often due to metavariables
+      have sumEq2 : ∑ i : Fin 8, borient (apermute i) = ∑ x in {0, 1, 2,3,4,5,6,7}, borient (apermute x) := rfl
+      rw [← sumEq2]
+      clear sumEq2
+      rw [h1]
+      clear h1
+      have sumEq1 : ∑ i : Fin 8, borient i = Finset.sum {0, 1, 2,3,4,5,6,7} borient := rfl
+      rw [sumEq1]
+      exact h2
+      done
+
+  @[simp]
   lemma inv_mem' {x : RubiksSuperType}
   : x∈ValidCube → x⁻¹ ∈ ValidCube
   := by
@@ -811,13 +846,15 @@ section RubiksGroup
     { have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} x.1.orient = 0
         := by apply hxv.right.left
       -- 和“mul_mem'”一样的问题，很容易看出来，不知道怎么写：
-      sorry
+      apply inv_mem'_permuteRemainsSum
+      exact h1
     }
     {
       have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8,9,10,11} x.2.orient = 0
         := by apply hxv.right.right
       -- 和“mul_mem'”一样的问题，很容易看出来，不知道怎么写：
-      sorry
+      apply mul_mem'_permuteRemainsSum
+      exact h1
     }
 
 
