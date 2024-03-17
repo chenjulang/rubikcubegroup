@@ -396,3 +396,17 @@ gorient (gpermute 1) = 0
       exact Fin.zero_ne_one
     exact (h6 h4).elim
   }
+
+
+  -- def pairingFunction (i j : ℕ) : ℕ :=
+  -- ((i + j) * (i + j + 1)) / 2 + j
+
+  -- def inversePairingFunction (k : ℕ) : ℕ × ℕ
+  -- := by
+  --   let w := Nat.floor ((Nat.sqrt (8 * k + 1) - 1) / 2)
+  --   let t := (w * w + w) / 2
+  --   let y := k - t
+  --   exact (y, w - y)
+
+  -- #eval pairingFunction 2 3
+  -- #eval inversePairingFunction 11

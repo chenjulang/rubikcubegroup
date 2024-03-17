@@ -266,8 +266,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- #eval G2Perm
   --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
   --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
-  -- 如何定义G2的“L,R,F,B”变式呢？直接推算，还是写一个函数映射呢？ todo,应该是写一个像
-    -- 先写4个映射，然后列表映射即可。
+  -- 如何定义G2的“L,R,B”变式呢？直接推算，还是写一个函数映射呢？
+    -- 先写3个映射，然后列表映射即可。
     def VariantFaceTurn_L : RubiksSuperType → RubiksSuperType :=
     fun x =>
       if x = U then U
@@ -292,41 +292,54 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
     def VariantFaceTurn_R : RubiksSuperType → RubiksSuperType :=
     fun x =>
-      if x=U then U
-      else F
-
-    def VariantFaceTurn_F : RubiksSuperType → RubiksSuperType :=
-    fun x =>
-      if x=U then U
-      else F
+      if x = U then U
+      else if x = D then D
+      else if x = R then B
+      else if x = L then F
+      else if x = F then R
+      else if x = B then L
+      else if x = U2 then U2
+      else if x = D2 then D2
+      else if x = R2 then B2
+      else if x = L2 then F2
+      else if x = F2 then R2
+      else if x = B2 then L2
+      else if x = U' then U'
+      else if x = D' then D'
+      else if x = R' then B'
+      else if x = L' then F'
+      else if x = F' then R'
+      else if x = B' then L'
+      else 1
 
     def VariantFaceTurn_B : RubiksSuperType → RubiksSuperType :=
     fun x =>
-      if x=U then U
-      else F
-    -- #eval toString $ VariantFaceTurn B
+      if x = U then U
+      else if x = D then D
+      else if x = R then L
+      else if x = L then R
+      else if x = F then B
+      else if x = B then F
+      else if x = U2 then U2
+      else if x = D2 then D2
+      else if x = R2 then L2
+      else if x = L2 then R2
+      else if x = F2 then B2
+      else if x = B2 then F2
+      else if x = U' then U'
+      else if x = D' then D'
+      else if x = R' then L'
+      else if x = L' then R'
+      else if x = F' then B'
+      else if x = B' then F'
+      else 1
 
-    def RST_list3 : Array RubiksSuperType := #[R' ,D ,D ,R ,B' ,U ,U ,B,R' ,D ,D ,R ,B' ,U ,U ,B]
-    #eval (RST_list3.map VariantFaceTurn_L).toList.prod --注意，这样toList不会去掉重复？
-    -- #eval toString $ (RST_list3.map VariantFaceTurn_L).toList.prod
-    -- def RST_list : List RubiksSuperType := {R' ,D ,D ,R ,B' ,U ,U ,B,R' ,D ,D ,R ,B' ,U ,U ,B}
-    -- def RST_list2 : Multiset RubiksSuperType := {R' ,D,D,D,U}
+    def G1Perm_L : Array RubiksSuperType := #[R' ,D ,D ,R ,B' ,U ,U ,B,R' ,D ,D ,R ,B' ,U ,U ,B]
+    -- #eval toString $ (G1Perm_L.map VariantFaceTurn_L).toList
+    #eval (G1Perm_L.map VariantFaceTurn_L).toList.prod --注意，这样toList不会去掉重复？
+    -- ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 1, 0] },
+    --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
 
-    -- def multiplyByTwoAndProduct (ms : multiset ℕ) : ℕ :=
--- ms.prod * 2 ^ ms.card
-    -- #eval (RST_list2.map VariantFaceTurn_L).prod
-    -- def RST_list2 : List RubiksSuperType := {R' ,D,D,D,U}
-    -- #eval RST_list2
-    -- def RST_list := ![R' ,D,D,D,U]
-    -- #eval RST_list
-    -- #eval R*D*D = RST_list.prod -- false
-    -- #eval toString $ List.map VariantFaceTurn_L RST_list
-    -- #eval toString $ List.map VariantFaceTurn_L RST_list
-    -- #eval (List.map VariantFaceTurn_B RST_list).prod
-
-      -- def cyclePieces {α : Type*} [DecidableEq α] -- 这里如何文字上理解也是个问题，输入旧位置，得到新位置？
-      -- : List α → Perm α
-      -- := fun list =>  List.formPerm list
   end rubikCubeFormula
 
   -- 说白了，只需要倒腾这20个块就能还原，不多也不少：
