@@ -264,8 +264,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- #eval G2Perm
   --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
   --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
-  -- 如何定义G2的“L,R,F,B”变式呢？直接推算，还是写一个函数映射呢？ todo
+  -- 如何定义G2的“L,R,F,B”变式呢？直接推算，还是写一个函数映射呢？ todo,应该是写一个像
+    -- 写4个映射，然后列表映射即可。
 
+      -- def cyclePieces {α : Type*} [DecidableEq α] -- 这里如何文字上理解也是个问题，输入旧位置，得到新位置？
+      -- : List α → Perm α
+      -- := fun list =>  List.formPerm list
 
   -- 说白了，只需要倒腾这20个块就能还原，不多也不少：
   -- 角块的排位：8个
@@ -295,6 +299,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   section lemma1TrashCode
 
+    lemma lemma1_013:(F * G1Perm * F').2.orient = 0
+    := by
+      decide
+      done
 
     lemma lemma1_012
     (g:RubiksSuperType)
@@ -420,20 +428,20 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- ∧
       -- ((g*h) * (h⁻¹*x1))作为参数插入命题A成立
     /-- 这个引理理应频繁使用的，不知道为什么这里没用到呢？感觉应该可以比较抽象的解决很多重复代码。 -/
-    lemma lemma1_2reachableMove_Exist_same_property
-    (g : RubiksSuperType)
-    (h : RubiksSuperType)
-    (hInG : h ∈ RubiksGroup)
-    (somePropA : RubiksSuperType →  Prop)
-    :
-    ∃ x1:RubiksGroup,
-    somePropA ((g) * x1) -- “冒号”写成“属于号”就不行了，请注意
-    →
-      (∃ x2 ∈ RubiksGroup, somePropA ((g*h) * x2))
-      ∧
-      somePropA ((g*h) * (h⁻¹*x1))
-    := by
-      sorry
+    -- lemma lemma1_2reachableMove_Exist_same_property
+    -- (g : RubiksSuperType)
+    -- (h : RubiksSuperType)
+    -- (hInG : h ∈ RubiksGroup)
+    -- (somePropA : RubiksSuperType →  Prop)
+    -- :
+    -- ∃ x1:RubiksGroup,
+    -- somePropA ((g) * x1) -- “冒号”写成“属于号”就不行了，请注意
+    -- →
+    --   (∃ x2 ∈ RubiksGroup, somePropA ((g*h) * x2))
+    --   ∧
+    --   somePropA ((g*h) * (h⁻¹*x1))
+    -- := by
+    --   sorry
 
     -- 这个应该可以去掉，暂时保留注释：
     -- 假设角块的方向数求和后，模3为0,假设8个角块的方向数中，有7个方向数被以上步骤还原为0以后，则=>,第8个角块的方向数也还原成0 ，为什么呢？：
@@ -484,6 +492,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       have h_CAO_DBL_is0: Corner_Absolute_Orient g.1 DBL_index = 0
       := by
         -- 用h1 , h2即可
+        simp only [Corner_Absolute_Orient] at h2 ⊢
+        -- 这个在社区解决了等待写
         sorry
         -- done
       by_cases ha0 : (Corner_Absolute_Orient g.1 DBL_index)=0
@@ -958,8 +968,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           --这个是直接计算结果，因为后者moveAction2的orient全零 --
           have h2_4_4_1: g.2.orient = (g * moveAction2).2.orient
             := by
-            sorry
-            -- done
+            rw [Prod.snd_mul]
+            simp only [PieceState.mul_def,ps_mul]
+            rw [lemma1_013]
+            simp only [Pi.zero_comp, zero_add]
+            done
           exact h2_4_4_1
         }
         apply And.intro

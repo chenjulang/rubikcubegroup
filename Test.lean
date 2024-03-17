@@ -4,9 +4,7 @@ import Mathlib.GroupTheory.Perm.Fin
 import Mathlib.Algebra.Module.Equiv
 open Equiv Perm
 open BigOperators
-
-
--- set_option maxRecDepth 2000
+set_option maxRecDepth 2000
 
 -- instance (n : Nat) : Repr (Perm (Fin n)) :=
 --     ⟨reprPrec ∘ Equiv.toFun⟩
@@ -206,45 +204,45 @@ open BigOperators
 -- :=
 --   prod_equiv e _ _ fun _ ↦ rfl
 
-lemma Test002
-(apermute : Perm (Fin 3))
-(borient : (Fin 3) → Fin 2)
-(h2: Finset.sum {0, 1, 2} borient = 0)
-: (Finset.sum {0, 1, 2} fun x ↦ borient (apermute x)) = 0
-:= by
-  have h1:= Equiv.sum_comp apermute borient -- 常见错误：因为没有输入足够的参数 typeclass instance problem is stuck, it is often due to metavariables
-  -- AddCommMonoid ?m.1493
-  -- have sumEq :  ∑ i : Fin 3 ,i =  ∑ i in {0, 1, 2},i := by
-  --   simp only [Finset.mem_insert,false_or, implies_true, Finset.sum_insert_of_eq_zero_if_not_mem]
-  --   decide -- rfl
-  have sumEq2 : ∑ i : Fin 3, borient (apermute i) = ∑ x in {0, 1, 2}, borient (apermute x) := rfl
-  rw [← sumEq2]
-  clear sumEq2
-  rw [h1]
-  clear h1
-  have sumEq1 : ∑ i : Fin 3, borient i = Finset.sum {0, 1, 2} borient := rfl
-  rw [sumEq1]
-  exact h2
-  done
--- Finset.sum_equiv
+-- lemma Test002
+-- (apermute : Perm (Fin 3))
+-- (borient : (Fin 3) → Fin 2)
+-- (h2: Finset.sum {0, 1, 2} borient = 0)
+-- : (Finset.sum {0, 1, 2} fun x ↦ borient (apermute x)) = 0
+-- := by
+--   have h1:= Equiv.sum_comp apermute borient -- 常见错误：因为没有输入足够的参数 typeclass instance problem is stuck, it is often due to metavariables
+--   -- AddCommMonoid ?m.1493
+--   -- have sumEq :  ∑ i : Fin 3 ,i =  ∑ i in {0, 1, 2},i := by
+--   --   simp only [Finset.mem_insert,false_or, implies_true, Finset.sum_insert_of_eq_zero_if_not_mem]
+--   --   decide -- rfl
+--   have sumEq2 : ∑ i : Fin 3, borient (apermute i) = ∑ x in {0, 1, 2}, borient (apermute x) := rfl
+--   rw [← sumEq2]
+--   clear sumEq2
+--   rw [h1]
+--   clear h1
+--   have sumEq1 : ∑ i : Fin 3, borient i = Finset.sum {0, 1, 2} borient := rfl
+--   rw [sumEq1]
+--   exact h2
+--   done
+-- -- Finset.sum_equiv
 
 
-lemma Test003
-(apermute : Perm (Fin 12))
-(borient : (Fin 12) → Fin 2)
-(h2: Finset.sum {0, 1, 2,3,4,5,6,7,8,9,10,11} borient = 0)
-: (Finset.sum {0, 1, 2,3,4,5,6,7,8,9,10,11} fun x ↦ borient (apermute x)) = 0
-:= by
-  have h1:= Equiv.sum_comp apermute borient -- 常见错误：因为没有输入足够的参数 typeclass instance problem is stuck, it is often due to metavariables
-  have sumEq2 : ∑ i : Fin 12, borient (apermute i) = ∑ x in {0, 1, 2,3,4,5,6,7,8,9,10,11}, borient (apermute x) := rfl
-  rw [← sumEq2]
-  clear sumEq2
-  rw [h1]
-  clear h1
-  have sumEq1 : ∑ i : Fin 12, borient i = Finset.sum {0, 1, 2,3,4,5,6,7,8,9,10,11} borient := rfl
-  rw [sumEq1]
-  exact h2
-  done
+-- lemma Test003
+-- (apermute : Perm (Fin 12))
+-- (borient : (Fin 12) → Fin 2)
+-- (h2: Finset.sum {0, 1, 2,3,4,5,6,7,8,9,10,11} borient = 0)
+-- : (Finset.sum {0, 1, 2,3,4,5,6,7,8,9,10,11} fun x ↦ borient (apermute x)) = 0
+-- := by
+--   have h1:= Equiv.sum_comp apermute borient -- 常见错误：因为没有输入足够的参数 typeclass instance problem is stuck, it is often due to metavariables
+--   have sumEq2 : ∑ i : Fin 12, borient (apermute i) = ∑ x in {0, 1, 2,3,4,5,6,7,8,9,10,11}, borient (apermute x) := rfl
+--   rw [← sumEq2]
+--   clear sumEq2
+--   rw [h1]
+--   clear h1
+--   have sumEq1 : ∑ i : Fin 12, borient i = Finset.sum {0, 1, 2,3,4,5,6,7,8,9,10,11} borient := rfl
+--   rw [sumEq1]
+--   exact h2
+--   done
 
 
 
@@ -258,3 +256,118 @@ lemma Test003
   -- simp at x
   -- exact j x
   -- linarith
+
+-- #check Finset.sum_bij
+
+  variable {β : Type*}
+  @[to_additive]
+  theorem prod_univ_9 [CommMonoid β] (f : Fin 9 → β) :
+    ∏ i, f i = f 0 * f 1 * f 2 * f 3 * f 4 * f 5 * f 6 * f 7 * f 8
+  := by
+    rw [Fin.prod_univ_castSucc, Fin.prod_univ_eight]
+    rfl
+  @[to_additive]
+  theorem prod_univ_10 [CommMonoid β] (f : Fin 10 → β) :
+    ∏ i, f i = f 0 * f 1 * f 2 * f 3 * f 4 * f 5 * f 6 * f 7 * f 8 * f 9
+  := by
+    rw [Fin.prod_univ_castSucc, prod_univ_9]
+    rfl
+  @[to_additive]
+  theorem prod_univ_11 [CommMonoid β] (f : Fin 11 → β) :
+    ∏ i, f i = f 0 * f 1 * f 2 * f 3 * f 4 * f 5 * f 6 * f 7 * f 8 * f 9 * f 10
+  := by
+    rw [Fin.prod_univ_castSucc, prod_univ_10]
+    rfl
+  @[to_additive]
+  theorem prod_univ_12 [CommMonoid β] (f : Fin 12 → β) :
+    ∏ i, f i = f 0 * f 1 * f 2 * f 3 * f 4 * f 5 * f 6 * f 7 * f 8 * f 9 * f 10 * f 11
+  := by
+    rw [Fin.prod_univ_castSucc, prod_univ_11]
+    rfl
+
+
+
+  lemma testSum2
+  (fn: Fin 12 → Fin 10)
+  : ∑ i in {0,1,2,3,4,5,6,7,8,9,10,11}, fn i = fn 0 + fn 1 + fn 2 + fn 3 + fn 4+ fn 5+ fn 6 + fn 7+ fn 8+ fn 9+ fn 10+ fn 11
+  := by
+    apply sum_univ_12 fn
+
+  lemma testSum
+  (fn: Fin 3 → Fin 10)
+  : ∑ i in {0,1,2}, fn i = fn 0 + fn 1 + fn 2
+  := by
+    apply Fin.sum_univ_three _
+    done
+
+  lemma Test004_2
+  (apermute : Perm (Fin 3))
+  (borient : (Fin 3) → (Fin 3))
+  (h2: Finset.sum {0, 1, 2} borient = 0)
+  : (Finset.sum {0, 1, 2} fun x ↦ borient (apermute x)) = 0
+  := by
+    have h1:= Equiv.sum_comp apermute borient -- 常见错误：因为没有输入足够的参数 typeclass instance problem is stuck, it is often due to metavariables
+    have sumEq2 : ∑ i : Fin 3, borient (apermute i) = ∑ x in {0, 1, 2}, borient (apermute x) := rfl
+    rw [← sumEq2]
+    clear sumEq2
+    rw [h1]
+    clear h1
+    have sumEq1 : ∑ i : Fin 3, borient i = Finset.sum {0, 1, 2} borient := rfl
+    rw [sumEq1]
+    exact h2
+    done
+
+  lemma Test004_1
+  (gorient: Fin 3 → Fin 3)
+  (gpermute: Perm (Fin 3))
+  : ∑ i in {0,1,2}, (gorient ∘ gpermute) i
+  = (gorient ∘ gpermute) 0
+  + (gorient ∘ gpermute) 1
+  + (gorient ∘ gpermute) 2
+    := by
+    set fn := (gorient ∘ gpermute)
+    apply Fin.sum_univ_three _
+    -- simp only [Function.comp_apply]
+    -- simp only [Finset.mem_insert, or_self, not_false_eq_true,Finset.sum_insert,
+    -- Finset.mem_singleton, OfNat.one_ne_ofNat]
+    -- sorry
+
+
+lemma Test004
+(gorient: Fin 3 → Fin 3)
+(gpermute: Perm (Fin 3))
+(h1: Finset.sum {0,1,2} gorient = 0)
+(h2:
+gorient (gpermute 0) = 0
+∧
+gorient (gpermute 1) = 0
+)
+:gorient (gpermute 2) = 0
+:= by
+  by_cases ha0:(gorient (gpermute 2))=1
+  {
+    obtain ⟨h2_1,h2_2⟩ := h2
+    have h3: ∑ x in {0, 1, 2}, gorient (gpermute x) = Finset.sum {0,1,2} (gorient ∘ gpermute)
+    := by rfl
+    have h4_2 : Finset.sum {0,1,2} (gorient ∘ gpermute) = ∑ i in {0,1,2}, (gorient ∘ gpermute) i := by rfl
+    have h4_1 : ∑ i in {0,1,2}, (gorient ∘ gpermute) i = (gorient ∘ gpermute) 0 +(gorient ∘ gpermute) 1 + (gorient ∘ gpermute) 2
+      := by exact Test004_1 gorient gpermute
+    have h4: Finset.sum {0,1,2} (gorient ∘ gpermute) = 1
+      := by
+      simp only [Function.comp_apply]
+      rw [h3]
+      rw [h4_2]
+      rw [h4_1]
+      simp only [Function.comp_apply]
+      rw [h2_1,h2_2]
+      simp only [add_zero, zero_add,ha0]
+    have h5: Finset.sum {0, 1, 2} (gorient ∘ gpermute) = 0 := by
+      have h5_1 := Test004_2 gpermute gorient-- Test003类似的工作
+      apply h5_1 at h1
+      exact h1
+    clear h3 h2_1 h2_2 ha0 h1
+    have h6: Finset.sum {0, 1, 2} (gorient ∘ ⇑gpermute) ≠ 1 := by
+      rw [h5]
+      exact Fin.zero_ne_one
+    exact (h6 h4).elim
+  }
