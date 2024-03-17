@@ -1724,6 +1724,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   end lemma2TrashCode
 
 
+  --todo 先看看这个引理是：1.直接在lemma3中使用，还是2.换成已知定理在去lemma3中使用，这时候就要删掉这里了。
     -- 涉及定理：closure_three_cycles_eq_alternating
     -- 涉及定义：3循环： IsThreeCycle
   -- 通用小引理4.6：假设n>=3，对于任意集合M，假设M包含Sn中全体3循环，则=>， M >= An
