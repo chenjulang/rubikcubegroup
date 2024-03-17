@@ -180,7 +180,6 @@ section ValidityChecks
       --     · exact rfl
       --     · rfl
       --   }
-      sorry
       -- done
 
   @[simp]
@@ -381,6 +380,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * (F^2 * G1Perm^2 * F^2)).1.orient = 0
     := by
       sorry -- 计算结果可知
+      -- 这个在社区解决了等待写
       -- done
 
     lemma lemma1_011:(F^2 * G1Perm^2 * F^2).1.permute = 1
@@ -408,6 +408,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- (F * G1Perm * F').1.orient = ![2, 0, 0, 0, 0, 0, 0, 1]，求和模3也为0
       -- (F * G1Perm * F').1.orient ∘ ⇑g.1.permute ，只是重新排列了，求和模3也为0
       -- g.1.orient的话由h1知道也是求和为0。
+      -- 这个在社区解决了等待写
       sorry
       -- done
 
@@ -435,6 +436,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- (F * G1Perm * F').1.orient = ![2, 0, 0, 0, 0, 0, 0, 1]，求和模3也为0
       -- (F * G1Perm * F').1.orient ∘ ⇑g.1.permute ，只是重新排列了，求和模3也为0
       -- g.1.orient的话由h1知道也是求和为0。
+      -- 这个在社区解决了等待写
       sorry
       -- done
 
@@ -470,8 +472,19 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- (F * G1Perm * F').1.orient = ![2, 0, 0, 0, 0, 0, 0, 1]，求和模3也为0
       -- (F * G1Perm * F').1.orient ∘ ⇑g.1.permute ，只是重新排列了，求和模3也为0
       -- g.1.orient的话由h1知道也是求和为0。
-      sorry
-      -- done
+      -- 这个在社区解决了等待写
+      have h3: ∑ x in {0, 1, 2, 3, 4, 5, 6, 7}, (F * G1Perm * F').1.orient x = 0 := sorry
+      simp only [Pi.add_apply]
+      have h4: ∑ x in {0, 1, 2, 3, 4, 5, 6, 7}, (((F * G1Perm * F').1.orient ∘ ⇑g.1.permute) x + g.1.orient x)
+      = ∑ x in {0, 1, 2, 3, 4, 5, 6, 7}, ((F * G1Perm * F').1.orient ∘ g.1.permute) x
+        + ∑ x in {0, 1, 2, 3, 4, 5, 6, 7},g.1.orient x := sorry
+      rw [h4]
+      rw [h1]
+      clear h1 h4
+      rw [add_zero]
+      have h5: ∑ x in {0, 1, 2, 3, 4, 5, 6, 7}, ((F * G1Perm * F').1.orient ∘ g.1.permute) x = 0 := by sorry
+      exact h5
+      done
 
 
     -- 这个引理要一般性一点：g和i如果中途相隔一个G中的元素h，也就是gh=i，则某个旧目标g可以达到，可以变成新目标i可以达到。
@@ -511,7 +524,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     --   ∧
     --   somePropA ((g*h) * (h⁻¹*x1))
     -- := by
-    --   sorry
+    --
 
     -- 这个应该可以去掉，暂时保留注释：
     -- 假设角块的方向数求和后，模3为0,假设8个角块的方向数中，有7个方向数被以上步骤还原为0以后，则=>,第8个角块的方向数也还原成0 ，为什么呢？：
@@ -538,7 +551,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- ∀ j : (Fin 7),  (g*x1).1.orient j = 0 -- 注意：当这3个符号报错时 :,∈,in 三个都轮流试一下。
     -- →
     -- (g*x1).1.orient 7 = 0
-    -- := sorry
+    -- :=
 
     -- 由于前几个角块的证明过分类似，还没找到复写代码的巧妙方法，直接跳到最后一个引理进行证明，看看如何收尾即可。
     -- 想不到引理1最后一步这么简单，推出矛盾即可。
@@ -573,7 +586,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         simp only [moveAction1]
         rw [mul_one]
         sorry
-        -- done -- 很明显了
+        -- 这个在社区解决了等待写
+        -- done -- 很明显了,目标本身一堆rfl的，然后0那个就是展开即可
       }
       { by_cases ha1: (Corner_Absolute_Orient g.1 DBL_index) = 1
         {
@@ -593,6 +607,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             --   match a with
             --   | 2 => rfl
             -- done
+            -- 这个在社区解决了等待写
             sorry
           -- 这里矛盾点在哪呢？一开始的分类讨论非0就能和0推出矛盾，所以不需要考虑当前情况。
           exact (ha0 h_CAO_DBL_is0).elim
@@ -626,7 +641,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (g).2.orient = (g * h).2.orient
     ∧
     ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
-    := by sorry
+    := by sorry --
 
     lemma lemma1_004_UBL
     (g : RubiksSuperType) -- RubiksSuperType即手写的H。
@@ -640,7 +655,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (g).2.orient = (g * h).2.orient
     ∧
     ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
-    := by sorry
+    := by sorry --
 
     lemma lemma1_003_DFR
     (g : RubiksSuperType) -- RubiksSuperType即手写的H。
@@ -653,7 +668,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (g).2.orient = (g * h).2.orient
     ∧
     ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
-    := by sorry
+    := by sorry --
 
     lemma lemma1_002_DFL
     (g : RubiksSuperType) -- RubiksSuperType即手写的H。
@@ -666,7 +681,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (g).2.orient = (g * h).2.orient
     ∧
     ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
-    := by sorry
+    := by sorry --
 
     -- lemma1的主要证明依赖本引理lemma1_001_UFL，本引理主要证明依赖lemma1_002_DFL
     -- 任意H中的状态，满足：角块方向数求和后模3为0,UFL的方向数为0
@@ -819,6 +834,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             --   match a with
             --   | 2 => rfl
             -- done
+            -- 这个在社区解决了等待写
             sorry
           let moveAction3 := (F^2)*(G1Perm^2)*(F^2)
           have h3_1: (g.1.orient + moveAction3.1.orient ∘ g.1.permute) (g.1.permute⁻¹ DFL_index)
@@ -875,7 +891,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             exact h3_3_1
             done
           have h_b_3:Corner_Absolute_Orient (g * moveAction3).1 UFL_index = 0
-            := by sorry --待办
+            := by
+            simp only [Corner_Absolute_Orient]
+            sorry --待办 -- 类似于 (Corner_Absolute_Orient (g*moveAction3).1 DFL_index) = 0的证明，需要从已知出发，先证明两个关键引理。
           have h3_4 := lemma1_002_DFL (g * moveAction3) h3_3 {
             left := h_b_3
             right := h3
@@ -1079,6 +1097,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           --   match a with
           --   | 2 => rfl
           -- done
+          -- 这个在社区解决了等待写
           sorry
         let moveAction3 := F*(G1Perm^2)*F'
         -- #eval F*(G1Perm^2)*F'
@@ -1282,7 +1301,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       simp only [moveAction1]
       rw [mul_one]
       sorry
-      -- done -- 很明显了
+      -- done -- 很明显了,Goal很多rfl-- 这个在社区解决了等待写
     }
     { have ha2: Edge_Absolute_Orient g.2 UF_index = 1
       := by
@@ -1295,6 +1314,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         --   match a with
         --   | 2 => rfl
         -- done
+        -- 这个在社区解决了等待写
         sorry
       exact (ha0 h_EAO_UF_is0).elim
     }
@@ -1316,7 +1336,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
-  := by sorry
+  := by sorry --
 
   lemma lemma2_008_FL
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
@@ -1332,7 +1352,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
-  := by sorry
+  := by sorry --
 
   lemma lemma2_007_LD
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
@@ -1347,7 +1367,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
-  := by sorry
+  := by sorry --
 
   lemma lemma2_006_LB
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
@@ -1361,7 +1381,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
-  := by sorry
+  := by sorry --
 
   lemma lemma2_005_BD
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
@@ -1375,7 +1395,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
-  := by sorry
+  := by sorry --
 
   lemma lemma2_004_UB
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
@@ -1389,7 +1409,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
-  := by sorry
+  := by sorry--
 
   lemma lemma2_003_RB
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
@@ -1402,7 +1422,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
-  := by sorry
+  := by sorry--
 
   lemma lemma2_002_RD
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
@@ -1415,7 +1435,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
-  := by sorry
+  := by sorry--
 
   lemma lemma2_002_FR
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
@@ -1428,7 +1448,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
-  := by sorry
+  := by sorry--
 
   -- 任意H中的状态，满足：棱块方向数求和后模2为0,UR的方向数为0
     -- 则=>存在G中操作h，(g*h)还原所有棱块的方向数，且不改变全体角块的方向数，且不改变所有块的位置。
@@ -1523,7 +1543,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         exact h3_3_1
         done
       have h_b_3:Edge_Absolute_Orient (g * moveAction3).2 UR_index = 0
-        := by sorry --待办
+        := by sorry --待办--
       have h3_4 := lemma2_002_FR (g * moveAction3) h3_3 {
         left := h_b_3
         right := h3
