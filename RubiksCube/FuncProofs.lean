@@ -265,7 +265,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
   --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
   -- 如何定义G2的“L,R,F,B”变式呢？直接推算，还是写一个函数映射呢？ todo,应该是写一个像
-    -- 写4个映射，然后列表映射即可。
+    -- 先写4个映射，然后列表映射即可。
 
       -- def cyclePieces {α : Type*} [DecidableEq α] -- 这里如何文字上理解也是个问题，输入旧位置，得到新位置？
       -- : List α → Perm α
@@ -1178,7 +1178,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   lemma lemma2_003:(G2Perm).2.permute = 1 := by decide
 
-  --todo
   lemma lemma2_010_UL_and_011_UF
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
   (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
@@ -1197,7 +1196,41 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
   ∧
   (Edge_Absolute_Orient g.2 UF_index) = 0
-  := by sorry
+  := by
+    let h := Solved
+    have h_EAO_UF_is0: Edge_Absolute_Orient g.2 UF_index = 0
+    := by
+      -- 用h1 , h2即可
+      simp only [Edge_Absolute_Orient] at h2 ⊢
+      -- 这个在社区解决了等待写
+      sorry
+      -- done
+    by_cases ha0 : Edge_Absolute_Orient g.2 UF_index = 0
+    {
+      let moveAction1 : RubiksSuperType := 1
+      use moveAction1
+      simp only [moveAction1]
+      rw [mul_one]
+      sorry
+      -- done -- 很明显了
+    }
+    --todo
+    { have ha2: Edge_Absolute_Orient g.2 UF_index = 1
+      := by
+        -- 怎么使用排除法呢？很明显是对的,非0，1,就是2
+        -- Kyle Miller: You can use the generalize tactic in your original goal to turn Corner_Absolute_Orient g.1 UFL_index into a, and then
+        -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
+        --   fin_cases a <;> simp at *
+        -- Kyle Miller: There's also this magic:
+        -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
+        --   match a with
+        --   | 2 => rfl
+        -- done
+        sorry
+      exact (ha0 h_EAO_UF_is0).elim
+    }
+    done
+
 
   lemma lemma2_009_FD
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
