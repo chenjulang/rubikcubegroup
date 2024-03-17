@@ -367,7 +367,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   def LD_index :Fin 12 := 11
 
 
-
   section lemma1TrashCode
 
     lemma lemma1_013:(F * G1Perm * F').2.orient = 0
