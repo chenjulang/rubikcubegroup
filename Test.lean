@@ -2,9 +2,12 @@ import Lean
 import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.GroupTheory.Perm.Fin
 import Mathlib.Algebra.Module.Equiv
+import Mathlib.Data.Fin.Tuple.Reflection
+
 open Equiv Perm
 open BigOperators
 set_option maxRecDepth 2000
+
 
 -- instance (n : Nat) : Repr (Perm (Fin n)) :=
 --     ⟨reprPrec ∘ Equiv.toFun⟩
@@ -257,7 +260,18 @@ set_option maxRecDepth 2000
   -- exact j x
   -- linarith
 
--- #check Finset.sum_bij
+  -- #check Finset.sum_bij
+
+
+  -- 改进证明：
+  variable {α : Type*}
+
+  example [AddCommMonoid α] (a : Fin 3 → α) : ∑ i, a i = a 0 + a 1 + a 2 :=
+  (FinVec.sum_eq _).symm
+
+
+
+
 
   variable {β : Type*}
   @[to_additive]
@@ -285,13 +299,23 @@ set_option maxRecDepth 2000
     rw [Fin.prod_univ_castSucc, prod_univ_11]
     rfl
 
-
+  -- 如何将这些比较复杂的tactic由simp？或apply?自动提醒比如：(FinVec.sum_eq _).symm ,这就要设计macro了。
+  lemma testSum2'
+  (fn: Fin 12 → Fin 10)
+  : ∑ i in {0,1,2,3,4,5,6,7,8,9,10,11}, fn i = fn 0 + fn 1 + fn 2 + fn 3 + fn 4+ fn 5+ fn 6 + fn 7+ fn 8+ fn 9+ fn 10+ fn 11
+  := (FinVec.sum_eq _).symm
 
   lemma testSum2
   (fn: Fin 12 → Fin 10)
   : ∑ i in {0,1,2,3,4,5,6,7,8,9,10,11}, fn i = fn 0 + fn 1 + fn 2 + fn 3 + fn 4+ fn 5+ fn 6 + fn 7+ fn 8+ fn 9+ fn 10+ fn 11
   := by
     apply sum_univ_12 fn
+
+  lemma testSum'
+  (fn: Fin 3 → Fin 10)
+  : ∑ i in {0,1,2}, fn i = fn 0 + fn 1 + fn 2
+  := by
+    exact (FinVec.sum_eq _).symm
 
   lemma testSum
   (fn: Fin 3 → Fin 10)
@@ -326,7 +350,8 @@ set_option maxRecDepth 2000
   + (gorient ∘ gpermute) 2
     := by
     set fn := (gorient ∘ gpermute)
-    apply Fin.sum_univ_three _
+    -- apply Fin.sum_univ_three _
+    exact (FinVec.sum_eq _).symm
     -- simp only [Function.comp_apply]
     -- simp only [Finset.mem_insert, or_self, not_false_eq_true,Finset.sum_insert,
     -- Finset.mem_singleton, OfNat.one_ne_ofNat]

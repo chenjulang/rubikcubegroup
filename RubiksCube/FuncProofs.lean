@@ -242,6 +242,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     rw [h]
     exact Reachable.Solved
 
+  section rubikCubeFormula
+
   def G1Perm_element : RubiksSuperType
   := R' * D * D * R * B' * U * U * B
   /-- g1:
@@ -266,10 +268,66 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
   -- 如何定义G2的“L,R,F,B”变式呢？直接推算，还是写一个函数映射呢？ todo,应该是写一个像
     -- 先写4个映射，然后列表映射即可。
+    def VariantFaceTurn_L : RubiksSuperType → RubiksSuperType :=
+    fun x =>
+      if x = U then U
+      else if x = D then D
+      else if x = R then F
+      else if x = L then B
+      else if x = F then L
+      else if x = B then R
+      else if x = U2 then U2
+      else if x = D2 then D2
+      else if x = R2 then F2
+      else if x = L2 then B2
+      else if x = F2 then L2
+      else if x = B2 then R2
+      else if x = U' then U'
+      else if x = D' then D'
+      else if x = R' then F'
+      else if x = L' then B'
+      else if x = F' then L'
+      else if x = B' then R'
+      else 1
+
+    def VariantFaceTurn_R : RubiksSuperType → RubiksSuperType :=
+    fun x =>
+      if x=U then U
+      else F
+
+    def VariantFaceTurn_F : RubiksSuperType → RubiksSuperType :=
+    fun x =>
+      if x=U then U
+      else F
+
+    def VariantFaceTurn_B : RubiksSuperType → RubiksSuperType :=
+    fun x =>
+      if x=U then U
+      else F
+    -- #eval toString $ VariantFaceTurn B
+
+    def RST_list3 : Array RubiksSuperType := #[R' ,D ,D ,R ,B' ,U ,U ,B,R' ,D ,D ,R ,B' ,U ,U ,B]
+    #eval (RST_list3.map VariantFaceTurn_L).toList.prod --注意，这样toList不会去掉重复？
+    -- #eval toString $ (RST_list3.map VariantFaceTurn_L).toList.prod
+    -- def RST_list : List RubiksSuperType := {R' ,D ,D ,R ,B' ,U ,U ,B,R' ,D ,D ,R ,B' ,U ,U ,B}
+    -- def RST_list2 : Multiset RubiksSuperType := {R' ,D,D,D,U}
+
+    -- def multiplyByTwoAndProduct (ms : multiset ℕ) : ℕ :=
+-- ms.prod * 2 ^ ms.card
+    -- #eval (RST_list2.map VariantFaceTurn_L).prod
+    -- def RST_list2 : List RubiksSuperType := {R' ,D,D,D,U}
+    -- #eval RST_list2
+    -- def RST_list := ![R' ,D,D,D,U]
+    -- #eval RST_list
+    -- #eval R*D*D = RST_list.prod -- false
+    -- #eval toString $ List.map VariantFaceTurn_L RST_list
+    -- #eval toString $ List.map VariantFaceTurn_L RST_list
+    -- #eval (List.map VariantFaceTurn_B RST_list).prod
 
       -- def cyclePieces {α : Type*} [DecidableEq α] -- 这里如何文字上理解也是个问题，输入旧位置，得到新位置？
       -- : List α → Perm α
       -- := fun list =>  List.formPerm list
+  end rubikCubeFormula
 
   -- 说白了，只需要倒腾这20个块就能还原，不多也不少：
   -- 角块的排位：8个
@@ -1214,7 +1272,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       sorry
       -- done -- 很明显了
     }
-    --todo
     { have ha2: Edge_Absolute_Orient g.2 UF_index = 1
       := by
         -- 怎么使用排除法呢？很明显是对的,非0，1,就是2
@@ -1526,7 +1583,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     by_cases ha0 : (Edge_Absolute_Orient g.2 UR_index)=0
     {
       let moveAction1 := Solved
-      have h1 := lemma1_002_UR g hsum0 ha0
+      have h1 := lemma2_001_UR g hsum0 ha0
       obtain ⟨h1_1,h1_2,h1_3,h1_4,h1_5,h1_6⟩ := h1
       use h1_1
       done
