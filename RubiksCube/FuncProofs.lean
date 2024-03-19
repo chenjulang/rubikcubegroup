@@ -1744,26 +1744,28 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   end lemma2TrashCode
 
 
-  --todo 先看看这个引理是：1.直接在lemma3中使用，还是2.换成已知定理在去lemma3中使用，这时候就要删掉这里了。
+  -- 先看看这个引理是：1.直接在lemma3中使用，还是2.换成已知定理在去lemma3中使用，这时候就要删掉这里了。
+  -- 选择先去掉。
     -- 涉及定理：closure_three_cycles_eq_alternating
     -- 涉及定义：3循环： IsThreeCycle
   -- 通用小引理4.6：假设n>=3，对于任意集合M，假设M包含Sn中全体3循环，则=>， M >= An
-  lemma lemma46
-  (M:Subgroup (Perm α)):
-  ∀ σ:Perm α,
-    IsThreeCycle σ
-    ∧
-    σ ∈ M
-  →
-  ∀ al ∈ alternatingGroup α,
-  al ∈ M
-  := by
-    have h1:= closure { σ : Perm α | σ ∈ M}
-    sorry
+  -- lemma lemma46
+  -- (M:Subgroup (Perm α)):
+  -- ∀ σ:Perm α,
+  --   IsThreeCycle σ
+  --   ∧
+  --   σ ∈ M
+  -- →
+  -- ∀ al ∈ alternatingGroup α,
+  -- al ∈ M
+  -- := by
+  --   have h1:= closure { σ : Perm α | σ ∈ M}
+  --   sorry
 
   -- #check alternatingGroup α
 
 
+  -- todo 先证明组合的定理，一天能否写完所有杂牌引理，然后剩下31，32？
   -- 应该写成参数好一点
   -- 下面31和32是最关键的最重要的定理
   -- 魔方群能生成所有角块的位置三循环（方向数不改变）。
