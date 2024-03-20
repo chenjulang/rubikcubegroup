@@ -880,6 +880,7 @@ section RubiksGroup
     | FT : ∀x : RubiksSuperType, FaceTurn x → Reachable x
     | mul : ∀x y : RubiksSuperType, Reachable x → Reachable y → Reachable (x * y)
     | inv :  ∀x : RubiksSuperType, Reachable x → Reachable x⁻¹
+    | split : ∀x y : RubiksSuperType, Reachable (x * y) → Reachable x → Reachable y
 
   inductive Reachable_TWGroup1
   : RubiksSuperType → Prop

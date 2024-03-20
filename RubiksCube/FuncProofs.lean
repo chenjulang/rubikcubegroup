@@ -1906,14 +1906,21 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   /-- （奇X奇) → (偶X偶）-/
   lemma lemma13_oddXoddToEvenXEven
   (x: RubiksSuperType)
-  (h2: Reachable x)
   (h3: (sign x.1.permute = -1 ∧ -1 = sign x.2.permute) )
   :
-  ∃ (g: RubiksSuperType),
+  ∃ (g: RubiksSuperType), -- 举例操作是g5
     Reachable g
     ∧
     (sign (g * x).1.permute = 1 ∧ 1 = sign (g * x).2.permute)
-  := by sorry
+  := by
+    sorry
+
+  -- lemma reachable_split
+  -- (x: RubiksSuperType)
+  -- (y: RubiksSuperType)
+  -- (h0: Reachable y)
+  -- (h1: Reachable (x*y))
+  -- : Reachable x := by sorry
 
   lemma lemma13_EvenPermute_valid_isReachable
   (x: RubiksSuperType)
@@ -2098,7 +2105,13 @@ theorem valid_reachable
     -- lemma13_oddXoddToEvenXEven
     -- lemma13_EvenPermute_valid_isReachable
     -- Reachable g →   Reachable g*x →  Reachable x
-    sorry
+    have h3_1_1 := lemma13_oddXoddToEvenXEven x h3_1
+    obtain ⟨od1,od2,od3,od4⟩ := h3_1_1
+    have h3_1_2 := lemma13_EvenPermute_valid_isReachable (od1 * x) {left:=od3,right:=od4} od2
+    -- 这里很明显了，但是是不是需要增加Reachable的定义呢？但是可能会影响左推右的过程，但问题不大。
+    apply Reachable.split
+    · exact h3_1_2
+    · exact od2
   | inr h3_2 =>
     apply lemma13_EvenPermute_valid_isReachable
     · exact h3_2
@@ -2174,6 +2187,7 @@ theorem reachable_valid
         done
       }
     }
+  | split x y h1 h2 h3 h4 => sorry
   done
 
 /-- 魔方第二基本定理 -/
