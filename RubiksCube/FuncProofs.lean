@@ -1768,56 +1768,71 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- todo 先证明组合的定理，一天能否写完所有杂牌引理，然后剩下31，32？
   -- 应该写成参数好一点
   -- 下面31和32是最关键的最重要的定理
-  -- 魔方群能生成所有角块的位置三循环（方向数不改变）。
+  -- 魔方群能生成所有角块的位置三循环（全体方向数不改变,棱块位置不变）。
   lemma lemma31
-  :∃ g : RubiksSuperType,
-  Reachable g
-  ∧
-  ∀ x : RubiksSuperType,
-  IsThreeCycle x.1.permute
-  ∧
-  x.2.permute = 1
-  ∧
-  x.1.orient = 0
-  ∧
-  x.2.orient = 0
-  →
-  x * g = Solved
+  (x : RubiksSuperType)
+  (h1 : IsThreeCycle x.1.permute)
+  -- (h2 : x.2.permute = 1)
+  (h3 : x.1.orient = 0)
+  (h4 : x.2.orient = 0)
+  :
+  ∃ g : RubiksSuperType,
+    Reachable g
+    ∧
+    (x * g).1.permute = 1
+    ∧
+    (x * g).1.orient = (x).1.orient
+    ∧
+    (x * g).2.orient = (x).2.orient
+    ∧
+    (x * g).2.permute = (x).2.permute
   := by sorry
 
-  -- 魔方群能生成所有棱块的位置三循环（方向数不改变）。
+  -- 魔方群能生成所有棱块的位置三循环（全体方向数不改变,角块位置不变）。
   lemma lemma32
-  :∃ g : RubiksSuperType,
-  Reachable g
-  ∧
-  ∀ x : RubiksSuperType,
-  IsThreeCycle x.2.permute
-  ∧
-  x.1.permute = 1
-  ∧
-  x.1.orient = 0
-  ∧
-  x.2.orient = 0
-  →
-  x * g = Solved
+  (x : RubiksSuperType)
+  (h1: IsThreeCycle x.2.permute)
+  (h2: x.1.permute = 1)
+  (h3: x.1.orient = 0)
+  (h4: x.2.orient = 0)
+  :
+  ∃ g : RubiksSuperType,
+    Reachable g
+    ∧
+    x * g = Solved
   := by sorry
 
   -- 其实就是lemma31和lemma32的简单结合，由于角块和棱块可以分别互不影响地完成，这个引理应该很容易证明。
   lemma lemma11
-  :∀ x : RubiksSuperType,
-  IsThreeCycle x.2.permute
-  ∧
-  IsThreeCycle x.1.permute
-  ∧
-  x.1.orient = 0
-  ∧
-  x.2.orient = 0
-  →
+  (x : RubiksSuperType)
+  (h1: IsThreeCycle x.2.permute)
+  (h2: IsThreeCycle x.1.permute)
+  (h3: x.1.orient = 0)
+  (h4: x.2.orient = 0)
+  :
   ∃ g : RubiksSuperType,
-  Reachable g
-  ∧
-  x * g = Solved
-  := by sorry
+    Reachable g
+    ∧
+    x * g = Solved
+  := by
+    have cornerR := lemma31 x h2 h3 h4
+    obtain ⟨c1,c2,c3,c4,c5,c6⟩ := cornerR
+    have remains_threecycle : IsThreeCycle (x * c1).2.permute
+      := by
+      rw [c6.symm] at h1
+      exact h1
+    rw [c4.symm] at h3
+    rw [c5.symm] at h4
+    have edgeR := lemma32 (x * c1) remains_threecycle c3 h3 h4
+    obtain ⟨e1,e2,e3⟩ := edgeR
+    use (c1 * e1)
+    apply And.intro
+    · apply Reachable.mul
+      exact c2
+      exact e2
+    · rw [← mul_assoc]
+      exact e3
+    done
 
   -- 右推左的限制条件1使得只能选这2种情况进行分类讨论。
   /-- 1.（奇X奇) 2.(偶X偶）-/
@@ -1829,19 +1844,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (sign x.1.permute = -1 ∧ -1 = sign x.2.permute)
   ∨
   (sign x.1.permute = 1 ∧ 1 = sign x.2.permute)
-  := by sorry
-
-  -- 化归思想，所有lemma12_condition1_restriction中的情况1可以通过魔方群操作变成情况2。
-  /-- （奇X奇) → (偶X偶）-/
-  lemma lemma13_oddXoddToEvenXEven
-  (g:RubiksSuperType)
-  (h1:Reachable g)
-  :∀ x:RubiksSuperType,
-  Reachable x
-  ∧
-  (sign x.1.permute = -1 ∧ -1 = sign x.2.permute)
-  →
-  (sign (g * x).1.permute = 1 ∧ 1 = sign (g * x).2.permute)
   := by sorry
 
   -- 对于任意g状态角块位置置换属于偶置换的状态，
@@ -1890,42 +1892,50 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   := by sorry
 
 
--- 魔方第二基本定理的右推左部分：
-theorem valid_reachable
-: ∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
-:= by
-  intro x hvx
-  have xIsValid := hvx -- 后面被拆散了，先保留一个。
-  simp [ValidCube] at hvx
-  let currStat := x
-  -- 分类讨论1得到小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
-  have h1 := lemma1 x hvx.2.1
-  obtain ⟨h1_2,h1_3,h1_4,h1_5,h1_6,h1_7⟩ := h1
-  let currStat := x * h1_2
-  let currStat_satisfy := h1_4
-  -- 分类讨论2得到小引理2:假设有状态g∈H,且∑(12在上 i=1) wi(g) = 0 (mod 2) ， 则=>,g能通过有限次作用G中的元素，得到新的性质：w(g)={0,0,...,0}。并且不改变角块的方向数。
-  have h2 := lemma2 (x * h1_2)
-  have h2_2 := hvx.2.2
-  rw [h1_5] at h2_2
-  have h2 := lemma2 (x * h1_2) h2_2
-  obtain ⟨h2_3,h2_4,h2_5,h2_6,h2_7,h2_8⟩ := h2
-  have h2_8 := h1_4
-  rw [h2_6] at h2_8
-  let currStat := x * h1_2 * h2_3
-  let currStat_satisfy: ((x * h1_2 * h2_3).2.orient = 0) ∧ ((x * h1_2 * h2_3).1.orient = 0)
-    := { left := h2_5, right := h2_8 }
-  -- ValidCube的条件1，限制了当前状态x的范围，所以可以进行2种分类讨论：1.（奇X奇) 2.(偶X偶）
-  have h3 := hvx.1
-  rw [lemma12_condition1_restriction] at h3
-  cases h3 with
-  | inl h3_1 =>
-    -- 某个过程，存在一个复合操作，作用一次到状态集合（奇X奇)上的某个元素后，
-    -- 新状态会属于新的状态集合(偶X偶），归化成inr
-    -- lemma13_oddXoddToEvenXEven
-    -- 和inr一样的证明过程
-    sorry
-  | inr h3_2 =>
-    -- 根据h3_2推出x.1,x.2属于偶置换
+
+
+  -- 化归思想，所有lemma12_condition1_restriction中的情况1可以通过魔方群操作变成情况2。
+  /-- （奇X奇) → (偶X偶）-/
+  lemma lemma13_oddXoddToEvenXEven
+  (x: RubiksSuperType)
+  (h2: Reachable x)
+  (h3: (sign x.1.permute = -1 ∧ -1 = sign x.2.permute) )
+  :
+  ∃ (g: RubiksSuperType),
+    Reachable g
+    ∧
+  (sign (g * x).1.permute = 1 ∧ 1 = sign (g * x).2.permute)
+  := by sorry
+
+  lemma lemma13_EvenPermute_valid_isReachable
+  (x: RubiksSuperType)
+  (h3_2: sign x.1.permute = 1 ∧ 1 = sign x.2.permute)
+  (hvx: x ∈ ValidCube)
+  :Reachable x
+  := by
+    have xIsValid := hvx -- 后面被拆散了，先保留一个。
+    simp [ValidCube] at hvx
+    let currStat := x
+    -- 分类讨论1得到小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
+    have h1 := lemma1 x hvx.2.1
+    obtain ⟨h1_2,h1_3,h1_4,h1_5,h1_6,h1_7⟩ := h1
+    let currStat := x * h1_2
+    let currStat_satisfy := h1_4
+    -- 分类讨论2得到小引理2:假设有状态g∈H,且∑(12在上 i=1) wi(g) = 0 (mod 2) ， 则=>,g能通过有限次作用G中的元素，得到新的性质：w(g)={0,0,...,0}。并且不改变角块的方向数。
+    have h2 := lemma2 (x * h1_2)
+    have h2_2 := hvx.2.2
+    rw [h1_5] at h2_2
+    have h2 := lemma2 (x * h1_2) h2_2
+    obtain ⟨h2_3,h2_4,h2_5,h2_6,h2_7,h2_8⟩ := h2
+    have h2_9 := h1_4
+    rw [h2_6] at h2_9
+    let currStat := x * h1_2 * h2_3
+    let currStat_satisfy: ((x * h1_2 * h2_3).2.orient = 0) ∧ ((x * h1_2 * h2_3).1.orient = 0)
+      := { left := h2_5, right := h2_9 }
+    -- ValidCube的条件1，限制了当前状态x的范围，所以可以进行2种分类讨论：1.（奇X奇) 2.(偶X偶）
+    have h3 := hvx.1
+    rw [lemma12_condition1_restriction] at h3
+    -- //
     have h3_2_1 : (x * h1_2 * h2_3).1.permute ∈ alternatingGroup (Fin 8) := sorry
     have h3_2_2 : (x * h1_2 * h2_3).2.permute ∈ alternatingGroup (Fin 12) := sorry
     -- 使用lemma16使得新状态保持旧属性：方向数不变，获取新属性：角块+棱块的位置都变成1。
@@ -1934,7 +1944,7 @@ theorem valid_reachable
     obtain ⟨h3_2_4,h3_2_5,h3_2_6,h3_2_7,h3_2_8⟩ := h3_2_3
     obtain ⟨h3_2_9,h3_2_10⟩ := h3_2_6
     rw [h2_5] at h3_2_8
-    rw [h2_8] at h3_2_7
+    rw [h2_9] at h3_2_7
     let currStat := x * h1_2 * h2_3 * h3_2_4
     let currStat_satisfy: (x * h1_2 * h2_3 * h3_2_4).1.orient = 0 ∧ (x * h1_2 * h2_3 * h3_2_4).2.orient = 0
     ∧ (x * h1_2 * h2_3 * h3_2_4).1.permute = 1 ∧ (x * h1_2 * h2_3 * h3_2_4).2.permute = 1 :=
@@ -1989,6 +1999,103 @@ theorem valid_reachable
         exact hs.1
     apply h105 y
     exact { left := h101, right := h102 }
+    exact hvx
+    done
+
+  --todo
+
+
+  -- -- 对于任意g状态角块位置置换属于偶置换的状态，
+  --   -- 则存在操作x1使得(g*x1)的角块位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
+  -- lemma lemma14
+  -- (g:RubiksSuperType)
+  -- (h1:g.1.permute ∈ alternatingGroup (Fin 8))
+  -- :∃ x1 : RubiksSuperType,
+  -- Reachable x1
+  -- ∧
+  -- (g*x1).1.permute = 1
+  -- ∧
+  -- (g*x1).2.permute = (g).2.permute
+  -- ∧
+  -- ((g*x1).1.orient = (g).1.orient ∧ (g*x1).2.orient = (g).2.orient )
+  -- := by sorry
+
+  -- -- 对于任意g状态棱块位置置换属于偶置换的状态，
+  --   -- 则存在操作x1使得(g*x1)的棱块位置置换变成1，而且保持(g*x1)的角块位置不变，而且所有块的方向数不变。
+  -- lemma lemma15
+  -- (g:RubiksSuperType)
+  -- (h1:g.2.permute ∈ alternatingGroup (Fin 12))
+  -- :∃ x1 : RubiksSuperType,
+  -- Reachable x1
+  -- ∧
+  -- (g*x1).2.permute = 1
+  -- ∧
+  -- (g*x1).1.permute = (g).1.permute
+  -- ∧
+  -- ((g*x1).1.orient = (g).1.orient ∧ (g*x1).2.orient = (g).2.orient )
+  -- := by sorry
+
+  -- -- 就是lemma14+15的简单结合
+  -- -- 对于任意g状态角块位置置换属于偶置换的状态，且棱块位置置换属于偶置换的状态，
+  --   -- 则存在操作x1使得(g*x1)的棱块位置置换变成1，而且角块位置置换变成1，而且所有块的方向数不变。
+  -- lemma lemma16
+  -- (g:RubiksSuperType)
+  -- (h1:g.1.permute ∈ alternatingGroup (Fin 8))
+  -- (h2:g.2.permute ∈ alternatingGroup (Fin 12))
+  -- :∃ x1 : RubiksSuperType,
+  -- Reachable x1
+  -- ∧
+  -- ((g*x1).1.permute = 1 ∧ (g*x1).2.permute = 1)
+  -- ∧
+  -- ((g*x1).1.orient = (g).1.orient ∧ (g*x1).2.orient = (g).2.orient )
+  -- := by sorry
+
+
+-- 魔方第二基本定理的右推左部分：
+theorem valid_reachable
+: ∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
+:= by
+  intro x hvx
+  have xIsValid := hvx -- 后面被拆散了，先保留一个。
+  simp [ValidCube] at hvx
+  let currStat := x
+  -- 分类讨论1得到小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
+  have h1 := lemma1 x hvx.2.1
+  obtain ⟨h1_2,h1_3,h1_4,h1_5,h1_6,h1_7⟩ := h1
+  let currStat := x * h1_2
+  let currStat_satisfy := h1_4
+  -- 分类讨论2得到小引理2:假设有状态g∈H,且∑(12在上 i=1) wi(g) = 0 (mod 2) ， 则=>,g能通过有限次作用G中的元素，得到新的性质：w(g)={0,0,...,0}。并且不改变角块的方向数。
+  have h2 := lemma2 (x * h1_2)
+  have h2_2 := hvx.2.2
+  rw [h1_5] at h2_2
+  have h2 := lemma2 (x * h1_2) h2_2
+  obtain ⟨h2_3,h2_4,h2_5,h2_6,h2_7,h2_8⟩ := h2
+  have h2_9 := h1_4
+  rw [h2_6] at h2_9
+  let currStat := x * h1_2 * h2_3
+  let currStat_satisfy: ((x * h1_2 * h2_3).2.orient = 0) ∧ ((x * h1_2 * h2_3).1.orient = 0)
+    := { left := h2_5, right := h2_9 }
+  -- ValidCube的条件1，限制了当前状态x的范围，所以可以进行2种分类讨论：1.（奇X奇) 2.(偶X偶）
+  have h3 := hvx.1
+  rw [lemma12_condition1_restriction] at h3
+  have cornerpermute_Remains : (x * h1_2 * h2_3).1.permute = x.1.permute := by
+    simp only [h2_7,h1_6]
+  have edgepermute_Remains : (x * h1_2 * h2_3).2.permute = x.2.permute := by
+    simp only [h2_8,h1_7]
+  have corner_eqPermuteSign_edge : sign (x * h1_2 * h2_3).1.permute = sign (x * h1_2 * h2_3).2.permute := by
+    simp only [cornerpermute_Remains,edgepermute_Remains,hvx.1]
+  cases h3 with
+  | inl h3_1 =>
+    -- 某个过程，存在一个复合操作，作用一次到状态集合（奇X奇)上的某个元素后，
+    -- 新状态会属于新的状态集合(偶X偶），归化成inr
+    -- lemma13_oddXoddToEvenXEven
+    -- 和inr一样的证明过程
+    -- have h3_1_1 := lemma13_oddXoddToEvenXEven _ _ _ h3_1
+    sorry
+  | inr h3_2 =>
+    apply lemma13_EvenPermute_valid_isReachable
+    · exact h3_2
+    · exact hvx
     done
   -- 这里为啥还要证明已知的x ∈ ValidCube？原来是假设被拆散用了...
   exact hvx
