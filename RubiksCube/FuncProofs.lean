@@ -2187,7 +2187,18 @@ theorem reachable_valid
         done
       }
     }
-  | split x y h1 h2 h3 h4 => sorry
+  | split x y h1 h2 h3 h4 =>
+    have h_split1: x⁻¹ ∈ ValidCube := by
+      apply RubiksGroup.inv_mem'
+      exact h4
+    have h_split2:= RubiksGroup.mul_mem' h_split1 h3 -- 注意：条件不够就会分段报错
+    have h_split_eq: (x⁻¹ * (x * y)) = y := by
+      rw [← mul_assoc]
+      simp only [mul_left_inv, one_mul]
+    have h_split3: (y) ∈ ValidCube := by
+      rw [← h_split_eq]
+      exact h_split2
+    exact h_split3
   done
 
 /-- 魔方第二基本定理 -/
