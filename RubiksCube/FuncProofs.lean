@@ -1901,7 +1901,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
 
 
-
+  -- todo
   -- 化归思想，所有lemma12_condition1_restriction中的情况1可以通过魔方群操作变成情况2。
   /-- （奇X奇) → (偶X偶）-/
   lemma lemma13_oddXoddToEvenXEven
@@ -2064,64 +2064,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- := by sorry
 
 
--- 魔方第二基本定理的右推左部分：
-theorem valid_reachable
-: ∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
-:= by
-  intro x hvx
-  have xIsValid := hvx -- 后面被拆散了，先保留一个。
-  simp [ValidCube] at hvx
-  let currStat := x
-  -- 分类讨论1得到小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
-  have h1 := lemma1 x hvx.2.1
-  obtain ⟨h1_2,h1_3,h1_4,h1_5,h1_6,h1_7⟩ := h1
-  let currStat := x * h1_2
-  let currStat_satisfy := h1_4
-  -- 分类讨论2得到小引理2:假设有状态g∈H,且∑(12在上 i=1) wi(g) = 0 (mod 2) ， 则=>,g能通过有限次作用G中的元素，得到新的性质：w(g)={0,0,...,0}。并且不改变角块的方向数。
-  have h2 := lemma2 (x * h1_2)
-  have h2_2 := hvx.2.2
-  rw [h1_5] at h2_2
-  have h2 := lemma2 (x * h1_2) h2_2
-  obtain ⟨h2_3,h2_4,h2_5,h2_6,h2_7,h2_8⟩ := h2
-  have h2_9 := h1_4
-  rw [h2_6] at h2_9
-  let currStat := x * h1_2 * h2_3
-  let currStat_satisfy: ((x * h1_2 * h2_3).2.orient = 0) ∧ ((x * h1_2 * h2_3).1.orient = 0)
-    := { left := h2_5, right := h2_9 }
-  -- ValidCube的条件1，限制了当前状态x的范围，所以可以进行2种分类讨论：1.（奇X奇) 2.(偶X偶）
-  have h3 := hvx.1
-  rw [lemma12_condition1_restriction] at h3
-  have cornerpermute_Remains : (x * h1_2 * h2_3).1.permute = x.1.permute := by
-    simp only [h2_7,h1_6]
-  have edgepermute_Remains : (x * h1_2 * h2_3).2.permute = x.2.permute := by
-    simp only [h2_8,h1_7]
-  have corner_eqPermuteSign_edge : sign (x * h1_2 * h2_3).1.permute = sign (x * h1_2 * h2_3).2.permute := by
-    simp only [cornerpermute_Remains,edgepermute_Remains,hvx.1]
-  cases h3 with
-  | inl h3_1 =>
-    -- todo , 操作是g5
-    -- 某个过程，存在一个复合操作，作用一次到状态集合（奇X奇)上的某个元素后，
-    -- 新状态会属于新的状态集合(偶X偶），归化成inr
-    -- lemma13_oddXoddToEvenXEven
-    -- lemma13_EvenPermute_valid_isReachable
-    -- Reachable g →   Reachable g*x →  Reachable x
-    have h3_1_1 := lemma13_oddXoddToEvenXEven x h3_1
-    obtain ⟨od1,od2,od3,od4⟩ := h3_1_1
-    have h3_1_2 := lemma13_EvenPermute_valid_isReachable (od1 * x) {left:=od3,right:=od4} od2
-    -- 这里很明显了，但是是不是需要增加Reachable的定义呢？但是可能会影响左推右的过程，但问题不大。
-    apply Reachable.split
-    · exact h3_1_2
-    · exact od2
-  | inr h3_2 =>
-    apply lemma13_EvenPermute_valid_isReachable
-    · exact h3_2
-    · exact hvx
-    done
-  -- 这里为啥还要证明已知的x ∈ ValidCube？原来是假设被拆散用了...
-  exact hvx
-  done
-
-
 -- 魔方第二基本定理的左推右部分：done
 theorem reachable_valid
 : ∀x : RubiksSuperType, Reachable x → x ∈ ValidCube
@@ -2200,6 +2142,71 @@ theorem reachable_valid
       exact h_split2
     exact h_split3
   done
+
+
+
+-- 魔方第二基本定理的右推左部分：
+theorem valid_reachable
+: ∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
+:= by
+  intro x hvx
+  have xIsValid := hvx -- 后面被拆散了，先保留一个。
+  simp [ValidCube] at hvx
+  let currStat := x
+  -- 分类讨论1得到小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
+  have h1 := lemma1 x hvx.2.1
+  obtain ⟨h1_2,h1_3,h1_4,h1_5,h1_6,h1_7⟩ := h1
+  let currStat := x * h1_2
+  let currStat_satisfy := h1_4
+  -- 分类讨论2得到小引理2:假设有状态g∈H,且∑(12在上 i=1) wi(g) = 0 (mod 2) ， 则=>,g能通过有限次作用G中的元素，得到新的性质：w(g)={0,0,...,0}。并且不改变角块的方向数。
+  have h2 := lemma2 (x * h1_2)
+  have h2_2 := hvx.2.2
+  rw [h1_5] at h2_2
+  have h2 := lemma2 (x * h1_2) h2_2
+  obtain ⟨h2_3,h2_4,h2_5,h2_6,h2_7,h2_8⟩ := h2
+  have h2_9 := h1_4
+  rw [h2_6] at h2_9
+  let currStat := x * h1_2 * h2_3
+  let currStat_satisfy: ((x * h1_2 * h2_3).2.orient = 0) ∧ ((x * h1_2 * h2_3).1.orient = 0)
+    := { left := h2_5, right := h2_9 }
+  -- ValidCube的条件1，限制了当前状态x的范围，所以可以进行2种分类讨论：1.（奇X奇) 2.(偶X偶）
+  have h3 := hvx.1
+  rw [lemma12_condition1_restriction] at h3
+  have cornerpermute_Remains : (x * h1_2 * h2_3).1.permute = x.1.permute := by
+    simp only [h2_7,h1_6]
+  have edgepermute_Remains : (x * h1_2 * h2_3).2.permute = x.2.permute := by
+    simp only [h2_8,h1_7]
+  have corner_eqPermuteSign_edge : sign (x * h1_2 * h2_3).1.permute = sign (x * h1_2 * h2_3).2.permute := by
+    simp only [cornerpermute_Remains,edgepermute_Remains,hvx.1]
+  cases h3 with
+  | inl h3_1 =>
+    -- 操作是g5
+    -- 某个过程，存在一个复合操作，作用一次到状态集合（奇X奇)上的某个元素后，
+    -- 新状态会属于新的状态集合(偶X偶），归化成inr
+    -- lemma13_oddXoddToEvenXEven
+    -- lemma13_EvenPermute_valid_isReachable
+    -- Reachable g →   Reachable g*x →  Reachable x
+    have h3_1_1 := lemma13_oddXoddToEvenXEven x h3_1
+    obtain ⟨od1,od2,od3,od4⟩ := h3_1_1
+    have h3_1_2_1: od1 * x ∈ ValidCube := by
+      apply RubiksGroup.mul_mem'
+      · exact reachable_valid od1 od2
+      · exact hvx
+    have h3_1_2 := lemma13_EvenPermute_valid_isReachable (od1 * x) {left:=od3,right:=od4} h3_1_2_1
+    -- 这里很明显了，但是是不是需要增加Reachable的定义呢？但是可能会影响左推右的过程，但问题不大。
+    apply Reachable.split
+    · exact h3_1_2
+    · exact od2
+  | inr h3_2 =>
+    apply lemma13_EvenPermute_valid_isReachable
+    · exact h3_2
+    · exact hvx
+    done
+  -- 这里为啥还要证明已知的x ∈ ValidCube？原来是假设被拆散用了...
+  exact hvx
+  done
+
+
 
 /-- 魔方第二基本定理 -/
 theorem RubikCube_BasicRule_2
