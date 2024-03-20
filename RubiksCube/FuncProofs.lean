@@ -338,6 +338,14 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     #eval (G1Perm_L.map VariantFaceTurn_L).toList.prod --注意，这样toList不会去掉重复？
     -- ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 1, 0] },
     --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
+  def G5Perm_element1 : RubiksSuperType
+  := R*U*R'*U'*R'*F*R*R*U'*R'
+  /--是2个2循环:2个角块的2循环+2个棱块的2循环,详细: 角块ρ(g5) =(2,3)， 棱块σ(g5) =(1,2) -/
+  def G5Perm : RubiksSuperType -- R U R' F' R U R' U' R' F R R U' R' U'
+  := R*U*R'*F'*G5Perm_element1*U'
+  -- #eval G5Perm
+  -- ({ permute := ![0, 2, 1, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
+  -- { permute := ![1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
 
   end rubikCubeFormula
 
@@ -1904,7 +1912,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   ∃ (g: RubiksSuperType),
     Reachable g
     ∧
-  (sign (g * x).1.permute = 1 ∧ 1 = sign (g * x).2.permute)
+    (sign (g * x).1.permute = 1 ∧ 1 = sign (g * x).2.permute)
   := by sorry
 
   lemma lemma13_EvenPermute_valid_isReachable
@@ -2002,8 +2010,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     exact hvx
     done
 
-  --todo
-
 
   -- -- 对于任意g状态角块位置置换属于偶置换的状态，
   --   -- 则存在操作x1使得(g*x1)的角块位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
@@ -2086,11 +2092,12 @@ theorem valid_reachable
     simp only [cornerpermute_Remains,edgepermute_Remains,hvx.1]
   cases h3 with
   | inl h3_1 =>
+    -- todo , 操作是g5
     -- 某个过程，存在一个复合操作，作用一次到状态集合（奇X奇)上的某个元素后，
     -- 新状态会属于新的状态集合(偶X偶），归化成inr
     -- lemma13_oddXoddToEvenXEven
-    -- 和inr一样的证明过程
-    -- have h3_1_1 := lemma13_oddXoddToEvenXEven _ _ _ h3_1
+    -- lemma13_EvenPermute_valid_isReachable
+    -- Reachable g →   Reachable g*x →  Reachable x
     sorry
   | inr h3_2 =>
     apply lemma13_EvenPermute_valid_isReachable
