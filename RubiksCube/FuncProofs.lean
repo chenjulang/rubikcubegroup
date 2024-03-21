@@ -1841,7 +1841,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       exact e3
     done
 
-  -- todo -- 5个sorry 其实重要的只有3个。目前先把每个引理都过一遍，为了保证命题的准确性。
   -- 右推左的限制条件1使得只能选这2种情况进行分类讨论。
   /-- 1.（奇X奇) 2.(偶X偶）-/
   lemma lemma12_condition1_restriction
@@ -1855,11 +1854,25 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   := by
     constructor
     · intro signEq
-      by_cases  sign x.1.permute = -1
-      sorry
-    · sorry
+      by_cases ha0:(sign x.1.permute = -1)
+      { left
+        simp only [ha0,← signEq]
+        simp only [and_self]
+      }
+      {
+        have ha1:(sign x.1.permute = 1)
+          := by sorry -- 这个要问社区
+        right
+        simp only [ha1,← signEq]
+        simp only [and_self]
+      }
+    · intro oneOrNegone
+      cases' oneOrNegone with BothNegone BothOne
+      · simp only [BothNegone]
+      · simp only [BothOne]
     done
 
+  -- todo -- 4个sorry 14,15,31,32。
   -- 对于任意g状态角块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的角块位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
   lemma lemma14
