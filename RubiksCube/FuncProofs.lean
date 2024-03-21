@@ -1773,13 +1773,15 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- #check alternatingGroup α
 
 
+  -- todo -- 用31证明14，用32证明15，将11舍去，可以的，选择这个方向。
+
+  -- 思考：纯3循环就是偶置换说的全体3循环吗？是的，因为魔方还原到目前状态也具有方向数全0的属性，也是一个“纯”的偶置换。
   -- 应该写成参数好一点
   -- 下面31和32是最关键的最重要的定理
-  -- 魔方群能生成所有角块的位置三循环（全体方向数不改变,棱块位置不变）。
+  -- 所有角块的位置纯三循环（全体方向数不改变,棱块位置不变）能被魔方群还原。
   lemma lemma31
   (x : RubiksSuperType)
   (h1 : IsThreeCycle x.1.permute)
-  -- (h2 : x.2.permute = 1)
   (h3 : x.1.orient = 0)
   (h4 : x.2.orient = 0)
   :
@@ -1795,7 +1797,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (x * g).2.permute = (x).2.permute
   := by sorry
 
-  -- 魔方群能生成所有棱块的位置三循环（全体方向数不改变,角块位置不变）。
+  -- 所有棱块的位置纯三循环（全体方向数不改变,角块位置不变）能被魔方群还原。
   lemma lemma32
   (x : RubiksSuperType)
   (h1: IsThreeCycle x.2.permute)
@@ -1809,37 +1811,40 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     x * g = Solved
   := by sorry
 
-  -- 其实就是lemma31和lemma32的简单结合，由于角块和棱块可以分别互不影响地完成，这个引理应该很容易证明。
-  lemma lemma11
-  (x : RubiksSuperType)
-  (h1: IsThreeCycle x.2.permute)
-  (h2: IsThreeCycle x.1.permute)
-  (h3: x.1.orient = 0)
-  (h4: x.2.orient = 0)
-  :
-  ∃ g : RubiksSuperType,
-    Reachable g
-    ∧
-    x * g = Solved
-  := by
-    have cornerR := lemma31 x h2 h3 h4
-    obtain ⟨c1,c2,c3,c4,c5,c6⟩ := cornerR
-    have remains_threecycle : IsThreeCycle (x * c1).2.permute
-      := by
-      rw [c6.symm] at h1
-      exact h1
-    rw [c4.symm] at h3
-    rw [c5.symm] at h4
-    have edgeR := lemma32 (x * c1) remains_threecycle c3 h3 h4
-    obtain ⟨e1,e2,e3⟩ := edgeR
-    use (c1 * e1)
-    apply And.intro
-    · apply Reachable.mul
-      exact c2
-      exact e2
-    · rw [← mul_assoc]
-      exact e3
-    done
+  -- 说的是G群里的操作覆盖了所有的3轮换的操作。
+  -- lemma lemma33: sorry := sorry
+
+  -- -- 其实就是lemma31和lemma32的简单结合，由于角块和棱块可以分别互不影响地完成，这个引理应该很容易证明。
+  -- lemma lemma11
+  -- (x : RubiksSuperType)
+  -- (h1: IsThreeCycle x.2.permute)
+  -- (h2: IsThreeCycle x.1.permute)
+  -- (h3: x.1.orient = 0)
+  -- (h4: x.2.orient = 0)
+  -- :
+  -- ∃ g : RubiksSuperType,
+  --   Reachable g
+  --   ∧
+  --   x * g = Solved
+  -- := by
+  --   have cornerR := lemma31 x h2 h3 h4
+  --   obtain ⟨c1,c2,c3,c4,c5,c6⟩ := cornerR
+  --   have remains_threecycle : IsThreeCycle (x * c1).2.permute
+  --     := by
+  --     rw [c6.symm] at h1
+  --     exact h1
+  --   rw [c4.symm] at h3
+  --   rw [c5.symm] at h4
+  --   have edgeR := lemma32 (x * c1) remains_threecycle c3 h3 h4
+  --   obtain ⟨e1,e2,e3⟩ := edgeR
+  --   use (c1 * e1)
+  --   apply And.intro
+  --   · apply Reachable.mul
+  --     exact c2
+  --     exact e2
+  --   · rw [← mul_assoc]
+  --     exact e3
+  --   done
 
   -- 右推左的限制条件1使得只能选这2种情况进行分类讨论。
   /-- 1.（奇X奇) 2.(偶X偶）-/
@@ -1872,9 +1877,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       · simp only [BothOne]
     done
 
-  -- todo -- 4个sorry 14,15,31,32。
+  -- 目前证明思路有两条：1.用11证明16，但和当前的代码版本不太对。
+  -- 2.用14证明31，用15证明32，将11舍去，可以的，选择这个方向。
+
   -- 对于任意g状态角块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的角块位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
+    -- 这里x1的例子我们使用3循环的复合。
   lemma lemma14
   (g:RubiksSuperType)
   (h1:g.1.permute ∈ alternatingGroup (Fin 8))
