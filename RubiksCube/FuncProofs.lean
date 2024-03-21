@@ -340,7 +340,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
   def G5Perm_element1 : RubiksSuperType
   := R*U*R'*U'*R'*F*R*R*U'*R'
-  /--是2个2循环:2个角块的2循环+2个棱块的2循环,详细: 角块ρ(g5) =(2,3)， 棱块σ(g5) =(1,2) -/
+  /-- 是2个2循环:2个角块的2循环+2个棱块的2循环,详细: 角块ρ(g5) =(2,3)， 棱块σ(g5) =(1,2) -/
   def G5Perm : RubiksSuperType -- R U R' F' R U R' U' R' F R R U' R' U'
   := R*U*R'*F'*G5Perm_element1*U'
   -- #eval G5Perm
@@ -1773,7 +1773,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- #check alternatingGroup α
 
 
-  -- todo 先证明组合的定理，一天能否写完所有杂牌引理，然后剩下31，32？
   -- 应该写成参数好一点
   -- 下面31和32是最关键的最重要的定理
   -- 魔方群能生成所有角块的位置三循环（全体方向数不改变,棱块位置不变）。
@@ -1897,11 +1896,30 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   ((g*x1).1.permute = 1 ∧ (g*x1).2.permute = 1)
   ∧
   ((g*x1).1.orient = (g).1.orient ∧ (g*x1).2.orient = (g).2.orient )
-  := by sorry
+  := by
+    have cornerPermuteTo1 := lemma14 g h1
+    obtain ⟨c1,c2,c3,c4,c5,c6⟩ := cornerPermuteTo1
+    have EdgePermute_remains_in_aGroup: (g * c1).2.permute ∈ alternatingGroup (Fin 12)
+      := by sorry
+    have edgePermuteTo1 := lemma15 (g * c1) EdgePermute_remains_in_aGroup
+    obtain ⟨e1,e2,e3,e4,e5,e6⟩ := edgePermuteTo1
+    use (c1 * e1)
+    apply And.intro
+    · apply Reachable.mul
+      {exact c2}
+      {exact e2}
+    apply And.intro
+    · -- 用 c3,e3,还有计算结果
+      sorry
+      -- done
+    · exact
+      {left := by
+        rw [← mul_assoc]
+        simp only [c5,e5],
+       right := by simp only [← mul_assoc,c6,e6]}
+    done
 
-
-
-  -- todo
+  -- todo -- 6个sorry 其实重要的只有3个。目前先把每个引理都过一遍，为了保证命题的准确性。
   -- 化归思想，所有lemma12_condition1_restriction中的情况1可以通过魔方群操作变成情况2。
   /-- （奇X奇) → (偶X偶）-/
   lemma lemma13_oddXoddToEvenXEven
@@ -1913,14 +1931,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     ∧
     (sign (g * x).1.permute = 1 ∧ 1 = sign (g * x).2.permute)
   := by
+    use (G5Perm)
+    -- todo -- 要找到一个定理是permute作用一个2轮换后，奇偶性会变换1次的。
     sorry
-
-  -- lemma reachable_split
-  -- (x: RubiksSuperType)
-  -- (y: RubiksSuperType)
-  -- (h0: Reachable y)
-  -- (h1: Reachable (x*y))
-  -- : Reachable x := by sorry
 
   lemma lemma13_EvenPermute_valid_isReachable
   (x: RubiksSuperType)
