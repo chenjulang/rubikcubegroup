@@ -1841,6 +1841,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       exact e3
     done
 
+  -- todo -- 5个sorry 其实重要的只有3个。目前先把每个引理都过一遍，为了保证命题的准确性。
   -- 右推左的限制条件1使得只能选这2种情况进行分类讨论。
   /-- 1.（奇X奇) 2.(偶X偶）-/
   lemma lemma12_condition1_restriction
@@ -1851,7 +1852,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (sign x.1.permute = -1 ∧ -1 = sign x.2.permute)
   ∨
   (sign x.1.permute = 1 ∧ 1 = sign x.2.permute)
-  := by sorry
+  := by
+    constructor
+    · intro signEq
+      by_cases  sign x.1.permute = -1
+      sorry
+    · sorry
+    done
 
   -- 对于任意g状态角块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的角块位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
@@ -1870,6 +1877,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   -- 对于任意g状态棱块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的棱块位置置换变成1，而且保持(g*x1)的角块位置不变，而且所有块的方向数不变。
+    -- 这里x1的例子我们使用3循环的复合。
   lemma lemma15
   (g:RubiksSuperType)
   (h1:g.2.permute ∈ alternatingGroup (Fin 12))
@@ -1919,21 +1927,33 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
        right := by simp only [← mul_assoc,c6,e6]}
     done
 
-  -- todo -- 6个sorry 其实重要的只有3个。目前先把每个引理都过一遍，为了保证命题的准确性。
   -- 化归思想，所有lemma12_condition1_restriction中的情况1可以通过魔方群操作变成情况2。
   /-- （奇X奇) → (偶X偶）-/
   lemma lemma13_oddXoddToEvenXEven
   (x: RubiksSuperType)
   (h3: (sign x.1.permute = -1 ∧ -1 = sign x.2.permute) )
   :
-  ∃ (g: RubiksSuperType), -- 举例操作是g5
+  ∃ (g: RubiksSuperType), -- 要找到一个定理是permute作用一个2轮换后，奇偶性会变换1次的。,举例操作是g5
     Reachable g
     ∧
     (sign (g * x).1.permute = 1 ∧ 1 = sign (g * x).2.permute)
   := by
     use (G5Perm)
-    -- todo -- 要找到一个定理是permute作用一个2轮换后，奇偶性会变换1次的。
-    sorry
+    apply And.intro
+    · simp only [G5Perm,G5Perm_element1]
+      sorry
+      -- apply Reachable.mul
+      -- apply Reachable.mul
+      -- apply Reachable.mul
+      -- apply Reachable.mul
+      -- apply Reachable.mul
+      -- apply Reachable.FT <;> simp only [FaceTurn.R,FaceTurn.U]
+      -- 这里写完要很长，怎么节省代码呢？
+      -- done
+    · -- 缺一个lemma13_oddXoddToEvenXEven中的引理，角和棱位置各变换1次，符号会分别变1次。
+      -- 就是这个：Equiv.Perm.sign (Equiv.swap x y) = -1
+      sorry
+    done
 
   lemma lemma13_EvenPermute_valid_isReachable
   (x: RubiksSuperType)
