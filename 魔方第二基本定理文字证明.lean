@@ -1,5 +1,12 @@
 证明最后阶段：
-1.涉及定理：closure_three_cycles_eq_alternating
+1.涉及定理：
+    1.(精读)closure_three_cycles_eq_alternating: closure { σ : Perm α | IsThreeCycle σ } = alternatingGroup α
+    2.mem_alternatingGroup: f ∈ alternatingGroup α ↔ sign f = 1
+    3.需要一个类似这样的定理，但不止2个元素的：theorem mem_closure_pair {x y z : C} :
+        z ∈ closure ({x, y} : Set C) ↔ ∃ m n : ℤ, x ^ m * y ^ n = z
+    4.sign (h : IsThreeCycle σ) : sign σ = 1
+    5.mem_alternatingGroup {f : Perm α} : f ∈ alternatingGroup α ↔ sign f = 1
+    6.mem_ker (f : G →* M) {x : G} : x ∈ f.ker ↔ f x = 1
 2.需要一个定理：存在一个操作，具体说明涉及定理：closure_three_cycles_eq_alternating说的偶置换是如何被3循环复合得到的。
     不一定要具体操作，给出存在性命题即可，然后同构于目前的问题。
 3. 31怎么证明14，32如何证明15

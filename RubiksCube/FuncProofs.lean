@@ -1794,6 +1794,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (x * g).2.permute = (x).2.permute
   := by sorry
 
+  #check mem_alternatingGroup
+
    -- 如果状态x的棱块的位置是一个三循环，则，存在G中复合操作g，使得（x*g）的位置是复原状态。
     -- （特例： 如果状态x的棱块的位置是一个三循环，且（全体方向数已还原,角块位置已还原），则存在操作g，使得x*g是魔方还原状态。）
   /-- 如果状态x的棱块的位置是一个三循环，则，存在G中复合操作g，使得（x*g）的位置是复原状态。-/
@@ -1879,7 +1881,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- 对于任意g状态角块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的角块位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
     -- 这里x1的例子我们使用3循环的复合。
-  -- todo -- 用31证明14，用32证明15，将11舍去，可以的，选择这个方向。
+  -- todo -- 先精读permute，根据定理涉及定理：closure_three_cycles_eq_alternating，然后完成证明14，15；重头戏在31，32。
   lemma lemma14
   (g:RubiksSuperType)
   (h1:g.1.permute ∈ alternatingGroup (Fin 8))
@@ -1898,6 +1900,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- 3. 综合1和2可知，g.1.permute = gn*...*g3*g2*g1 ， x1取逆映射，也就是(gn*...*g3*g2*g1)⁻¹，
       -- 则满足(g*x1).1.permute = 1
     sorry
+
+  #check closure_three_cycles_eq_alternating
+  -- ∃
 
   -- 对于任意g状态棱块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的棱块位置置换变成1，而且保持(g*x1)的角块位置不变，而且所有块的方向数不变。
