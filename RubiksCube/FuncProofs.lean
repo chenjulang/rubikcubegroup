@@ -1898,9 +1898,43 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- 1. g.1.permute，根据定理涉及定理：closure_three_cycles_eq_alternating，
       -- 可以写成多个角块3循环操作的复合，比如写成A1 * A2 * A3 ... * An，共n个3循环操作
     -- 2. 每一个Ai（i取1到n），根据lemma31，都可以写成一个G群复合乘积g，这里记成g1,g2,g3,...,gn
+    have h2 : ∃ l:List (Perm (Fin 8)),
+      (∀ g ∈ l, IsThreeCycle g)
+      ∧
+      (l.prod = g.1.permute) := sorry
+    obtain ⟨l1,l2,l3⟩ := h2
     -- 3. 综合1和2可知，g.1.permute = gn*...*g3*g2*g1 ， x1取逆映射，也就是(gn*...*g3*g2*g1)⁻¹，
       -- 则满足(g*x1).1.permute = 1
-    sorry
+    let x1:RubiksSuperType := {
+      fst := {
+        permute := (List.prod l1)⁻¹
+        orient := 0
+      }
+      snd := {
+        permute := 1
+        orient := 0
+      }
+    }
+    -- x1 这里应该写成多个3循环的分解操作的乘积，后面证明才有完成。
+    use x1
+    apply And.intro
+    · sorry -- todo -- 需要上面x1.1.permute细化成多个3循环的复合之后，多个Reachable的复合。
+    apply And.intro
+    · simp only [Prod.fst_mul]
+      simp only [permute_mul,← l3]
+      simp only [mul_left_inv]
+    apply And.intro
+    · simp only [Prod.snd_mul]
+      simp only [permute_mul,← l3]
+      simp only [one_mul]
+    apply And.intro
+    · simp only [Prod.fst_mul]
+      simp only [orient_mul,← l3]
+      simp only [Pi.zero_comp, zero_add]
+    · simp only [Prod.snd_mul]
+      simp only [orient_mul,← l3]
+      simp only [Pi.zero_comp, zero_add]
+    done
 
 
 
