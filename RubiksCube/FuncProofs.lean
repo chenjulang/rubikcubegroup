@@ -1881,7 +1881,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- 对于任意g状态角块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的角块位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
     -- 这里x1的例子我们使用3循环的复合。
-  -- todo 先精读permute，根据定理涉及定理：closure_three_cycles_eq_alternating，然后完成证明14，15；重头戏在31，32。
   lemma lemma14
   (g:RubiksSuperType)
   (h1:g.1.permute ∈ alternatingGroup (Fin 8))
@@ -1898,51 +1897,32 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- 1. g.1.permute，根据定理涉及定理：closure_three_cycles_eq_alternating，
       -- 可以写成多个角块3循环操作的复合，比如写成A1 * A2 * A3 ... * An，共n个3循环操作
     -- 2. 每一个Ai（i取1到n），根据lemma31，都可以写成一个G群复合乘积g，这里记成g1,g2,g3,...,gn
-    have h2 : ∃ l:List (Perm (Fin 8)),
-      (∀ g ∈ l, IsThreeCycle g)
-      ∧
-      (l.prod = g.1.permute) := sorry
-    obtain ⟨l1,l2,l3⟩ := h2
-    --  todo h3应该可以替代h2
+    -- have h2 : ∃ l:List (Perm (Fin 8)),
+    --   (∀ g ∈ l, IsThreeCycle g)
+    --   ∧
+    --   (l.prod = g.1.permute) := sorry
+    -- obtain ⟨l1,l2,l3⟩ := h2
     have h3 : ∃ l:List (RubiksSuperType),
       (∀ g ∈ l, IsThreeCycle g.1.permute)
       ∧
-      (l.prod = g)
+      ((g*l.prod).1.permute = 1)
+      ∧
+      (g*l.prod).1.orient = (g).1.orient
+      ∧
+      (g*l.prod).2.orient = (g).2.orient
+      ∧
+      (g*l.prod).2.permute = (g).2.permute
+      ∧
+      Reachable l.prod
       := by
-      -- todo1 改目标成∀ g ∈ l, ∃ g2: RubiksSuperType,Reachable g, 后面的需要吗？
+      -- 这里面应该用到了closure_three_cycles_eq_alternating
+
+      -- todo 改目标成∀ g ∈ l, ∃ g2: RubiksSuperType,Reachable g, 后面的需要吗？；证明14，同样15。最后重头戏31，32
       sorry
+    obtain ⟨rl1,rl2,rl3,rl4,rl5,rl6,rl7⟩ := h3
     -- 3. 综合1和2可知，g.1.permute = gn*...*g3*g2*g1 ， x1取逆映射，也就是(gn*...*g3*g2*g1)⁻¹，
       -- 则满足(g*x1).1.permute = 1
-    -- todo -- 需要x1.1.permute细化成多个3循环的复合之后，才能证明下面的多个Reachable的复合。
-    let x1:RubiksSuperType := {
-      fst := {
-        permute := (List.prod l1)⁻¹
-        orient := 0
-      }
-      snd := {
-        permute := 1
-        orient := 0
-      }
-    }
-    -- x1 这里应该写成多个3循环的分解操作的乘积，后面证明才有完成。
-    use x1
-    apply And.intro
-    · sorry
-    apply And.intro
-    · simp only [Prod.fst_mul]
-      simp only [permute_mul,← l3]
-      simp only [mul_left_inv]
-    apply And.intro
-    · simp only [Prod.snd_mul]
-      simp only [permute_mul,← l3]
-      simp only [one_mul]
-    apply And.intro
-    · simp only [Prod.fst_mul]
-      simp only [orient_mul,← l3]
-      simp only [Pi.zero_comp, zero_add]
-    · simp only [Prod.snd_mul]
-      simp only [orient_mul,← l3]
-      simp only [Pi.zero_comp, zero_add]
+    use rl1.prod
     done
 
 
