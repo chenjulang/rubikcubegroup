@@ -7,10 +7,25 @@
     4.sign (h : IsThreeCycle σ) : sign σ = 1
     5.mem_alternatingGroup {f : Perm α} : f ∈ alternatingGroup α ↔ sign f = 1
     6.mem_ker (f : G →* M) {x : G} : x ∈ f.ker ↔ f x = 1
+    7.(任何排列可表示成2循环的复合)def truncSwapFactors [Fintype α] (f : Perm α) :
+        Trunc { l : List (Perm α) // l.prod = f ∧ ∀ g ∈ l, IsSwap g }
+    8*.(任意2个2循环的乘积结果是一个3循环)IsSwap.mul_mem_closure_three_cycles {σ τ : Perm α} (hσ : IsSwap σ) (hτ : IsSwap τ) :
+        σ * τ ∈ closure { σ : Perm α | IsThreeCycle σ }
+    9*.swap_mul_swap_same_mem_closure_three_cycles {a b c : α} (ab : a ≠ b) (ac : a ≠ c) :
+        swap a b * swap a c ∈ closure { σ : Perm α | IsThreeCycle σ }
+    10*.(精读)(获取一个3循环的方式之一：)isThreeCycle_swap_mul_swap_same {a b c : α} (ab : a ≠ b) (ac : a ≠ c) (bc : b ≠ c) :
+        IsThreeCycle (swap a b * swap a c)
+    11.(找出一个排列变换中原参数不等于结果值的这些原参数；换句话说，改变值的那些原参数，不变的不需要)support (f : Perm α) : Finset α :=
+      univ.filter fun x => f x ≠ x
+    12.(获取一个3循环的方式之二：)：_root_.card_support_eq_three_iff : σ.support.card = 3 ↔ σ.IsThreeCycle
+    13.
 2.需要一个定理：存在一个操作，具体说明涉及定理：closure_three_cycles_eq_alternating说的偶置换是如何被3循环复合得到的。
     不一定要具体操作，给出存在性命题即可，然后同构于目前的问题。
 3. 31怎么证明14，32如何证明15
 4.还需要问社区大哥几个问题的，给出几个#mwe即可。
+
+
+
 
 魔方第二基本定理：注意***，这里的正方向标记将使用TW算法的标记法。
 对于∀g∈ H (也就是广义的魔方群，可以拆散魔方) ，g在这里代表任意的一个魔方状态
