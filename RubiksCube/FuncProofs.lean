@@ -1903,16 +1903,17 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   ∧
   ((g*x1).1.orient = (g).1.orient ∧ (g*x1).2.orient = (g).2.orient )
   := by
-    -- 这里估计也要用到归纳法。
     -- 1. g.1.permute，根据定理涉及定理：closure_three_cycles_eq_alternating，
       -- 可以写成多个角块3循环操作的复合，比如写成A1 * A2 * A3 ... * An，共n个3循环操作
     -- 2. 每一个Ai（i取1到n），根据lemma31，都可以写成一个G群复合乘积g，这里记成g1,g2,g3,...,gn
-
-    -- todo 定义一个简写的可单独还原角位置的定义,写出所有子引理；证明14，同样15。最后重头戏31，32
     have h3_pre1 : ∃ l:List (Perm (Fin 8)),
       (∀ g ∈ l, IsThreeCycle g)
       ∧
-      (l.prod = g.1.permute) := sorry -- 可能要用归纳法证明
+      (l.prod = g.1.permute)
+      := by
+      -- 可能要用归纳法证明
+      sorry
+  -- todo写出所有子引理；证明14，同样15。最后重头戏31，32
     have h3 : ∃ l:List (RubiksSuperType),
       (∀ a ∈ l, IsThreeCycle a.1.permute)
       ∧
@@ -1923,17 +1924,17 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       (g*l.prod).2.orient = (g).2.orient
       ∧
       (g*l.prod).2.permute = (g).2.permute
-      ∧
-      Reachable l.prod
       := by
-      -- have h3_1 : ∀ b1 ∈ l, ∃ b2 : RubiksSuperType, Reachable b2 ∧
-      --   (b1 * b2).1.permute = 1
-      --   ∧ (b1 * b2).1.orient = (b1).1.orient ∧ (b1 * b2).2.orient = (b1).2.orient
-      --   ∧ (b1 * b2).2.permute = (b1).2.permute := sorry
       -- 这里面应该用到了closure_three_cycles_eq_alternating
       sorry
-
-    obtain ⟨rl1,rl2,rl3,rl4,rl5,rl6,rl7⟩ := h3
+    -- 这里遇到问题思路： 1.h3能单独证明，在h3后面再引入引理任意一个元素都可以exist_reachableG_cornerPermute_to1, 但是后面的引理没用啊！ ；
+          --2.h3内部引入引理exist_reachableG_cornerPermute_to1
+          --3.最后是把h3的结果弱化了一下，将部分结果拆成了新引理h4解决了不能使用l的问题。
+    obtain ⟨rl1,rl2,rl3,rl4,rl5,rl6⟩ := h3
+    -- todo1 --
+    have h4: Reachable rl1.prod :=
+      -- 用lemma31证明
+      by sorry
     -- 3. 综合1和2可知，g.1.permute = gn*...*g3*g2*g1 ， x1取逆映射，也就是(gn*...*g3*g2*g1)⁻¹，
       -- 则满足(g*x1).1.permute = 1
     use rl1.prod
