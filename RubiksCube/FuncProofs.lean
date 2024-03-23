@@ -1773,7 +1773,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- #check alternatingGroup α
 
   structure exist_reachableG_cornerPermute_to1
-  (x : RubiksSuperType) (h1 : IsThreeCycle x.1.permute) : Prop where
+  (x : RubiksSuperType)  : Prop where
+    isThreeCycle: IsThreeCycle x.1.permute
     existG: ∃ g : RubiksSuperType,
       Reachable g
       ∧
@@ -1784,8 +1785,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       (x * g).2.orient = (x).2.orient
       ∧
       (x * g).2.permute = (x).2.permute
+
   structure exist_reachableG_edgePermute_to1
-  (x : RubiksSuperType) (h1 : IsThreeCycle x.2.permute) : Prop where
+  (x : RubiksSuperType) : Prop where
+    isThreeCycle: IsThreeCycle x.2.permute
     existG: ∃ g : RubiksSuperType,
       Reachable g
       ∧
@@ -1805,7 +1808,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   lemma lemma31
   (x : RubiksSuperType)
   (h1 : IsThreeCycle x.1.permute)
-  : exist_reachableG_cornerPermute_to1 x h1
+  : exist_reachableG_cornerPermute_to1 x
   := by sorry
 
   #check prod_list_swap_mem_alternatingGroup_iff_even_length
@@ -1925,16 +1928,20 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       ∧
       (g*l.prod).2.permute = (g).2.permute
       := by
+      -- 应该用到h3_pre1，直接构造若干个RubiksSuperType，每个的.1.permute直接使用h3_pre1的这个列表。
+        -- 这若干个RubiksSuperType的复合结果就是本命题所需的l。
       -- 这里面应该用到了closure_three_cycles_eq_alternating
       sorry
-    -- 这里遇到问题思路： 1.h3能单独证明，在h3后面再引入引理任意一个元素都可以exist_reachableG_cornerPermute_to1, 但是后面的引理没用啊！ ；
+    -- 这里遇到问题思路选择： 1.h3能单独证明，在h3后面再引入引理任意一个元素都可以exist_reachableG_cornerPermute_to1, 但是后面的引理没用啊！ ；
           --2.h3内部引入引理exist_reachableG_cornerPermute_to1
           --3.最后是把h3的结果弱化了一下，将部分结果拆成了新引理h4解决了不能使用l的问题。
     obtain ⟨rl1,rl2,rl3,rl4,rl5,rl6⟩ := h3
-    -- todo1 --
-    have h4: Reachable rl1.prod :=
+    have h4_pre: ∀ a ∈ rl1, exist_reachableG_cornerPermute_to1 a
+    := by
       -- 用lemma31证明
-      by sorry
+      exact fun a a_1 ↦ lemma31 a (rl2 a a_1)
+    -- todo-- 现在应该证明一个exist_reachableG_cornerPermute_to1的保乘法性质才行
+
     -- 3. 综合1和2可知，g.1.permute = gn*...*g3*g2*g1 ， x1取逆映射，也就是(gn*...*g3*g2*g1)⁻¹，
       -- 则满足(g*x1).1.permute = 1
     use rl1.prod
