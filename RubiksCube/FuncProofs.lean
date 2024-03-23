@@ -1793,6 +1793,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       ∧
       (x * g).2.permute = (x).2.permute
 
+  @[simp]
   theorem exist_reachableG_cornerPermute_to1_mul
   (g1 g2 : RubiksSuperType)
   (h1: Reachable g1)
@@ -1816,15 +1817,24 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     · rw [← mul_assoc]
       simp only [mul_inv_cancel_right]
       exact erx3
-    apply And.intro
-    · rw [← mul_assoc]
-      simp only [mul_inv_cancel_right]
+    sorry
+    -- apply And.intro
+    -- · rw [← mul_assoc]
+    --   simp only [mul_inv_cancel_right]
       --todo -- 还有一些条件没给到，g1,g2都是保持orient，另一个permute不变的。
 
-
-
-    sorry
-
+  -- g.1.permute = (List.prod rl1).1.permute
+  @[simp]
+  theorem exist_reachableG_cornerPermute_to1_mul2
+  (g1 g2 g: RubiksSuperType)
+  (h1: exist_reachableG_cornerPermute_to1 g1)
+  (h2: exist_reachableG_cornerPermute_to1 g2)
+  (h3: g.1.permute = (g1*g2).1.permute)
+  (rane1: remains_allOrient_and_edgePermute g1)
+  (rane2: remains_allOrient_and_edgePermute g2)
+  :  -- 实际上是双向可推的，但是目前只证明需要用到的左推右。
+  exist_reachableG_cornerPermute_to1 (g)
+  := by sorry
 
   def exist_reachableG_edgePermute_to1
   (x : RubiksSuperType) : Prop
@@ -1847,13 +1857,27 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- 如果状态x的角块的位置是一个三循环，则，存在G中复合操作g，使得（x*g）的位置是复原状态。
     -- （特例： 如果状态x的角块的位置是一个三循环，且（全体方向数已还原,棱块位置已还原），则存在操作g，使得x*g是魔方还原状态。）
   /-- 如果状态x的角块的位置是一个三循环，则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
+  @[simp]
   lemma lemma31
   (x : RubiksSuperType)
   (h1 : IsThreeCycle x.1.permute)
   : exist_reachableG_cornerPermute_to1 x
   := by sorry
 
-  #check prod_list_swap_mem_alternatingGroup_iff_even_length
+  lemma lemma31_invpermute
+  (x : RubiksSuperType)
+  (h1 : IsThreeCycle x.1.permute⁻¹)
+  : exist_reachableG_cornerPermute_to1 x
+  := by
+    intros
+    have h2:IsThreeCycle x.1.permute := by exact IsThreeCycle.inv_iff.mp h1
+    exact lemma31 x h2
+
+
+
+
+
+  -- #check prod_list_swap_mem_alternatingGroup_iff_even_length
 
    -- 如果状态x的棱块的位置是一个三循环，则，存在G中复合操作g，使得（x*g）的位置是复原状态。
     -- （特例： 如果状态x的棱块的位置是一个三循环，且（全体方向数已还原,角块位置已还原），则存在操作g，使得x*g是魔方还原状态。）
@@ -1863,6 +1887,15 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (h1: IsThreeCycle x.2.permute)
   : exist_reachableG_edgePermute_to1 x
   := by sorry
+
+  lemma lemma32_invpermute
+  (x : RubiksSuperType)
+  (h1 : IsThreeCycle x.2.permute⁻¹)
+  : exist_reachableG_edgePermute_to1 x
+  := by
+    intros
+    have h2:IsThreeCycle x.2.permute := by exact IsThreeCycle.inv_iff.mp h1
+    exact lemma32 x h2
 
   -- 说的是G群里的操作覆盖了所有的3轮换的操作。
   -- lemma lemma33: sorry := sorry
@@ -1939,18 +1972,18 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   lemma lemma14
   (g:RubiksSuperType)
   (h1:g.1.permute ∈ alternatingGroup (Fin 8))
-  :∃ x1 : RubiksSuperType,
-  Reachable x1
-  ∧
-  (g*x1).1.permute = 1
-  ∧
-  (g*x1).2.permute = (g).2.permute
-  ∧
-  ((g*x1).1.orient = (g).1.orient ∧ (g*x1).2.orient = (g).2.orient )
+  :exist_reachableG_cornerPermute_to1 g
+  -- ∃ x1 : RubiksSuperType,
+  -- Reachable x1
+  -- ∧
+  -- (g*x1).1.permute = 1
+  -- ∧
+  -- (g*x1).2.permute = (g).2.permute
+  -- ∧
+  -- ((g*x1).1.orient = (g).1.orient ∧ (g*x1).2.orient = (g).2.orient )
   := by
     -- 1. g.1.permute，根据定理涉及定理：closure_three_cycles_eq_alternating，
       -- 可以写成多个角块3循环操作的复合，比如写成A1 * A2 * A3 ... * An，共n个3循环操作
-    -- 2. 每一个Ai（i取1到n），根据lemma31，都可以写成一个G群复合乘积g，这里记成g1,g2,g3,...,gn
     have h3_pre1 : ∃ l:List (Perm (Fin 8)),
       (∀ g ∈ l, IsThreeCycle g)
       ∧
@@ -1958,7 +1991,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       := by
       -- 可能要用归纳法证明
       sorry
-  -- todo写出所有子引理；证明14，同样15。最后重头戏31，32
+  -- todo -- 定理是反着写的；证明14，同样15。最后重头戏31，32
     have h3 : ∃ l:List (RubiksSuperType),
       (∀ a ∈ l, IsThreeCycle a.1.permute)
       ∧
@@ -1977,25 +2010,37 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- 这里遇到问题思路选择： 1.h3能单独证明，在h3后面再引入引理任意一个元素都可以exist_reachableG_cornerPermute_to1, 但是后面的引理没用啊！ ；
           --2.h3内部引入引理exist_reachableG_cornerPermute_to1
           --3.最后是把h3的结果弱化了一下，将部分结果拆成了新引理h4解决了不能使用l的问题。
+    have h3' := h3
     obtain ⟨rl1,rl2,rl3,rl4,rl5,rl6⟩ := h3
     have h4_pre: ∀ a ∈ rl1, exist_reachableG_cornerPermute_to1 a
     := by
       -- 用lemma31证明
       exact fun a a_1 ↦ lemma31 a (rl2 a a_1)
 
-    -- todo-- 现在应该证明一个exist_reachableG_cornerPermute_to1的保乘法性质才行,
-      -- 所以需要去掉exist_reachableG_cornerPermute_to1的第一个限制性质。
-    -- have h4: exist_reachableG_cornerPermute_to1 ()
+      -- rl1 = l1*l2*l3*...*ln  : List RubiksSuperType
+      -- l1.1.permute , l2.1.permute .... 都是3循环
+      -- g.1.permute = (l1*l2*l3*...*ln).1.permute⁻¹
+        -- = (ln.1.permute*...*l2.1.permute*l1.1.permute)⁻¹
+        -- = (l1.1.permute⁻¹*l2.1.permute⁻¹*...*ln.1.permute⁻¹)
+    have h5: g.1.permute= (List.prod rl1).1.permute⁻¹ -- 要将g.1.permute拆成3循环的乘积
+    := by
+      exact eq_inv_of_mul_eq_one_right rl3
+    have h6: ∀ a ∈ rl1, IsThreeCycle a.1.permute⁻¹ := by
+      intro a a_1
+      exact IsThreeCycle.inv (rl2 a a_1)
+    -- have h7: ∀ a ∈ rl1, exist_reachableG_cornerPermute_to1 a := by
+    --   intro a a_1
+    --   exact h4_pre a a_1
+    -- todo -- 只从h5出发，是不是要再出一个保运算性定理？ 用rl1.prod 还是exist_reachableG_cornerPermute_to1_mul来证明呢？
+    -- 这里不能直接用exist_reachableG_cornerPermute_to1_mul2，只能用归纳法因为是一个列表
 
-    -- 3. 综合1和2可知，g.1.permute = gn*...*g3*g2*g1 ， x1取逆映射，也就是(gn*...*g3*g2*g1)⁻¹，
-      -- 则满足(g*x1).1.permute = 1
-    use rl1.prod
+
     sorry
     done
 
 
 
-  #check closure_three_cycles_eq_alternating
+  -- #check closure_three_cycles_eq_alternating
   -- ∃
 
   -- 对于任意g状态棱块位置置换属于偶置换的状态，
