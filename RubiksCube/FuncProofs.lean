@@ -1772,6 +1772,18 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   -- #check alternatingGroup α
 
+  structure exist_reachableG_cpermute_to1
+  (x : RubiksSuperType) (h1 : IsThreeCycle x.1.permute) : Prop where
+    existG: ∃ g : RubiksSuperType,
+      Reachable g
+      ∧
+      (x * g).1.permute = 1
+      ∧
+      (x * g).1.orient = (x).1.orient
+      ∧
+      (x * g).2.orient = (x).2.orient
+      ∧
+      (x * g).2.permute = (x).2.permute
 
 
   -- 思考：纯3循环就是偶置换说的全体3循环吗？是的，因为魔方还原到目前状态也具有方向数全0的属性，也是一个“纯”的偶置换。
@@ -1897,13 +1909,14 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- 1. g.1.permute，根据定理涉及定理：closure_three_cycles_eq_alternating，
       -- 可以写成多个角块3循环操作的复合，比如写成A1 * A2 * A3 ... * An，共n个3循环操作
     -- 2. 每一个Ai（i取1到n），根据lemma31，都可以写成一个G群复合乘积g，这里记成g1,g2,g3,...,gn
-    -- have h2 : ∃ l:List (Perm (Fin 8)),
-    --   (∀ g ∈ l, IsThreeCycle g)
-    --   ∧
-    --   (l.prod = g.1.permute) := sorry
-    -- obtain ⟨l1,l2,l3⟩ := h2
+
+    -- todo 定义一个简写的可单独还原角位置的定义,写出所有子引理；证明14，同样15。最后重头戏31，32
+    have h3_pre1 : ∃ l:List (Perm (Fin 8)),
+      (∀ g ∈ l, IsThreeCycle g)
+      ∧
+      (l.prod = g.1.permute) := sorry -- 可能要用归纳法证明
     have h3 : ∃ l:List (RubiksSuperType),
-      (∀ g ∈ l, IsThreeCycle g.1.permute)
+      (∀ a ∈ l, IsThreeCycle a.1.permute)
       ∧
       ((g*l.prod).1.permute = 1)
       ∧
@@ -1915,10 +1928,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       ∧
       Reachable l.prod
       := by
+      -- have h3_1 : ∀ b1 ∈ l, ∃ b2 : RubiksSuperType, Reachable b2 ∧
+      --   (b1 * b2).1.permute = 1
+      --   ∧ (b1 * b2).1.orient = (b1).1.orient ∧ (b1 * b2).2.orient = (b1).2.orient
+      --   ∧ (b1 * b2).2.permute = (b1).2.permute := sorry
       -- 这里面应该用到了closure_three_cycles_eq_alternating
-
-      -- todo 改目标成∀ g ∈ l, ∃ g2: RubiksSuperType,Reachable g, 后面的需要吗？；证明14，同样15。最后重头戏31，32
       sorry
+
     obtain ⟨rl1,rl2,rl3,rl4,rl5,rl6,rl7⟩ := h3
     -- 3. 综合1和2可知，g.1.permute = gn*...*g3*g2*g1 ， x1取逆映射，也就是(gn*...*g3*g2*g1)⁻¹，
       -- 则满足(g*x1).1.permute = 1
