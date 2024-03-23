@@ -1770,6 +1770,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   --   have h1:= closure { σ : Perm α | σ ∈ M}
   --   sorry
 
+  def remains_allOrient_and_edgePermute
+  (x : RubiksSuperType)  : Prop
+  := x.1.orient=0 ∧ x.2.orient=0 ∧ x.2.permute=1
+  def remains_allOrient_and_cornerPermute
+  (x : RubiksSuperType)  : Prop
+  := x.1.orient=0 ∧ x.2.orient=0 ∧ x.1.permute=1
 
   def exist_reachableG_cornerPermute_to1
   (x : RubiksSuperType)  : Prop
@@ -1791,6 +1797,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g1 g2 : RubiksSuperType)
   (h1: Reachable g1)
   (h2: Reachable g2)
+  (rane1: remains_allOrient_and_edgePermute g1)
+  (rane2: remains_allOrient_and_edgePermute g2)
   :(exist_reachableG_cornerPermute_to1 g1
   ∧ exist_reachableG_cornerPermute_to1 g2)
   →  -- 实际上是双向可推的，但是目前只证明需要用到的左推右。
