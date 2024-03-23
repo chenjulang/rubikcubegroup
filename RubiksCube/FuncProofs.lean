@@ -1772,7 +1772,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   -- #check alternatingGroup α
 
-  structure exist_reachableG_cpermute_to1
+  structure exist_reachableG_cornerPermute_to1
   (x : RubiksSuperType) (h1 : IsThreeCycle x.1.permute) : Prop where
     existG: ∃ g : RubiksSuperType,
       Reachable g
@@ -1784,6 +1784,18 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       (x * g).2.orient = (x).2.orient
       ∧
       (x * g).2.permute = (x).2.permute
+  structure exist_reachableG_edgePermute_to1
+  (x : RubiksSuperType) (h1 : IsThreeCycle x.2.permute) : Prop where
+    existG: ∃ g : RubiksSuperType,
+      Reachable g
+      ∧
+      (x * g).2.permute = 1
+      ∧
+      (x * g).1.orient = (x).1.orient
+      ∧
+      (x * g).2.orient = (x).2.orient
+      ∧
+      (x * g).1.permute = (x).1.permute
 
 
   -- 思考：纯3循环就是偶置换说的全体3循环吗？是的，因为魔方还原到目前状态也具有方向数全0的属性，也是一个“纯”的偶置换。
@@ -1793,17 +1805,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   lemma lemma31
   (x : RubiksSuperType)
   (h1 : IsThreeCycle x.1.permute)
-  :
-  ∃ g : RubiksSuperType,
-    Reachable g
-    ∧
-    (x * g).1.permute = 1
-    ∧
-    (x * g).1.orient = (x).1.orient
-    ∧
-    (x * g).2.orient = (x).2.orient
-    ∧
-    (x * g).2.permute = (x).2.permute
+  : exist_reachableG_cornerPermute_to1 x h1
   := by sorry
 
   #check prod_list_swap_mem_alternatingGroup_iff_even_length
@@ -1814,11 +1816,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   lemma lemma32
   (x : RubiksSuperType)
   (h1: IsThreeCycle x.2.permute)
-  :
-  ∃ g : RubiksSuperType,
-    Reachable g
-    ∧
-    x * g = Solved
+  : exist_reachableG_edgePermute_to1 x h1
   := by sorry
 
   -- 说的是G群里的操作覆盖了所有的3轮换的操作。
