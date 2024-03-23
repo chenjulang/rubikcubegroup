@@ -1821,7 +1821,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- apply And.intro
     -- · rw [← mul_assoc]
     --   simp only [mul_inv_cancel_right]
-      --todo -- 还有一些条件没给到，g1,g2都是保持orient，另一个permute不变的。
+      --todo
 
   -- g.1.permute = (List.prod rl1).1.permute
   @[simp]
@@ -1969,18 +1969,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- 对于任意g状态角块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的角块位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
     -- 这里x1的例子我们使用3循环的复合。
+
   lemma lemma14
   (g:RubiksSuperType)
   (h1:g.1.permute ∈ alternatingGroup (Fin 8))
   :exist_reachableG_cornerPermute_to1 g
-  -- ∃ x1 : RubiksSuperType,
-  -- Reachable x1
-  -- ∧
-  -- (g*x1).1.permute = 1
-  -- ∧
-  -- (g*x1).2.permute = (g).2.permute
-  -- ∧
-  -- ((g*x1).1.orient = (g).1.orient ∧ (g*x1).2.orient = (g).2.orient )
   := by
     -- 1. g.1.permute，根据定理涉及定理：closure_three_cycles_eq_alternating，
       -- 可以写成多个角块3循环操作的复合，比如写成A1 * A2 * A3 ... * An，共n个3循环操作
@@ -1991,17 +1984,16 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       := by
       -- 可能要用归纳法证明
       sorry
-  -- todo -- 定理是反着写的；证明14，同样15。最后重头戏31，32
     have h3 : ∃ l:List (RubiksSuperType),
       (∀ a ∈ l, IsThreeCycle a.1.permute)
       ∧
-      ((g*l.prod).1.permute = 1)
+      (g.1.permute = (1 * l.prod).1.permute)
       ∧
-      (g*l.prod).1.orient = (g).1.orient
+      (g * l.prod⁻¹).1.orient = (g).1.orient -- 不变
       ∧
-      (g*l.prod).2.orient = (g).2.orient
+      (g * l.prod⁻¹).2.orient = (g).2.orient -- 不变
       ∧
-      (g*l.prod).2.permute = (g).2.permute
+      (g*l.prod).2.permute = (g).2.permute -- 不变
       := by
       -- 应该用到h3_pre1，直接构造若干个RubiksSuperType，每个的.1.permute直接使用h3_pre1的这个列表。
         -- 这若干个RubiksSuperType的复合结果就是本命题所需的l。
@@ -2016,32 +2008,48 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     := by
       -- 用lemma31证明
       exact fun a a_1 ↦ lemma31 a (rl2 a a_1)
-
-      -- rl1 = l1*l2*l3*...*ln  : List RubiksSuperType
-      -- l1.1.permute , l2.1.permute .... 都是3循环
-      -- g.1.permute = (l1*l2*l3*...*ln).1.permute⁻¹
-        -- = (ln.1.permute*...*l2.1.permute*l1.1.permute)⁻¹
-        -- = (l1.1.permute⁻¹*l2.1.permute⁻¹*...*ln.1.permute⁻¹)
-    have h5: g.1.permute= (List.prod rl1).1.permute⁻¹ -- 要将g.1.permute拆成3循环的乘积
-    := by
-      exact eq_inv_of_mul_eq_one_right rl3
-    have h6: ∀ a ∈ rl1, IsThreeCycle a.1.permute⁻¹ := by
-      intro a a_1
-      exact IsThreeCycle.inv (rl2 a a_1)
-    -- have h7: ∀ a ∈ rl1, exist_reachableG_cornerPermute_to1 a := by
+    -- have h5: ∀ a ∈ rl1, IsThreeCycle a.1.permute⁻¹ := by -- 这个没啥用，先放着
     --   intro a a_1
-    --   exact h4_pre a a_1
-    -- todo -- 只从h5出发，是不是要再出一个保运算性定理？ 用rl1.prod 还是exist_reachableG_cornerPermute_to1_mul来证明呢？
-    -- 这里不能直接用exist_reachableG_cornerPermute_to1_mul2，只能用归纳法因为是一个列表
-
-
-    sorry
+    --   exact IsThreeCycle.inv (rl2 a a_1)
+    have h6: ∀ a ∈ rl1, exist_reachableG_cornerPermute_to1 a := by
+      intro a a_1
+      exact h4_pre a a_1
+    -- 思路：
+      -- rl1 = l1*l2*l3*...*ln  : List RubiksSuperType
+      -- l1.1.permute , l2.1.permute .... 都是3循环 == rl2
+      -- g.1.permute = (l1*l2*l3*...*ln).1.permute == rl3
+                  -- = (l1.1.permute*l2.1.permute*...*ln.1.permute)
+      -- l1.1.permute , l2.1.permute .... 都是ERCT == h6
+      -- -- 是不是要再出一个保运算性定理？ 用rl1.prod 还是exist_reachableG_cornerPermute_to1_mul来证明呢？
+      -- 这里不能直接用exist_reachableG_cornerPermute_to1_mul2，只能用归纳法因为是一个列表
+    induction' rl1 with ind0 ind1 ind2
+    · simp at rl3
+      simp only [exist_reachableG_cornerPermute_to1]
+      use Solved
+      simp only [solved_reachable, true_and]
+      have Sis1 : Solved = 1 := rfl
+      rw [Sis1]
+      simp only [mul_one, and_self, and_true]
+      simp only [rl3,CornerType]
+      exact rfl
+    -- 归纳情况：
+    · simp at rl3
+      have h7: (ind0 * List.prod ind1).1.permute = (List.prod ind1).1.permute * ind0.1.permute
+      := by
+        simp only [Prod.fst_mul, PieceState.mul_def]
+        rfl
+      rw [h7] at rl3
+      apply exist_reachableG_cornerPermute_to1_mul2 ind0 (List.prod (ind1)) g
+      -- todo1 -- 定理是反着写的；证明14，同样15。最后重头戏31，32
+      · exact h4_pre ind0 (List.Mem.head ind1)
+      · sorry
+      · exact rl3
+      · sorry
+      · sorry
     done
 
 
 
-  -- #check closure_three_cycles_eq_alternating
-  -- ∃
 
   -- 对于任意g状态棱块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的棱块位置置换变成1，而且保持(g*x1)的角块位置不变，而且所有块的方向数不变。
