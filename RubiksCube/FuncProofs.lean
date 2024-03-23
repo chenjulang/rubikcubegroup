@@ -1770,12 +1770,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   --   have h1:= closure { σ : Perm α | σ ∈ M}
   --   sorry
 
-  -- #check alternatingGroup α
 
-  structure exist_reachableG_cornerPermute_to1
-  (x : RubiksSuperType)  : Prop where
-    isThreeCycle: IsThreeCycle x.1.permute
-    existG: ∃ g : RubiksSuperType,
+  def exist_reachableG_cornerPermute_to1
+  (x : RubiksSuperType)  : Prop
+  -- where
+  :=
+    -- isThreeCycle: IsThreeCycle x.1.permute
+    ∃ g : RubiksSuperType,
       Reachable g
       ∧
       (x * g).1.permute = 1
@@ -1786,10 +1787,43 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       ∧
       (x * g).2.permute = (x).2.permute
 
-  structure exist_reachableG_edgePermute_to1
-  (x : RubiksSuperType) : Prop where
-    isThreeCycle: IsThreeCycle x.2.permute
-    existG: ∃ g : RubiksSuperType,
+  theorem exist_reachableG_cornerPermute_to1_mul
+  (g1 g2 : RubiksSuperType)
+  (h1: Reachable g1)
+  (h2: Reachable g2)
+  :(exist_reachableG_cornerPermute_to1 g1
+  ∧ exist_reachableG_cornerPermute_to1 g2)
+  →  -- 实际上是双向可推的，但是目前只证明需要用到的左推右。
+  (exist_reachableG_cornerPermute_to1 (g1*g2))
+  := by
+    intro er
+    obtain ⟨erx,ery⟩ := er
+    simp only [exist_reachableG_cornerPermute_to1] at erx ery ⊢
+    obtain ⟨g3,erx2,erx3,erx4,erx5,erx6⟩ := erx
+    obtain ⟨g4,ery2,ery3,ery4,ery5,ery6⟩ := ery
+    use (g2⁻¹*g3)
+    apply And.intro
+    · sorry
+    apply And.intro
+    · rw [← mul_assoc]
+      simp only [mul_inv_cancel_right]
+      exact erx3
+    apply And.intro
+    · rw [← mul_assoc]
+      simp only [mul_inv_cancel_right]
+      --todo -- 还有一些条件没给到，g1,g2都是保持orient，另一个permute不变的。
+
+
+
+    sorry
+
+
+  def exist_reachableG_edgePermute_to1
+  (x : RubiksSuperType) : Prop
+  :=
+  -- where
+    -- isThreeCycle: IsThreeCycle x.2.permute
+    ∃ g : RubiksSuperType,
       Reachable g
       ∧
       (x * g).2.permute = 1
@@ -1819,7 +1853,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   lemma lemma32
   (x : RubiksSuperType)
   (h1: IsThreeCycle x.2.permute)
-  : exist_reachableG_edgePermute_to1 x h1
+  : exist_reachableG_edgePermute_to1 x
   := by sorry
 
   -- 说的是G群里的操作覆盖了所有的3轮换的操作。
@@ -1940,11 +1974,15 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     := by
       -- 用lemma31证明
       exact fun a a_1 ↦ lemma31 a (rl2 a a_1)
-    -- todo-- 现在应该证明一个exist_reachableG_cornerPermute_to1的保乘法性质才行
+
+    -- todo-- 现在应该证明一个exist_reachableG_cornerPermute_to1的保乘法性质才行,
+      -- 所以需要去掉exist_reachableG_cornerPermute_to1的第一个限制性质。
+    -- have h4: exist_reachableG_cornerPermute_to1 ()
 
     -- 3. 综合1和2可知，g.1.permute = gn*...*g3*g2*g1 ， x1取逆映射，也就是(gn*...*g3*g2*g1)⁻¹，
       -- 则满足(g*x1).1.permute = 1
     use rl1.prod
+    sorry
     done
 
 
