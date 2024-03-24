@@ -333,11 +333,24 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       else if x = B' then F'
       else 1
 
-    def G1Perm_L : Array RubiksSuperType := #[R' ,D ,D ,R ,B' ,U ,U ,B,R' ,D ,D ,R ,B' ,U ,U ,B]
-    -- #eval toString $ (G1Perm_L.map VariantFaceTurn_L).toList
-    #eval (G1Perm_L.map VariantFaceTurn_L).toList.prod --注意，这样toList不会去掉重复？
+    -- def G1Perm_L : Array RubiksSuperType := #[R' ,D ,D ,R ,B' ,U ,U ,B,R' ,D ,D ,R ,B' ,U ,U ,B]
+    -- -- #eval toString $ G1Perm_L.toList.toArray.toList
+    -- -- #eval toString $ (G1Perm_L.map VariantFaceTurn_L).toList
+    -- #eval (G1Perm_L.map VariantFaceTurn_L).toList.prod --注意，这样toList不会去掉重复？
+    -- -- ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 1, 0] },
+    -- --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
+
+    -- def testG1Perm_L : List RubiksSuperType := [R' ,D ,D ,R ,B' ,U ,U ,B,R' ,D ,D ,R ,B' ,U ,U ,B]
+    def VariantFaceTurn_L_List : (l:List RubiksSuperType) → RubiksSuperType
+    := fun l => (l.map VariantFaceTurn_L).prod
+    -- #eval VariantFaceTurn_L_List testG1Perm_L
     -- ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 1, 0] },
-    --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
+    -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
+    def VariantFaceTurn_R_List : (l:List RubiksSuperType) → RubiksSuperType
+    := fun l => (l.map VariantFaceTurn_R).prod
+    def VariantFaceTurn_B_List : (l:List RubiksSuperType) → RubiksSuperType
+    := fun l => (l.map VariantFaceTurn_B).prod
+
   def G5Perm_element1 : RubiksSuperType
   := R*U*R'*U'*R'*F*R*R*U'*R'
   /-- 是2个2循环:2个角块的2循环+2个棱块的2循环,详细: 角块ρ(g5) =(2,3)， 棱块σ(g5) =(1,2) -/
@@ -346,6 +359,21 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- #eval G5Perm
   -- ({ permute := ![0, 2, 1, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
   -- { permute := ![1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
+
+  /-- 是一个角块3循环 ρ(g4) =(2,4,3)-/
+  def G4Perm : RubiksSuperType
+  := R'*F'*F'*F'*R'*B*B*R'*R'*R'*F'*R'*B*B*R'*R'
+  -- #eval G4Perm
+  -- ({ permute := ![0, 3, 1, 2, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
+  --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
+
+  /-- 创建一阶交换子公式。不强制要求：r1影响到的块的集合A，与r2影响到的块的集合B，交集有且仅有1个（这就是为什么称作一阶）。 -/
+  def conjugate_formula : RubiksSuperType → RubiksSuperType → RubiksSuperType
+  := fun r1 r2 => r1 * r2 * r1⁻¹
+  -- #eval conjugate_formula (D'*L*L) G4Perm  -- 比如：(2,3,6)交换子
+  -- ({ permute := ![0, 5, 1, 3, 4, 2, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
+  -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
+
 
   end rubikCubeFormula
 
@@ -1865,7 +1893,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   -- 思考：纯3循环就是偶置换说的全体3循环吗？是的，因为魔方还原到目前状态也具有方向数全0的属性，也是一个“纯”的偶置换。
   /-- 如果状态x的角块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
-  lemma lemma31
+  lemma lemma31 -- 这个命题直接上就是给出其中算法将角块3循环（全体方向数已还原,棱块位置已还原）还原到1。
+  -- 用到公式有3类：1.g4 ; 2.g4的4种变式(VariantFaceTurn_?_List) ； 3.包含g4（或g4变式）的交换子（conjugate_formula）。
   (x : RubiksSuperType)
   (h1: IsThreeCycle x.1.permute)
   (h2: x.1.orient =0)
@@ -1873,7 +1902,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (h4: x.1.orient =0)
   : Reachable x
   := by
-    -- todo-- 如何开展分类讨论？
+    -- todo-- 如何开展分类56种讨论？先看看IsThreeCycle为条件的一些定理是怎么证明的？
+    -- 要人为的等价分类：1.“变式的”，即“同形状”的是等价的。
+      -- G4Perm效果：ρ(g4) =(2,4,3)
+
     sorry
 
 
@@ -1886,7 +1918,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (h3: x.1.permute = 1)
   (h4: x.1.orient =0)
   : Reachable x
-  := by sorry
+  := by
+    -- 如何分类220种情况？
+    sorry
 
 
   -- 说的是G群里的操作覆盖了所有的3轮换的操作。
