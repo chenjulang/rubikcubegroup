@@ -18,7 +18,7 @@
     11.(找出一个排列变换中原参数不等于结果值的这些原参数；换句话说，改变值的那些原参数，不变的不需要)support (f : Perm α) : Finset α :=
       univ.filter fun x => f x ≠ x
     12.(获取一个3循环的方式之二：)：_root_.card_support_eq_three_iff : σ.support.card = 3 ↔ σ.IsThreeCycle
-    13.
+    13.prod_list_swap_mem_alternatingGroup_iff_even_length
 2.需要一个定理：存在一个操作，具体说明涉及定理：closure_three_cycles_eq_alternating说的偶置换是如何被3循环复合得到的。
     不一定要具体操作，给出存在性命题即可，然后同构于目前的问题。
 3. 31怎么证明14，32如何证明15

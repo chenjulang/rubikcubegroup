@@ -1777,6 +1777,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (x : RubiksSuperType)  : Prop
   := x.1.orient=0 ∧ x.2.orient=0 ∧ x.1.permute=1
 
+  -- 角块部分：
   def exist_reachableG_cornerPermute_to1
   (x : RubiksSuperType)  : Prop
   :=
@@ -1791,7 +1792,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       ∧
       (x * g).2.permute = (x).2.permute
 
-  def testthreeList: List (Perm (Fin 8)) := sorry
   def permFin8_to_RubiksSuperType
   : (Perm (Fin 8)) → RubiksSuperType
   := by
@@ -1819,12 +1819,54 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   rubiksList = (threeList.map permFin8_to_RubiksSuperType) -- 映射得来
   := by sorry
 
+  -- 棱块部分：
+  def exist_reachableG_edgePermute_to1
+  (x : RubiksSuperType)  : Prop
+  :=
+    ∃ g : RubiksSuperType,
+      Reachable g
+      ∧
+      (x * g).2.permute = 1
+      ∧
+      (x * g).1.orient = (x).1.orient
+      ∧
+      (x * g).2.orient = (x).2.orient
+      ∧
+      (x * g).1.permute = (x).1.permute
+
+  def permFin12_to_RubiksSuperType
+  : (Perm (Fin 12)) → RubiksSuperType
+  := by
+    exact fun x => {
+      fst := {
+        permute := 1
+        orient := 0
+      }
+      snd := {
+        permute := x
+        orient := 0
+      }
+    }
+
+  lemma alternatingEdgePermute_eq_3Cycles_to_g_eq_3Cycles_mul_one
+  (g: RubiksSuperType)
+  (threeList: List (Perm (Fin 12)) )
+  (h1: ∀a ∈ threeList, IsThreeCycle a)
+  (h2: g.2.permute = threeList.prod)
+  :∃ (rubiksList:List RubiksSuperType) (rst1:RubiksSuperType),
+  g = rubiksList.prod * rst1
+  ∧
+  -- 原始的3个项相等
+  (g.1.orient=rst1.1.orient ∧ g.1.permute=rst1.1.permute ∧ g.2.orient=rst1.2.orient)
+  ∧
+  rubiksList = (threeList.map permFin12_to_RubiksSuperType) -- 映射得来
+  := by sorry
+
 
   -- 思考：纯3循环就是偶置换说的全体3循环吗？是的，因为魔方还原到目前状态也具有方向数全0的属性，也是一个“纯”的偶置换。
   -- 如果状态x的角块的位置是一个三循环，则，存在G中复合操作g，使得（x*g）的位置是复原状态。
     -- （特例： 如果状态x的角块的位置是一个三循环，且（全体方向数已还原,棱块位置已还原），则存在操作g，使得x*g是魔方还原状态。）
   /-- 如果状态x的角块的位置是一个三循环，则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
-  @[simp]
   lemma lemma31
   (x : RubiksSuperType)
   (h1: IsThreeCycle x.1.permute)
@@ -1832,11 +1874,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (h3: x.2.permute = 1)
   (h4: x.1.orient =0)
   : Reachable x
-  := by sorry
+  := by
+    -- todo-- 如何开展分类讨论？
+    sorry
 
 
-
-  -- #check prod_list_swap_mem_alternatingGroup_iff_even_length
 
    -- 如果状态x的棱块的位置是一个三循环，则，存在G中复合操作g，使得（x*g）的位置是复原状态。
     -- （特例： 如果状态x的棱块的位置是一个三循环，且（全体方向数已还原,角块位置已还原），则存在操作g，使得x*g是魔方还原状态。）
@@ -1917,9 +1959,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       · simp only [BothOne]
     done
 
-  -- 目前证明思路有两条：1.用11证明16，但和当前的代码版本不太对。
-  -- 2.用31证明14，用32证明15，将11舍去，可以的，选择这个方向。
-
+  -- todo 14+15
   -- 对于任意g状态角块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的角块位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
     -- 这里x1的例子我们使用3循环的复合。
@@ -1972,21 +2012,41 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   lemma lemma15
   (g:RubiksSuperType)
   (h1:g.2.permute ∈ alternatingGroup (Fin 12))
-  :∃ x1 : RubiksSuperType,
-  Reachable x1
-  ∧
-  (g*x1).2.permute = 1
-  ∧
-  (g*x1).1.permute = (g).1.permute
-  ∧
-  ((g*x1).1.orient = (g).1.orient ∧ (g*x1).2.orient = (g).2.orient )
+  :exist_reachableG_edgePermute_to1 g
   := by
-    -- 1. g.2.permute，根据定理涉及定理：closure_three_cycles_eq_alternating，
-      -- 可以写成多个棱块3循环操作的复合，比如写成A1 * A2 * A3 ... * An，共n个3循环操作
-    -- 2. 每一个Ai（i取1到n），根据lemma32，都可以写成一个G群复合乘积g，这里记成g1,g2,g3,...,gn
-    -- 3. 综合1和2可知，g.2.permute = gn*...*g3*g2*g1 ，x1取逆映射，也就是(gn*...*g3*g2*g1)⁻¹，
-      -- 则满足(g*x1).2.permute = 1
-    sorry
+    -- 2.lemma31,lemma32:即所有满足这样的g:RubiksSuperType：
+      -- {1.IsThreeCycle g.1.p ；2.g.1.o = 0 ；3.g.2.p=1 ; 4.g.2.o=0 }
+      -- 都能通过群G复合生成。
+    -- 3. 由于g.1.p 是偶的置换，使用这里面应该用到了closure_three_cycles_eq_alternating
+      -- g.1.p 可以表示成3循环的乘积,这里记为threeList
+    have h2 : ∃ (threeList:List (Perm (Fin 12))) ,
+      (∀ g ∈ threeList, IsThreeCycle g)
+      ∧
+      (g.2.permute = threeList.prod)
+      := by
+      -- 可能要用归纳法证明
+      sorry
+    obtain ⟨h2_1,h2_2,h2_3⟩ := h2
+    -- 4. 此处需要一个引理lalternatingCornerPermute_eq_3Cycles_to_g_eq_3Cycles_mul_one来带入这个结论
+      -- g可以表示成若干RubiksSuperType和一个rst1:RubiksSuperType的乘积，这里记为rubiksList.
+      -- rubiksList满足：{对所有元素a，IsThreeCycle a.1.p；a.1.orient=0; a.2.permute=1; a.2.orient=0}
+      -- rst1满足：{a.1.p = 1 ; a.1.orient=g.1.orient; a.2.permute=g.2.permute ; a.2.orient=g.2.orient}
+    have h3 := alternatingEdgePermute_eq_3Cycles_to_g_eq_3Cycles_mul_one
+      g h2_1 h2_2 h2_3
+    obtain ⟨rubiksList,h3_2,h3_3,h3_4,h3_5⟩ := h3
+    -- 5.总结：命题所需的复合操作就是(rubiksList.prod)⁻¹
+    simp only [exist_reachableG_edgePermute_to1]
+    use (rubiksList.prod)⁻¹
+    apply And.intro
+    · sorry
+    apply And.intro
+    · sorry
+    apply And.intro
+    · sorry
+    apply And.intro
+    · sorry
+    · sorry
+    done
 
   -- 就是lemma14+15的简单结合
   -- 对于任意g状态角块位置置换属于偶置换的状态，且棱块位置置换属于偶置换的状态，
