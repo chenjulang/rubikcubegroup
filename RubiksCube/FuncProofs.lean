@@ -1864,9 +1864,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
 
   -- 思考：纯3循环就是偶置换说的全体3循环吗？是的，因为魔方还原到目前状态也具有方向数全0的属性，也是一个“纯”的偶置换。
-  -- 如果状态x的角块的位置是一个三循环，则，存在G中复合操作g，使得（x*g）的位置是复原状态。
-    -- （特例： 如果状态x的角块的位置是一个三循环，且（全体方向数已还原,棱块位置已还原），则存在操作g，使得x*g是魔方还原状态。）
-  /-- 如果状态x的角块的位置是一个三循环，则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
+  /-- 如果状态x的角块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
   lemma lemma31
   (x : RubiksSuperType)
   (h1: IsThreeCycle x.1.permute)
@@ -1880,9 +1878,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
 
 
-   -- 如果状态x的棱块的位置是一个三循环，则，存在G中复合操作g，使得（x*g）的位置是复原状态。
-    -- （特例： 如果状态x的棱块的位置是一个三循环，且（全体方向数已还原,角块位置已还原），则存在操作g，使得x*g是魔方还原状态。）
-  /-- 如果状态x的棱块的位置是一个三循环，则，存在G中复合操作g，使得（x*g）的位置是复原状态。-/
+  /-- 如果状态x的棱块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
   lemma lemma32
   (x : RubiksSuperType)
   (h1: IsThreeCycle x.2.permute)
