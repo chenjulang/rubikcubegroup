@@ -1993,7 +1993,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       ∧
       (g * l.prod⁻¹).2.orient = (g).2.orient -- 不变
       ∧
-      (g*l.prod).2.permute = (g).2.permute -- 不变
+      (g * l.prod⁻¹).2.permute = (g).2.permute -- 不变
       := by
       -- 应该用到h3_pre1，直接构造若干个RubiksSuperType，每个的.1.permute直接使用h3_pre1的这个列表。
         -- 这若干个RubiksSuperType的复合结果就是本命题所需的l。
@@ -2011,15 +2011,16 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- have h5: ∀ a ∈ rl1, IsThreeCycle a.1.permute⁻¹ := by -- 这个没啥用，先放着
     --   intro a a_1
     --   exact IsThreeCycle.inv (rl2 a a_1)
-    have h6: ∀ a ∈ rl1, exist_reachableG_cornerPermute_to1 a := by
-      intro a a_1
-      exact h4_pre a a_1
+    -- have h6: ∀ a ∈ rl1, exist_reachableG_cornerPermute_to1 a := by
+    --   intro a a_1
+    --   exact h4_pre a a_1
     -- 思路：
       -- rl1 = l1*l2*l3*...*ln  : List RubiksSuperType
-      -- l1.1.permute , l2.1.permute .... 都是3循环 == rl2
-      -- g.1.permute = (l1*l2*l3*...*ln).1.permute == rl3
+      -- l1.1.permute , l2.1.permute .... 都是3循环       == rl2
+      -- g.1.permute = (l1*l2*l3*...*ln).1.permute      == rl3
                   -- = (l1.1.permute*l2.1.permute*...*ln.1.permute)
-      -- l1.1.permute , l2.1.permute .... 都是ERCT == h6
+      -- l1 , l2 ,l3 .... 都是ERCT      == h4_pre
+
       -- -- 是不是要再出一个保运算性定理？ 用rl1.prod 还是exist_reachableG_cornerPermute_to1_mul来证明呢？
       -- 这里不能直接用exist_reachableG_cornerPermute_to1_mul2，只能用归纳法因为是一个列表
     induction' rl1 with ind0 ind1 ind2
@@ -2042,7 +2043,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       apply exist_reachableG_cornerPermute_to1_mul2 ind0 (List.prod (ind1)) g
       -- todo1 -- 定理是反着写的；证明14，同样15。最后重头戏31，32
       · exact h4_pre ind0 (List.Mem.head ind1)
-      · sorry
+      · sorry-- 如何使用ind2
       · exact rl3
       · sorry
       · sorry
