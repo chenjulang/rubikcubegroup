@@ -1779,9 +1779,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   def exist_reachableG_cornerPermute_to1
   (x : RubiksSuperType)  : Prop
-  -- where
   :=
-    -- isThreeCycle: IsThreeCycle x.1.permute
     ∃ g : RubiksSuperType,
       Reachable g
       ∧
@@ -1793,65 +1791,49 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       ∧
       (x * g).2.permute = (x).2.permute
 
-  @[simp]
-  theorem exist_reachableG_cornerPermute_to1_mul
-  (g1 g2 : RubiksSuperType)
-  (h1: Reachable g1)
-  (h2: Reachable g2)
-  (rane1: remains_allOrient_and_edgePermute g1)
-  (rane2: remains_allOrient_and_edgePermute g2)
-  :(exist_reachableG_cornerPermute_to1 g1
-  ∧ exist_reachableG_cornerPermute_to1 g2)
-  →  -- 实际上是双向可推的，但是目前只证明需要用到的左推右。
-  (exist_reachableG_cornerPermute_to1 (g1*g2))
+  def permFin8_to_RubiksSuperType
+  : (Perm (Fin 8)) → RubiksSuperType
   := by
-    intro er
-    obtain ⟨erx,ery⟩ := er
-    simp only [exist_reachableG_cornerPermute_to1] at erx ery ⊢
-    obtain ⟨g3,erx2,erx3,erx4,erx5,erx6⟩ := erx
-    obtain ⟨g4,ery2,ery3,ery4,ery5,ery6⟩ := ery
-    use (g2⁻¹*g3)
-    apply And.intro
-    · sorry
-    apply And.intro
-    · rw [← mul_assoc]
-      simp only [mul_inv_cancel_right]
-      exact erx3
-    sorry
-    -- apply And.intro
-    -- · rw [← mul_assoc]
-    --   simp only [mul_inv_cancel_right]
-      --todo
+    exact fun x => {
+      fst := {
+        permute := x
+        orient := 0
+      }
+      snd := {
+        permute := 1
+        orient := 0
+      }
+    }
 
-  -- g.1.permute = (List.prod rl1).1.permute
-  @[simp]
-  theorem exist_reachableG_cornerPermute_to1_mul2
-  (g1 g2 g: RubiksSuperType)
-  (h1: exist_reachableG_cornerPermute_to1 g1)
-  (h2: exist_reachableG_cornerPermute_to1 g2)
-  (h3: g.1.permute = (g1*g2).1.permute)
-  (rane1: remains_allOrient_and_edgePermute g1)
-  (rane2: remains_allOrient_and_edgePermute g2)
-  :  -- 实际上是双向可推的，但是目前只证明需要用到的左推右。
-  exist_reachableG_cornerPermute_to1 (g)
+  lemma alternatingCornerPermute_eq_3Cycles_to_g_eq_3Cycles_mul_one
+  (g: RubiksSuperType)
+  (threeList: List (Perm (Fin 8)) )
+  (h1: ∀a ∈ threeList, IsThreeCycle a)
+  (h2: g.1.permute = threeList.prod)
+  :∃ (rubiksList:List RubiksSuperType) (rst1:RubiksSuperType),
+  g = rubiksList.prod * rst1
+  ∧
+  -- todo
+  rubiksList = threeList.map ((fun x =>
+    by
+    let a :RubiksSuperType := {
+      fst := {
+        permute := x
+        orient := 0
+      }
+      snd := {
+        permute := 1
+        orient := 0
+      }
+    }
+    exact a
+  ))
+  -- -- 映射得来
+  -- ∧
+  (g.1.orient=rst1.1.orient ∧ g.2.permute=rst1.2.permute ∧ g.2.orient=rst1.2.orient)
   := by sorry
 
-  def exist_reachableG_edgePermute_to1
-  (x : RubiksSuperType) : Prop
-  :=
-  -- where
-    -- isThreeCycle: IsThreeCycle x.2.permute
-    ∃ g : RubiksSuperType,
-      Reachable g
-      ∧
-      (x * g).2.permute = 1
-      ∧
-      (x * g).1.orient = (x).1.orient
-      ∧
-      (x * g).2.orient = (x).2.orient
-      ∧
-      (x * g).1.permute = (x).1.permute
-
+  #check RubiksSuperType
 
   -- 思考：纯3循环就是偶置换说的全体3循环吗？是的，因为魔方还原到目前状态也具有方向数全0的属性，也是一个“纯”的偶置换。
   -- 如果状态x的角块的位置是一个三循环，则，存在G中复合操作g，使得（x*g）的位置是复原状态。
@@ -1860,21 +1842,14 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   @[simp]
   lemma lemma31
   (x : RubiksSuperType)
-  (h1 : IsThreeCycle x.1.permute)
-  : exist_reachableG_cornerPermute_to1 x
+  (h1: IsThreeCycle x.1.permute)
+  (h2: x.1.orient =0)
+  (h3: x.2.permute = 1)
+  (h4: x.1.orient =0)
+  : Reachable x
   := by sorry
 
-  lemma lemma31_invpermute
-  (x : RubiksSuperType)
-  (h1 : IsThreeCycle x.1.permute⁻¹)
-  : exist_reachableG_cornerPermute_to1 x
-  := by
-    intros
-    have h2:IsThreeCycle x.1.permute := by exact IsThreeCycle.inv_iff.mp h1
-    exact lemma31 x h2
-
-
-
+  -- lemma lemma31_invpermute
 
 
   -- #check prod_list_swap_mem_alternatingGroup_iff_even_length
@@ -1885,17 +1860,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   lemma lemma32
   (x : RubiksSuperType)
   (h1: IsThreeCycle x.2.permute)
-  : exist_reachableG_edgePermute_to1 x
+  (h2: x.2.orient =0)
+  (h3: x.1.permute = 1)
+  (h4: x.1.orient =0)
+  : Reachable x
   := by sorry
 
-  lemma lemma32_invpermute
-  (x : RubiksSuperType)
-  (h1 : IsThreeCycle x.2.permute⁻¹)
-  : exist_reachableG_edgePermute_to1 x
-  := by
-    intros
-    have h2:IsThreeCycle x.2.permute := by exact IsThreeCycle.inv_iff.mp h1
-    exact lemma32 x h2
 
   -- 说的是G群里的操作覆盖了所有的3轮换的操作。
   -- lemma lemma33: sorry := sorry
@@ -1972,19 +1942,28 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   lemma lemma14
   (g:RubiksSuperType)
+  -- 1. g.1.p 是偶的置换
   (h1:g.1.permute ∈ alternatingGroup (Fin 8))
   :exist_reachableG_cornerPermute_to1 g
   := by
-    -- 1. g.1.permute，根据定理涉及定理：closure_three_cycles_eq_alternating，
-      -- 可以写成多个角块3循环操作的复合，比如写成A1 * A2 * A3 ... * An，共n个3循环操作
-    have h3_pre1 : ∃ l:List (Perm (Fin 8)),
-      (∀ g ∈ l, IsThreeCycle g)
+    -- 2.lemma31,lemma32:即所有满足这样的g:RubiksSuperType：
+      -- {1.IsThreeCycle g.1.p ；2.g.1.o = 0 ；3.g.2.p=1 ; 4.g.2.o=0 }
+      -- 都能通过群G复合生成。
+    -- 3. 由于g.1.p 是偶的置换，使用这里面应该用到了closure_three_cycles_eq_alternating
+      -- g.1.p 可以表示成3循环的乘积,这里记为threeList
+    have h2 : ∃ (threeList:List (Perm (Fin 8))) ,
+      (∀ g ∈ threeList, IsThreeCycle g)
       ∧
-      (l.prod = g.1.permute)
+      (g.1.permute = threeList.prod)
       := by
       -- 可能要用归纳法证明
       sorry
-    have h3 : ∃ l:List (RubiksSuperType),
+    -- 4. 此处需要一个引理来带入这个结论
+      -- g可以表示成若干RubiksSuperType和一个rst1:RubiksSuperType的乘积，这里记为rubiksList.
+      -- rubiksList满足：{对所有元素a，IsThreeCycle a.1.p；a.1.orient=0; a.2.permute=1; a.2.orient=0}
+      -- rst1满足：{a.1.p = 1 ; a.1.orient=g.1.orient; a.2.permute=g.2.permute ; a.2.orient=g.2.orient}
+
+    have h3 : ∃ (l:List (RubiksSuperType)) ,
       (∀ a ∈ l, IsThreeCycle a.1.permute)
       ∧
       (g.1.permute = (1 * l.prod).1.permute)
@@ -2011,18 +1990,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- have h5: ∀ a ∈ rl1, IsThreeCycle a.1.permute⁻¹ := by -- 这个没啥用，先放着
     --   intro a a_1
     --   exact IsThreeCycle.inv (rl2 a a_1)
-    -- have h6: ∀ a ∈ rl1, exist_reachableG_cornerPermute_to1 a := by
-    --   intro a a_1
-    --   exact h4_pre a a_1
-    -- 思路：
-      -- rl1 = l1*l2*l3*...*ln  : List RubiksSuperType
-      -- l1.1.permute , l2.1.permute .... 都是3循环       == rl2
-      -- g.1.permute = (l1*l2*l3*...*ln).1.permute      == rl3
-                  -- = (l1.1.permute*l2.1.permute*...*ln.1.permute)
-      -- l1 , l2 ,l3 .... 都是ERCT      == h4_pre
-
-      -- -- 是不是要再出一个保运算性定理？ 用rl1.prod 还是exist_reachableG_cornerPermute_to1_mul来证明呢？
-      -- 这里不能直接用exist_reachableG_cornerPermute_to1_mul2，只能用归纳法因为是一个列表
     induction' rl1 with ind0 ind1 ind2
     · simp at rl3
       simp only [exist_reachableG_cornerPermute_to1]
@@ -2040,13 +2007,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         simp only [Prod.fst_mul, PieceState.mul_def]
         rfl
       rw [h7] at rl3
-      apply exist_reachableG_cornerPermute_to1_mul2 ind0 (List.prod (ind1)) g
-      -- todo1 -- 定理是反着写的；证明14，同样15。最后重头戏31，32
-      · exact h4_pre ind0 (List.Mem.head ind1)
-      · sorry-- 如何使用ind2
-      · exact rl3
-      · sorry
-      · sorry
+      sorry
     done
 
 
