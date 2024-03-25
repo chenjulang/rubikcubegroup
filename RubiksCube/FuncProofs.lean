@@ -360,7 +360,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- ({ permute := ![0, 2, 1, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
   -- { permute := ![1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
 
-  /-- 是一个角块3循环 ρ(g4) =(2,4,3)-/
+  /-- 是一个角块3循环 ρ(g4) =(2,4,3) 这里指2的新位置是4当前的位置 -/
   def G4Perm : RubiksSuperType
   := R'*F'*F'*F'*R'*B*B*R'*R'*R'*F'*R'*B*B*R'*R'
   -- #eval G4Perm
@@ -1903,11 +1903,28 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   : Reachable x
   := by
     -- todo-- 如何开展分类56种讨论？先看看IsThreeCycle为条件的一些定理是怎么证明的？
-    -- 要人为的等价分类：1.“变式的”，即“同形状”的是等价的。
-      -- G4Perm效果：ρ(g4) =(2,4,3)
+    -- G4Perm效果：ρ(g4) =(2,4,3) ： 顺时针
+    -- 可能要人为的等价分类：1.“变式的”，即“同形状”的是等价的。
+    -- 需要一个制造排列 Perm (Fin 8)的函数。应该是从List (Fin 8) → Perm (Fin 8)。
+    let p1 := List.formPerm ([1,2,3]:(List (Fin 8)))
+    -- 先进行一个小分类的推理：原2在3，原3在4，原4在2。
+    by_cases ha0:x.1.permute = p1
+      -- 执行一次G4Perm即可完成。此时制造一个RubiksSuperType
+    let rubiks_p1:RubiksSuperType := {
+      fst := {
+        permute := p1
+        orient := 0
+      }
+      snd := {
+        permute := 1
+        orient := 0
+      }
+    }
+    -- 由于 x*p1 = Solved
 
     sorry
 
+  #eval List.formPerm ([1,2,3]:(List (Fin 8)))
 
 
   /-- 如果状态x的棱块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
