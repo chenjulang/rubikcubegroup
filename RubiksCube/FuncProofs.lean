@@ -1891,6 +1891,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   := by sorry
 
 
+  def lemma31_testswap001: (swap 1 2) * (swap 2 3) = List.formPerm ([1,2,3]:(List (Fin 8))) := by decide
+
   -- 思考：纯3循环就是偶置换说的全体3循环吗？是的，因为魔方还原到目前状态也具有方向数全0的属性，也是一个“纯”的偶置换。
   /-- 如果状态x的角块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
   lemma lemma31 -- 这个命题直接上就是给出其中算法将角块3循环（全体方向数已还原,棱块位置已还原）还原到1。
@@ -1906,25 +1908,85 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- G4Perm效果：ρ(g4) =(2,4,3) ： 顺时针
     -- 可能要人为的等价分类：1.“变式的”，即“同形状”的是等价的。
     -- 需要一个制造排列 Perm (Fin 8)的函数。应该是从List (Fin 8) → Perm (Fin 8)。
-    let p1 := List.formPerm ([1,2,3]:(List (Fin 8)))
+    have x_eq_Solvedx : x = Solved * x := by exact self_eq_mul_left.mpr rfl
+    let p1 := List.formPerm ([1,2,3]:(List (Fin 8))) -- ![0, 2, 3, 1, 4, 5, 6, 7]
     -- 先进行一个小分类的推理：原2在3，原3在4，原4在2。
     by_cases ha0:x.1.permute = p1
       -- 执行一次G4Perm即可完成。此时制造一个RubiksSuperType
-    let rubiks_p1:RubiksSuperType := {
-      fst := {
-        permute := p1
-        orient := 0
+    {
+      let rubiks_p1:RubiksSuperType := {
+        fst := {
+          permute := p1
+          orient := 0
+        }
+        snd := {
+          permute := 1
+          orient := 0
+        }
       }
-      snd := {
-        permute := 1
-        orient := 0
-      }
+      -- 由于 Solved * rubiks_p1 = x
+      have x_eq_rubiks_p1: x = rubiks_p1
+        := by
+        simp only [mul_one]
+        simp only [← h2,← h3,← h4]
+        --很明显了
+        sorry
+      have G4Perm_eq_rubiks_p1: rubiks_p1*G4Perm = 1
+        := by
+        -- decide
+        simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+        simp only [G4Perm]
+        -- decide
+        -- simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+        -- rw [lemma31_testswap001]-- todo -- 这里swap结果不一样，看看哪里需要改。
+        sorry
+      rw [x_eq_Solvedx]
+      apply Reachable.mul
+      · exact Reachable.Solved
+      · rw [x_eq_rubiks_p1]
+        have testaaa1 := Reachable.split rubiks_p1 G4Perm
+        rw [G4Perm_eq_rubiks_p1] at testaaa1
+        -- split是正确的吗？
+        -- -- 很明显了
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.inv;apply Reachable.FT;exact FaceTurn.R
+        -- -- 很明显了，如何简化？
+        -- sorry
     }
-    -- 由于 x*p1 = Solved
 
-    sorry
 
-  #eval List.formPerm ([1,2,3]:(List (Fin 8)))
+  def testswap001:Perm (Fin 8) := (swap 1 2) * (swap 2 3)
+  def testswap002: (swap 1 2) * (swap 2 3) = List.formPerm ([1,2,3]:(List (Fin 8))) := by decide
+
+  --todo-- 这两个为什么不一样？
+  #eval testswap001 -- ![0, 2, 3, 1, 4, 5, 6, 7]
+  #eval List.formPerm ([1,2,3]:(List (Fin 8))) -- ![0, 2, 3, 1, 4, 5, 6, 7]
+  def rubik_test001:RubiksSuperType := {
+        fst := {
+          permute := testswap001
+          orient := 0
+        }
+        snd := {
+          permute := 1
+          orient := 0
+        }
+      }
+  #eval rubik_test001*(G4Perm) = Solved
+  #eval 1 = ({ permute := swap 1 2 * swap 2 3, orient := 0 }, { permute := 1, orient := 0 }) * (R' * F' * F' * F' * R' * B * B * R' * R' * R' * F' * R' * B * B * R' * R')
 
 
   /-- 如果状态x的棱块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
