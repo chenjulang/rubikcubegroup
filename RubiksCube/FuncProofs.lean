@@ -1891,11 +1891,17 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   := by sorry
 
 
-  def lemma31_testswap001: (swap 1 2) * (swap 2 3) = List.formPerm ([1,2,3]:(List (Fin 8))) := by decide
   lemma lemma31_001 : Solved = ({ permute := List.formPerm ([1,2,3]:(List (Fin 8))), orient := 0 }, { permute := 1, orient := 0 }) * (G4Perm)
     := by
     simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
     simp only [G4Perm]
+    simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
+    decide
+  lemma lemma31_002 : Solved =  ({ permute := List.formPerm ([1,0,6]:(List (Fin 8))) , orient := 0 }, { permute := 1, orient := 0 }) *
+    (B * B * VariantFaceTurn_B_List [R', F', F', F', R', B, B, R', R', R', F', R', B, B, R', R'] * B * B)⁻¹
+    := by
+    simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one, mul_inv_rev]
+    simp only [VariantFaceTurn_B_List,VariantFaceTurn_B]
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul]
     decide
 
@@ -1918,7 +1924,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- 先进行一个小分类的推理：原2在3，原3在4，原4在2。
     let p1 := List.formPerm ([1,2,3]:(List (Fin 8))) -- ![0, 2, 3, 1, 4, 5, 6, 7]
     -- 先进行一个小分类的推理：原3新在2，原2新在8，原8新在3。
-    let p2 := List.formPerm ([2,1,7]:(List (Fin 8))) -- ![0, 7, 1, 3, 4, 5, 6, 2]
+    let p2 := List.formPerm ([1,0,6]:(List (Fin 8))) -- (2,1,7) == 这里的[1,0,6] -- ![0, 7, 1, 3, 4, 5, 6, 2]
 
     by_cases ha0:x.1.permute = p1
       -- 执行一次G4Perm即可完成。此时制造一个RubiksSuperType
@@ -1975,12 +1981,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         -- sorry
     }
     by_cases ha0:x.1.permute = p2
-      -- 执行：交换子B*B*(VariantFaceTurn_B_List [R',F',F',F',R',B,B,R',R',R',F',R',B,B,R',R'])*B*B -- (2,1,7)
+      -- 执行：交换子(B*B*(VariantFaceTurn_B_List [R',F',F',F',R',B,B,R',R',R',F',R',B,B,R',R'])*B*B)⁻¹
       -- 即可完成。此时制造一个RubiksSuperType
     {
-      let rubiks_p1:RubiksSuperType := {
+      let rubiks_p2:RubiksSuperType := {
         fst := {
-          permute := p1
+          permute := p2
           orient := 0
         }
         snd := {
@@ -1988,58 +1994,64 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           orient := 0
         }
       }
-      -- 由于 Solved * rubiks_p1 = x
-      have x_eq_rubiks_p1: x = rubiks_p1
+      -- 由于 Solved * rubiks_p2 = x
+      have x_eq_rubiks_p2: x = rubiks_p2
         := by
         simp only [mul_one]
         simp only [← h2,← h3,← h4]
         --很明显了
         sorry
-      have G4Perm_eq_rubiks_p1: rubiks_p1*G4Perm = 1
+      let solution := (B*B*(VariantFaceTurn_B_List [R',F',F',F',R',B,B,R',R',R',F',R',B,B,R',R'])*B*B)⁻¹
+      have Solution_mul_rubiksp2_isOne: rubiks_p2 * solution = 1
         := by
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
-        rw [← Solved_eq_1,lemma31_001]
+        -- todo
+        rw [← Solved_eq_1,lemma31_002]
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
       rw [x_eq_Solvedx]
       apply Reachable.mul
       · exact Reachable.Solved
-      · rw [x_eq_rubiks_p1]
-        have R_rubiks_p1_mul_G4Perm: Reachable (rubiks_p1 * G4Perm) := by
-          rw [G4Perm_eq_rubiks_p1];exact Reachable.Solved
-        have testaaa1 := Reachable.split_fst (rubiks_p1) (G4Perm) R_rubiks_p1_mul_G4Perm
+      · rw [x_eq_rubiks_p2]
+        have R_rubiksp2_mul_Solution: Reachable (rubiks_p2 * solution) := by
+          rw [Solution_mul_rubiksp2_isOne];exact Reachable.Solved
+        have testaaa1 := Reachable.split_fst (rubiks_p2) (solution) R_rubiksp2_mul_Solution
         apply testaaa1
         sorry
-        -- -- 很明显了
-        -- apply Reachable.mul
-        -- apply Reachable.mul
-        -- apply Reachable.mul
-        -- apply Reachable.mul
-        -- apply Reachable.mul
-        -- apply Reachable.mul
-        -- apply Reachable.mul
-        -- apply Reachable.mul
-        -- apply Reachable.mul
-        -- apply Reachable.mul
-        -- apply Reachable.mul
-        -- apply Reachable.mul
-        -- apply Reachable.mul
-        -- apply Reachable.mul
-        -- apply Reachable.mul
-        -- apply Reachable.inv;apply Reachable.FT;exact FaceTurn.R
-        -- -- 很明显了，如何简化？
-        -- sorry
+      --   -- -- 很明显了
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.inv;apply Reachable.FT;exact FaceTurn.R
+      --   -- -- 很明显了，如何简化？
+      --   -- sorry
     }
     sorry
 
+  def perm_Test001 := (List.formPerm ([1,0,6]:(List (Fin 8))))
+  #eval perm_Test001 -- (2,1,7) == 这里的[1,0,6]
+  -- ![6, 0, 2, 3, 4, 5, 1, 7]
   def solutionTest001 := B*B*(VariantFaceTurn_B_List [R',F',F',F',R',B,B,R',R',R',F',R',B,B,R',R'])*B*B
   #eval solutionTest001 -- (2,1,7)
   -- ({ permute := ![6, 0, 2, 3, 4, 5, 1, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
   --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
-  #eval (List.formPerm ([2,1,7]:(List (Fin 8))))
+
 
   def rubik_test001:RubiksSuperType := {
         fst := {
-          permute := List.formPerm ([2,1,7]:(List (Fin 8)))
+          permute := perm_Test001
+          -- swap 1 0 * swap 0 6
           orient := 0
         }
         snd := {
@@ -2047,8 +2059,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           orient := 0
         }
       }
-  -- todo 没解决为什么？
-  #eval 1 = rubik_test001 * solutionTest001
+  -- todo
+  #eval 1= rubik_test001 * solutionTest001⁻¹
 
 
   /-- 如果状态x的棱块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
