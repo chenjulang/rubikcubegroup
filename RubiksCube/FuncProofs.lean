@@ -1904,6 +1904,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     simp only [VariantFaceTurn_B_List,VariantFaceTurn_B]
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul]
     decide
+  lemma lemma31_003 : Solved =  ({ permute := List.formPerm ([1,3,5]:(List (Fin 8))), orient := 0 }, { permute := 1, orient := 0 }) *
+    (G4Perm * (D' * L * L * G4Perm * L * L * D)⁻¹)⁻¹ -- 记得最后加一个逆号
+    := by
+    simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+    simp only [G4Perm]
+    simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
+    decide
 
   -- 思考：纯3循环就是偶置换说的全体3循环吗？是的，因为魔方还原到目前状态也具有方向数全0的属性，也是一个“纯”的偶置换。
   /-- 如果状态x的角块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
@@ -1925,6 +1932,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     let p1 := List.formPerm ([1,2,3]:(List (Fin 8))) -- ![0, 2, 3, 1, 4, 5, 6, 7]
     -- 先进行一个小分类的推理：原3新在2，原2新在8，原8新在3。
     let p2 := List.formPerm ([1,0,6]:(List (Fin 8))) -- (2,1,7) == 这里的[1,0,6] -- ![0, 7, 1, 3, 4, 5, 6, 2]
+    let p3 := List.formPerm ([1,3,5]:(List (Fin 8))) -- (2,4,6) == 这里的[1,3,5]
+
 
     by_cases ha0:x.1.permute = p1
       -- 执行一次G4Perm即可完成。此时制造一个RubiksSuperType
@@ -2005,7 +2014,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       have Solution_mul_rubiksp2_isOne: rubiks_p2 * solution = 1
         := by
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
-        -- todo
         rw [← Solved_eq_1,lemma31_002]
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
       rw [x_eq_Solvedx]
@@ -2037,21 +2045,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       --   -- -- 很明显了，如何简化？
       --   -- sorry
     }
-    sorry
-
-  def perm_Test001 := (List.formPerm ([1,0,6]:(List (Fin 8))))
-  #eval perm_Test001 -- (2,1,7) == 这里的[1,0,6]
-  -- ![6, 0, 2, 3, 4, 5, 1, 7]
-  def solutionTest001 := B*B*(VariantFaceTurn_B_List [R',F',F',F',R',B,B,R',R',R',F',R',B,B,R',R'])*B*B
-  #eval solutionTest001 -- (2,1,7)
-  -- ({ permute := ![6, 0, 2, 3, 4, 5, 1, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
-  --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
-
-
-  def rubik_test001:RubiksSuperType := {
+    by_cases ha0:x.1.permute = p3
+      -- 执行：交换子复合g4 : G4Perm*(D'*L*L*G4Perm*L*L*D)⁻¹
+      -- 即可完成。此时制造一个RubiksSuperType
+    {
+      let rubiks_p3:RubiksSuperType := {
         fst := {
-          permute := perm_Test001
-          -- swap 1 0 * swap 0 6
+          permute := p3
           orient := 0
         }
         snd := {
@@ -2059,8 +2059,90 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           orient := 0
         }
       }
-  -- todo
-  #eval 1= rubik_test001 * solutionTest001⁻¹
+      -- x 和 rubiks_p3 是一回事：
+      have x_eq_rubiks_p3: x = rubiks_p3
+        := by
+        simp only [mul_one]
+        simp only [← h2,← h3,← h4]
+        -- simp [ha0,p3,h2,h3,h4]
+        --很明显了
+        sorry
+      let solution := (G4Perm*(D'*L*L*G4Perm*L*L*D)⁻¹)⁻¹
+      have Solution_mul_rubiksp3_isOne: rubiks_p3 * solution = 1
+        := by
+        simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+        rw [← Solved_eq_1,lemma31_003]
+        simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+      rw [x_eq_Solvedx]
+      apply Reachable.mul
+      · exact Reachable.Solved
+      · rw [x_eq_rubiks_p3]
+        have R_rubiksp3_mul_Solution: Reachable (rubiks_p3 * solution) := by
+          rw [Solution_mul_rubiksp3_isOne];exact Reachable.Solved
+        have testaaa1 := Reachable.split_fst (rubiks_p3) (solution) R_rubiksp3_mul_Solution
+        apply testaaa1
+        sorry
+      --   -- -- 很明显了
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.inv;apply Reachable.FT;exact FaceTurn.R
+      --   -- -- 很明显了，如何简化？
+      --   -- sorry
+    }
+    sorry
+
+  -- def perm_Test001 := List.formPerm ([1,3,5]:(List (Fin 8)))
+  -- #eval perm_Test001
+  -- def solutionTest001 := (G4Perm * (D' * L * L * G4Perm * L * L * D)⁻¹)
+  -- #eval solutionTest001
+  -- def rubik_test001:RubiksSuperType := {
+  --       fst := {
+  --         permute := perm_Test001
+  --         -- swap 1 0 * swap 0 6
+  --         orient := 0
+  --       }
+  --       snd := {
+  --         permute := 1
+  --         orient := 0
+  --       }
+  --     }
+  -- #eval 1= rubik_test001 * solutionTest001⁻¹
+
+
+
+  -- lemma lemma32_001 : Solved = ({ permute := List.formPerm ([1,2,3]:(List (Fin 8))), orient := 0 }, { permute := 1, orient := 0 }) * (G4Perm)
+  --   := by
+  --   simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+  --   simp only [G4Perm]
+  --   simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
+  --   decide
+  -- lemma lemma31_002 : Solved =  ({ permute := List.formPerm ([1,0,6]:(List (Fin 8))) , orient := 0 }, { permute := 1, orient := 0 }) *
+  --   (B * B * VariantFaceTurn_B_List [R', F', F', F', R', B, B, R', R', R', F', R', B, B, R', R'] * B * B)⁻¹
+  --   := by
+  --   simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one, mul_inv_rev]
+  --   simp only [VariantFaceTurn_B_List,VariantFaceTurn_B]
+  --   simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul]
+  --   decide
+  -- lemma lemma31_003 : Solved =  ({ permute := List.formPerm ([1,3,5]:(List (Fin 8))), orient := 0 }, { permute := 1, orient := 0 }) *
+  --   (G4Perm * (D' * L * L * G4Perm * L * L * D)⁻¹)⁻¹ -- 记得最后加一个逆号
+  --   := by
+  --   simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+  --   simp only [G4Perm]
+  --   simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
+  --   decide
 
 
   /-- 如果状态x的棱块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
@@ -2075,41 +2157,25 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- 如何分类220种情况？
     sorry
 
+    -- def perm_Test001 := List.formPerm ([1,3,5]:(List (Fin 8)))
+  -- #eval perm_Test001
+  -- def solutionTest001 := (G4Perm * (D' * L * L * G4Perm * L * L * D)⁻¹)
+  -- #eval solutionTest001
+  -- def rubik_test001:RubiksSuperType := {
+  --       fst := {
+  --         permute := perm_Test001
+  --         -- swap 1 0 * swap 0 6
+  --         orient := 0
+  --       }
+  --       snd := {
+  --         permute := 1
+  --         orient := 0
+  --       }
+  --     }
+  -- #eval 1= rubik_test001 * solutionTest001⁻¹
 
-  -- 说的是G群里的操作覆盖了所有的3轮换的操作。
-  -- lemma lemma33: sorry := sorry
 
-  -- -- 其实就是lemma31和lemma32的简单结合，由于角块和棱块可以分别互不影响地完成，这个引理应该很容易证明。
-  -- lemma lemma11
-  -- (x : RubiksSuperType)
-  -- (h1: IsThreeCycle x.2.permute)
-  -- (h2: IsThreeCycle x.1.permute)
-  -- (h3: x.1.orient = 0)
-  -- (h4: x.2.orient = 0)
-  -- :
-  -- ∃ g : RubiksSuperType,
-  --   Reachable g
-  --   ∧
-  --   x * g = Solved
-  -- := by
-  --   have cornerR := lemma31 x h2 h3 h4
-  --   obtain ⟨c1,c2,c3,c4,c5,c6⟩ := cornerR
-  --   have remains_threecycle : IsThreeCycle (x * c1).2.permute
-  --     := by
-  --     rw [c6.symm] at h1
-  --     exact h1
-  --   rw [c4.symm] at h3
-  --   rw [c5.symm] at h4
-  --   have edgeR := lemma32 (x * c1) remains_threecycle c3 h3 h4
-  --   obtain ⟨e1,e2,e3⟩ := edgeR
-  --   use (c1 * e1)
-  --   apply And.intro
-  --   · apply Reachable.mul
-  --     exact c2
-  --     exact e2
-  --   · rw [← mul_assoc]
-  --     exact e3
-  --   done
+
 
   -- 右推左的限制条件1使得只能选这2种情况进行分类讨论。
   /-- 1.（奇X奇) 2.(偶X偶）-/
