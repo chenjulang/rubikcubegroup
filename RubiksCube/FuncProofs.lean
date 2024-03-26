@@ -1944,9 +1944,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       apply Reachable.mul
       · exact Reachable.Solved
       · rw [x_eq_rubiks_p1]
-        have testaaa1 := Reachable.split rubiks_p1 G4Perm
-        rw [G4Perm_eq_rubiks_p1] at testaaa1
-        -- split是正确的吗？
+        have R_rubiks_p1_mul_G4Perm: Reachable (rubiks_p1 * G4Perm) := by
+          rw [G4Perm_eq_rubiks_p1];exact Reachable.Solved
+        have testaaa1 := Reachable.split_fst (rubiks_p1) (G4Perm) R_rubiks_p1_mul_G4Perm
+        apply testaaa1
         -- -- 很明显了
         -- apply Reachable.mul
         -- apply Reachable.mul
@@ -1972,7 +1973,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   def testswap001:Perm (Fin 8) := (swap 1 2) * (swap 2 3)
   def testswap002: (swap 1 2) * (swap 2 3) = List.formPerm ([1,2,3]:(List (Fin 8))) := by decide
 
-  --todo-- 这两个为什么不一样？
   #eval testswap001 -- ![0, 2, 3, 1, 4, 5, 6, 7]
   #eval List.formPerm ([1,2,3]:(List (Fin 8))) -- ![0, 2, 3, 1, 4, 5, 6, 7]
   def rubik_test001:RubiksSuperType := {
