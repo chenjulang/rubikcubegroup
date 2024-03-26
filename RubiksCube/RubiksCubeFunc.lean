@@ -325,6 +325,9 @@ where
     orient := 0
   }
 
+@[simp]
+lemma Solved_eq_1: Solved = 1 :=by rfl
+
 -- def Solved2
 -- : RubiksSuperType → Prop :=
 --   fun x => (x.1.permute=1 ∧ x.2.permute=1 ∧ x.1.orient=0 ∧ x.2.orient=0)

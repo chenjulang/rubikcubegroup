@@ -360,8 +360,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- ({ permute := ![0, 2, 1, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
   -- { permute := ![1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
 
-  /-- 是一个角块3循环 ρ(g4) =(2,4,3) 这里指2的新位置是4当前的位置 -/
-  def G4Perm : RubiksSuperType
+  /-- 是一个角块3循环 ρ(g4) =(2,4,3) 这里指绝对位置2的块的新位置是绝对位置4；相当于顺时针 -/
+  def G4Perm : RubiksSuperType -- [R',F',F',F',R',B,B,R',R',R',F',R',B,B,R',R']
   := R'*F'*F'*F'*R'*B*B*R'*R'*R'*F'*R'*B*B*R'*R'
   -- #eval G4Perm
   -- ({ permute := ![0, 3, 1, 2, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
@@ -1892,6 +1892,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
 
   def lemma31_testswap001: (swap 1 2) * (swap 2 3) = List.formPerm ([1,2,3]:(List (Fin 8))) := by decide
+  lemma lemma31_001 : Solved = ({ permute := List.formPerm ([1,2,3]:(List (Fin 8))), orient := 0 }, { permute := 1, orient := 0 }) * (G4Perm)
+    := by
+    simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+    simp only [G4Perm]
+    simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul]
+    decide
 
   -- 思考：纯3循环就是偶置换说的全体3循环吗？是的，因为魔方还原到目前状态也具有方向数全0的属性，也是一个“纯”的偶置换。
   /-- 如果状态x的角块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
@@ -1904,13 +1910,16 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (h4: x.1.orient =0)
   : Reachable x
   := by
-    -- todo-- 如何开展分类56种讨论？先看看IsThreeCycle为条件的一些定理是怎么证明的？
+    -- 如何开展分类56种讨论？先看看IsThreeCycle为条件的一些定理是怎么证明的？
     -- G4Perm效果：ρ(g4) =(2,4,3) ： 顺时针
     -- 可能要人为的等价分类：1.“变式的”，即“同形状”的是等价的。
     -- 需要一个制造排列 Perm (Fin 8)的函数。应该是从List (Fin 8) → Perm (Fin 8)。
     have x_eq_Solvedx : x = Solved * x := by exact self_eq_mul_left.mpr rfl
-    let p1 := List.formPerm ([1,2,3]:(List (Fin 8))) -- ![0, 2, 3, 1, 4, 5, 6, 7]
     -- 先进行一个小分类的推理：原2在3，原3在4，原4在2。
+    let p1 := List.formPerm ([1,2,3]:(List (Fin 8))) -- ![0, 2, 3, 1, 4, 5, 6, 7]
+    -- 先进行一个小分类的推理：原3新在2，原2新在8，原8新在3。
+    let p2 := List.formPerm ([2,1,7]:(List (Fin 8))) -- ![0, 7, 1, 3, 4, 5, 6, 2]
+
     by_cases ha0:x.1.permute = p1
       -- 执行一次G4Perm即可完成。此时制造一个RubiksSuperType
     {
@@ -1933,13 +1942,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         sorry
       have G4Perm_eq_rubiks_p1: rubiks_p1*G4Perm = 1
         := by
-        -- decide
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
-        simp only [G4Perm]
-        -- decide
-        -- simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
-        -- rw [lemma31_testswap001]-- todo -- 这里swap结果不一样，看看哪里需要改。
-        sorry
+        rw [← Solved_eq_1,lemma31_001]
+        simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
       rw [x_eq_Solvedx]
       apply Reachable.mul
       · exact Reachable.Solved
@@ -1948,6 +1953,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           rw [G4Perm_eq_rubiks_p1];exact Reachable.Solved
         have testaaa1 := Reachable.split_fst (rubiks_p1) (G4Perm) R_rubiks_p1_mul_G4Perm
         apply testaaa1
+        sorry
         -- -- 很明显了
         -- apply Reachable.mul
         -- apply Reachable.mul
@@ -1968,16 +1974,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         -- -- 很明显了，如何简化？
         -- sorry
     }
-
-
-  def testswap001:Perm (Fin 8) := (swap 1 2) * (swap 2 3)
-  def testswap002: (swap 1 2) * (swap 2 3) = List.formPerm ([1,2,3]:(List (Fin 8))) := by decide
-
-  #eval testswap001 -- ![0, 2, 3, 1, 4, 5, 6, 7]
-  #eval List.formPerm ([1,2,3]:(List (Fin 8))) -- ![0, 2, 3, 1, 4, 5, 6, 7]
-  def rubik_test001:RubiksSuperType := {
+    by_cases ha0:x.1.permute = p2
+      -- 执行：交换子B*B*(VariantFaceTurn_B_List [R',F',F',F',R',B,B,R',R',R',F',R',B,B,R',R'])*B*B -- (2,1,7)
+      -- 即可完成。此时制造一个RubiksSuperType
+    {
+      let rubiks_p1:RubiksSuperType := {
         fst := {
-          permute := testswap001
+          permute := p1
           orient := 0
         }
         snd := {
@@ -1985,8 +1988,67 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           orient := 0
         }
       }
-  #eval rubik_test001*(G4Perm) = Solved
-  #eval 1 = ({ permute := swap 1 2 * swap 2 3, orient := 0 }, { permute := 1, orient := 0 }) * (R' * F' * F' * F' * R' * B * B * R' * R' * R' * F' * R' * B * B * R' * R')
+      -- 由于 Solved * rubiks_p1 = x
+      have x_eq_rubiks_p1: x = rubiks_p1
+        := by
+        simp only [mul_one]
+        simp only [← h2,← h3,← h4]
+        --很明显了
+        sorry
+      have G4Perm_eq_rubiks_p1: rubiks_p1*G4Perm = 1
+        := by
+        simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+        rw [← Solved_eq_1,lemma31_001]
+        simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+      rw [x_eq_Solvedx]
+      apply Reachable.mul
+      · exact Reachable.Solved
+      · rw [x_eq_rubiks_p1]
+        have R_rubiks_p1_mul_G4Perm: Reachable (rubiks_p1 * G4Perm) := by
+          rw [G4Perm_eq_rubiks_p1];exact Reachable.Solved
+        have testaaa1 := Reachable.split_fst (rubiks_p1) (G4Perm) R_rubiks_p1_mul_G4Perm
+        apply testaaa1
+        sorry
+        -- -- 很明显了
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.mul
+        -- apply Reachable.inv;apply Reachable.FT;exact FaceTurn.R
+        -- -- 很明显了，如何简化？
+        -- sorry
+    }
+    sorry
+
+  def solutionTest001 := B*B*(VariantFaceTurn_B_List [R',F',F',F',R',B,B,R',R',R',F',R',B,B,R',R'])*B*B
+  #eval solutionTest001 -- (2,1,7)
+  -- ({ permute := ![6, 0, 2, 3, 4, 5, 1, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
+  --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
+  #eval (List.formPerm ([2,1,7]:(List (Fin 8))))
+
+  def rubik_test001:RubiksSuperType := {
+        fst := {
+          permute := List.formPerm ([2,1,7]:(List (Fin 8)))
+          orient := 0
+        }
+        snd := {
+          permute := 1
+          orient := 0
+        }
+      }
+  -- todo 没解决为什么？
+  #eval 1 = rubik_test001 * solutionTest001
 
 
   /-- 如果状态x的棱块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
