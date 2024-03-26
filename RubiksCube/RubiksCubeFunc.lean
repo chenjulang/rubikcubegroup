@@ -880,7 +880,34 @@ section RubiksGroup
     | FT : ∀x : RubiksSuperType, FaceTurn x → Reachable x
     | mul : ∀x y : RubiksSuperType, Reachable x → Reachable y → Reachable (x * y)
     | inv :  ∀x : RubiksSuperType, Reachable x → Reachable x⁻¹
-    | split : ∀x y : RubiksSuperType, Reachable (x * y) → Reachable x → Reachable y
+    -- | split : ∀x y : RubiksSuperType, Reachable (x * y) → Reachable x → Reachable y -- 这个其实可以被推出
+
+  def Reachable.split_fst: ∀x y : RubiksSuperType, Reachable (x * y) → Reachable y → Reachable x
+  := by
+    intro x y Rxy Ry
+    have h1 := Reachable.inv (x * y) Rxy
+    simp at h1 -- Reachable (y⁻¹ * x⁻¹)
+    -- have h2 := Reachable.inv (x) Rx
+    -- simp at h2
+    have h3 := Reachable.mul (y) (y⁻¹ * x⁻¹) Ry h1
+    simp at h3
+    have h4 := Reachable.inv (x⁻¹) h3
+    simp at h4
+    exact h4
+  def Reachable.split_snd: ∀x y : RubiksSuperType, Reachable (x * y) → Reachable x → Reachable y
+  := by
+    intro x y Rxy Rx
+    have h1 := Reachable.inv (x * y) Rxy
+    simp at h1 -- Reachable (y⁻¹ * x⁻¹)
+    -- have h2 := Reachable.inv (x) Rx
+    -- simp at h2
+    have h3 := Reachable.mul (y⁻¹ * x⁻¹) (x) h1 Rx
+    simp at h3
+    have h4 := Reachable.inv (y⁻¹) h3
+    simp at h4
+    exact h4
+
+
 
   inductive Reachable_TWGroup1
   : RubiksSuperType → Prop
