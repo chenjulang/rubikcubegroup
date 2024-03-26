@@ -367,6 +367,14 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- ({ permute := ![0, 3, 1, 2, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
   --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
 
+  /-- 是一个棱块3循环 ρ(g4) =(1,2,4) 这里指绝对位置1的块的新位置是绝对位置2；相当于逆时针 -/
+  def G3Perm : RubiksSuperType -- [R,U',R,U,R,U,R,U',R',U',R,R]
+  := R*U'*R*U*R*U*R*U'*R'*U'*R*R
+  -- #eval G3Perm
+  --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
+  --  { permute := ![1, 3, 2, 0, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
+
+
   /-- 创建一阶交换子公式。不强制要求：r1影响到的块的集合A，与r2影响到的块的集合B，交集有且仅有1个（这就是为什么称作一阶）。 -/
   def conjugate_formula : RubiksSuperType → RubiksSuperType → RubiksSuperType
   := fun r1 r2 => r1 * r2 * r1⁻¹
@@ -1933,8 +1941,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- 先进行一个小分类的推理：原3新在2，原2新在8，原8新在3。
     let p2 := List.formPerm ([1,0,6]:(List (Fin 8))) -- (2,1,7) == 这里的[1,0,6] -- ![0, 7, 1, 3, 4, 5, 6, 2]
     let p3 := List.formPerm ([1,3,5]:(List (Fin 8))) -- (2,4,6) == 这里的[1,3,5]
-
-
     by_cases ha0:x.1.permute = p1
       -- 执行一次G4Perm即可完成。此时制造一个RubiksSuperType
     {
@@ -2123,12 +2129,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
 
 
-  -- lemma lemma32_001 : Solved = ({ permute := List.formPerm ([1,2,3]:(List (Fin 8))), orient := 0 }, { permute := 1, orient := 0 }) * (G4Perm)
-  --   := by
-  --   simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
-  --   simp only [G4Perm]
-  --   simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
-  --   decide
+  lemma lemma32_001 : Solved = ({ permute := 1, orient := 0 }, { permute := List.formPerm ([0,3,1]:(List (Fin 12))) , orient := 0 })  * (G3Perm)
+    := by
+    simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+    simp only [G3Perm]
+    simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
+    decide
   -- lemma lemma31_002 : Solved =  ({ permute := List.formPerm ([1,0,6]:(List (Fin 8))) , orient := 0 }, { permute := 1, orient := 0 }) *
   --   (B * B * VariantFaceTurn_B_List [R', F', F', F', R', B, B, R', R', R', F', R', B, B, R', R'] * B * B)⁻¹
   --   := by
@@ -2155,6 +2161,127 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   : Reachable x
   := by
     -- 如何分类220种情况？
+    -- G3Perm效果： σ(g3) =(1,2,4): 逆时针
+    have x_eq_Solvedx : x = Solved * x := by exact self_eq_mul_left.mpr rfl
+    let p1 := List.formPerm ([0,3,1]:(List (Fin 12))) -- (1,4,2) == 这里的[0,3,1]
+    let p2 := List.formPerm ([0,1,5]:(List (Fin 12))) -- {1,2,6} == 这里的[0,1,5]
+
+    by_cases ha0:x.2.permute = p1
+      -- 执行：G3Perm
+      -- 即可完成。此时制造一个RubiksSuperType
+    {
+      let rubiks_p1:RubiksSuperType := {
+        fst := {
+          permute := 1
+          orient := 0
+        }
+        snd := {
+          permute := p1
+          orient := 0
+        }
+      }
+      -- x 和 rubiks_p1 是一回事：
+      have x_eq_rubiks_p1: x = rubiks_p1
+        := by
+        simp only [mul_one]
+        simp only [← h2,← h3,← h4]
+        -- simp [ha0,p3,h2,h3,h4]
+        --很明显了
+        sorry
+      let solution := (G3Perm)
+      have Solution_mul_rubiksp1_isOne: rubiks_p1 * solution = 1
+        := by
+        simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+        rw [← Solved_eq_1,lemma32_001]
+        simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+      rw [x_eq_Solvedx]
+      apply Reachable.mul
+      · exact Reachable.Solved
+      · rw [x_eq_rubiks_p1]
+        have R_rubiksp1_mul_Solution: Reachable (rubiks_p1 * solution) := by
+          rw [Solution_mul_rubiksp1_isOne];exact Reachable.Solved
+        have testaaa1 := Reachable.split_fst (rubiks_p1) (solution) R_rubiksp1_mul_Solution
+        apply testaaa1
+        sorry
+      --   -- -- 很明显了
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.inv;apply Reachable.FT;exact FaceTurn.R
+      --   -- -- 很明显了，如何简化？
+      --   -- sorry
+    }
+    by_cases ha2:x.2.permute = p2
+    -- todo1 --
+      -- 首先定义中层操作M_UD
+      -- 执行：(M_UD L' (R U' R U R U R U' R' U' R R) L M_UD')⁻¹
+      -- 即可完成。此时制造一个RubiksSuperType
+    {
+      let rubiks_p1:RubiksSuperType := {
+        fst := {
+          permute := 1
+          orient := 0
+        }
+        snd := {
+          permute := p2
+          orient := 0
+        }
+      }
+      -- x 和 rubiks_p1 是一回事：
+      have x_eq_rubiks_p1: x = rubiks_p1
+        := by
+        simp only [mul_one]
+        simp only [← h2,← h3,← h4]
+        -- simp [ha0,p3,h2,h3,h4]
+        --很明显了
+        sorry
+      let solution := (G3Perm)
+      have Solution_mul_rubiksp1_isOne: rubiks_p1 * solution = 1
+        := by
+        simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+        rw [← Solved_eq_1,lemma32_001]
+        simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+      rw [x_eq_Solvedx]
+      apply Reachable.mul
+      · exact Reachable.Solved
+      · rw [x_eq_rubiks_p1]
+        have R_rubiksp1_mul_Solution: Reachable (rubiks_p1 * solution) := by
+          rw [Solution_mul_rubiksp1_isOne];exact Reachable.Solved
+        have testaaa1 := Reachable.split_fst (rubiks_p1) (solution) R_rubiksp1_mul_Solution
+        apply testaaa1
+        sorry
+      --   -- -- 很明显了
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.inv;apply Reachable.FT;exact FaceTurn.R
+      --   -- -- 很明显了，如何简化？
+      --   -- sorry
+    }
     sorry
 
     -- def perm_Test001 := List.formPerm ([1,3,5]:(List (Fin 8)))
