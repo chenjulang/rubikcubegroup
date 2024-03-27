@@ -1848,7 +1848,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (h1: ∀a ∈ threeList, IsThreeCycle a)
   (h2: g.1.permute = threeList.prod)
   :∃ (rubiksList:List RubiksSuperType) (rst1:RubiksSuperType),
-  g = rubiksList.prod * rst1
+  g =rst1 * rubiksList.prod
+  ∧
+  rst1.1.permute = 1
   ∧
   (g.1.orient=rst1.1.orient ∧ g.2.permute=rst1.2.permute ∧ g.2.orient=rst1.2.orient)
   ∧
@@ -1890,7 +1892,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (h1: ∀a ∈ threeList, IsThreeCycle a)
   (h2: g.2.permute = threeList.prod)
   :∃ (rubiksList:List RubiksSuperType) (rst1:RubiksSuperType),
-  g = rubiksList.prod * rst1
+  g = rst1 * rubiksList.prod
+  ∧
+  rst1.2.permute = 1
   ∧
   -- 原始的3个项相等
   (g.1.orient=rst1.1.orient ∧ g.1.permute=rst1.1.permute ∧ g.2.orient=rst1.2.orient)
@@ -2383,7 +2387,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       }
       {
         have ha1:(sign x.1.permute = 1)
-          := by sorry -- 这个要问社区
+          := by sorry -- 这个很明显，但要问社区
         right
         simp only [ha1,← signEq]
         simp only [and_self]
@@ -2394,7 +2398,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       · simp only [BothOne]
     done
 
-  -- todo 14+15
+  #check closure_three_cycles_eq_alternating
+  #check prod_list_swap_mem_alternatingGroup_iff_even_length
+
   -- 对于任意g状态角块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的角块位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
     -- 这里x1的例子我们使用3循环的复合。
@@ -2410,32 +2416,56 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- 3. 由于g.1.p 是偶的置换，使用这里面应该用到了closure_three_cycles_eq_alternating
       -- g.1.p 可以表示成3循环的乘积,这里记为threeList
     have h2 : ∃ (threeList:List (Perm (Fin 8))) ,
-      (∀ g ∈ threeList, IsThreeCycle g)
+      (∀ a ∈ threeList, IsThreeCycle a)
       ∧
       (g.1.permute = threeList.prod)
       := by
-      -- 可能要用归纳法证明
+      -- ???可能要用归纳法证明。思路：将偶置换表示成一长串3循环的乘积。
       sorry
-    obtain ⟨h2_1,h2_2,h2_3⟩ := h2
+    obtain ⟨permList,h2_2,h2_3⟩ := h2
     -- 4. 此处需要一个引理lalternatingCornerPermute_eq_3Cycles_to_g_eq_3Cycles_mul_one来带入这个结论
       -- g可以表示成若干RubiksSuperType和一个rst1:RubiksSuperType的乘积，这里记为rubiksList.
       -- rubiksList满足：{对所有元素a，IsThreeCycle a.1.p；a.1.orient=0; a.2.permute=1; a.2.orient=0}
       -- rst1满足：{a.1.p = 1 ; a.1.orient=g.1.orient; a.2.permute=g.2.permute ; a.2.orient=g.2.orient}
     have h3 := alternatingCornerPermute_eq_3Cycles_to_g_eq_3Cycles_mul_one
-      g h2_1 h2_2 h2_3
-    obtain ⟨rubiksList,h3_2,h3_3,h3_4,h3_5⟩ := h3
+      g permList h2_2 h2_3
+    obtain ⟨rubiksList,rst1,g_split,h3_4,unChanged3,h3_6⟩ := h3
     -- 5.总结：命题所需的复合操作就是(rubiksList.prod)⁻¹
     simp only [exist_reachableG_cornerPermute_to1]
     use (rubiksList.prod)⁻¹
+    have rubiksListElement_3items_is0or1 :∀b ∈ rubiksList, b.1.orient=0 ∧ b.2.permute=1 ∧ b.2.orient=0
+      := by
+      simp only [Prod.forall,h3_6]
+      -- 很明显了。
+      sorry
+    have rubiksListElement_permuteIsThreeCycle :∀b ∈ rubiksList, IsThreeCycle b.1.permute
+      := by
+      -- h2_2
+      -- 很明显了。
+      sorry
     apply And.intro
-    · sorry
+    · have rubiksListElement_isReachable: ∀b ∈ rubiksList, Reachable b
+        := by
+        intro b binL
+        have app1 := rubiksListElement_3items_is0or1 b binL
+        have app2 := rubiksListElement_permuteIsThreeCycle b binL
+        apply lemma31
+        · exact rubiksListElement_permuteIsThreeCycle b binL
+        simp only [app1];simp only [app1];simp only [app1]
+      apply Reachable.inv
+      -- simp [Reachable.mul,rubiksListElement_isReachable]
+      -- 很明显了
+      sorry
+    rw [g_split]
+    simp only [mul_inv_cancel_right]
     apply And.intro
-    · sorry
+    · exact h3_4
+    rw [← g_split]
     apply And.intro
-    · sorry
+    · exact unChanged3.1.symm
     apply And.intro
-    · sorry
-    · sorry
+    · exact unChanged3.2.2.symm
+    · exact unChanged3.2.1.symm
     done
 
 
@@ -2459,28 +2489,52 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       ∧
       (g.2.permute = threeList.prod)
       := by
-      -- 可能要用归纳法证明
+      -- ???可能要用归纳法证明。思路：将偶置换表示成一长串3循环的乘积。
       sorry
-    obtain ⟨h2_1,h2_2,h2_3⟩ := h2
-    -- 4. 此处需要一个引理lalternatingCornerPermute_eq_3Cycles_to_g_eq_3Cycles_mul_one来带入这个结论
+    obtain ⟨permList,h2_2,h2_3⟩ := h2
+    -- 4. 此处需要一个引理alternatingEdgePermute_eq_3Cycles_to_g_eq_3Cycles_mul_one来带入这个结论
       -- g可以表示成若干RubiksSuperType和一个rst1:RubiksSuperType的乘积，这里记为rubiksList.
       -- rubiksList满足：{对所有元素a，IsThreeCycle a.1.p；a.1.orient=0; a.2.permute=1; a.2.orient=0}
       -- rst1满足：{a.1.p = 1 ; a.1.orient=g.1.orient; a.2.permute=g.2.permute ; a.2.orient=g.2.orient}
     have h3 := alternatingEdgePermute_eq_3Cycles_to_g_eq_3Cycles_mul_one
-      g h2_1 h2_2 h2_3
-    obtain ⟨rubiksList,h3_2,h3_3,h3_4,h3_5⟩ := h3
+      g permList h2_2 h2_3
+    obtain ⟨rubiksList,rst1,g_split,h3_4,unChanged3,h3_6⟩ := h3
     -- 5.总结：命题所需的复合操作就是(rubiksList.prod)⁻¹
     simp only [exist_reachableG_edgePermute_to1]
     use (rubiksList.prod)⁻¹
+    have rubiksListElement_3items_is0or1 :∀b ∈ rubiksList, b.1.orient=0 ∧ b.1.permute=1 ∧ b.2.orient=0
+      := by
+      simp only [Prod.forall,h3_6]
+      -- 很明显了。
+      sorry
+    have rubiksListElement_permuteIsThreeCycle :∀b ∈ rubiksList, IsThreeCycle b.2.permute
+      := by
+      -- h2_2
+      -- 很明显了。
+      sorry
     apply And.intro
-    · sorry
+    · have rubiksListElement_isReachable: ∀b ∈ rubiksList, Reachable b
+        := by
+        intro b binL
+        have app1 := rubiksListElement_3items_is0or1 b binL
+        have app2 := rubiksListElement_permuteIsThreeCycle b binL
+        apply lemma32
+        · exact rubiksListElement_permuteIsThreeCycle b binL
+        simp only [app1];simp only [app1];simp only [app1]
+      apply Reachable.inv
+      -- simp [Reachable.mul,rubiksListElement_isReachable]
+      -- 很明显了
+      sorry
+    rw [g_split]
+    simp only [mul_inv_cancel_right]
     apply And.intro
-    · sorry
+    · exact h3_4
+    rw [← g_split]
     apply And.intro
-    · sorry
+    · exact unChanged3.1.symm
     apply And.intro
-    · sorry
-    · sorry
+    · exact unChanged3.2.2.symm
+    · exact unChanged3.2.1.symm
     done
 
   -- 就是lemma14+15的简单结合
@@ -2533,6 +2587,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     use (G5Perm)
     apply And.intro
     · simp only [G5Perm,G5Perm_element1]
+      -- 这个很明显了
       sorry
       -- apply Reachable.mul
       -- apply Reachable.mul
@@ -2602,7 +2657,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- 将目标Reachable x变成  ∃ y, (Reachable y) ∧ (x * y = Solved)
     -- x经过有限次操作变成了y， y就是复原状态e。
     let y : RubiksSuperType := h1_2 * h2_3 * h3_2_4
-    have h101 : Reachable y := sorry
+    have h101 : Reachable y := by sorry
     have h102 : x * y = Solved
       := by
       simp only [y]
@@ -2951,7 +3006,7 @@ end RubikCube_BasicRule_2
 --   }
 
 -- instance TWGroup1_instance : Subgroup RubiksSuperType := {
--- -- 如何写成这样的子群的子群呢 ??? instance TWGroup1_instance : Subgroup RubiksGroup := {
+-- -- 如何写成这样的子群的子群呢 ? instance TWGroup1_instance : Subgroup RubiksGroup := {
 --     carrier := TWGroup1
 --     mul_mem' := sorry -- 封闭性质
 --     one_mem' := sorry -- 单位1元素

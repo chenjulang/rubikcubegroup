@@ -1,4 +1,4 @@
-证明最后阶段：
+机器证明最后阶段：
 1.涉及定理：
     1.(精读)closure_three_cycles_eq_alternating: closure { σ : Perm α | IsThreeCycle σ } = alternatingGroup α
     2.mem_alternatingGroup: f ∈ alternatingGroup α ↔ sign f = 1
@@ -19,7 +19,15 @@
       univ.filter fun x => f x ≠ x
     12.(获取一个3循环的方式之二：)：_root_.card_support_eq_three_iff : σ.support.card = 3 ↔ σ.IsThreeCycle
     13.prod_list_swap_mem_alternatingGroup_iff_even_length
-
+2.补充：
+    lemma14 -- checked
+        alternatingCornerPermute_eq_3Cycles_to_g_eq_3Cycles_mul_one -- todo简单的
+    lemma15 -- checked
+        alternatingEdgePermute_eq_3Cycles_to_g_eq_3Cycles_mul_one -- todo简单的
+    lemma16
+    lemma13_oddXoddToEvenXEven
+    lemma13_EvenPermute_valid_isReachable
+    还有一些???要给官网解决就好。
 
 
 

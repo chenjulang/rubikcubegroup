@@ -268,6 +268,14 @@ section RubiksSuperGroup
 
   abbrev RubiksSuperType := CornerType × EdgeType
 
+  @[simp]
+  lemma RubiksSuperType_mul_assoc :
+  ∀ (a b c : RubiksSuperType),
+  a * b * c = a * (b * c)
+  := by
+    simp only [Prod.forall, Prod.mk_mul_mk, PieceState.mul_def, ps_mul_assoc, forall_const]
+    done
+
   instance RubiksSuperGroup -- 就是手写证明中的群H
   : Group RubiksSuperType
   := by exact Prod.instGroup -- 应该就是笛卡尔积元素组成的群，第一种运算为：“每一个分量本身的运算，运算结果的某个分量就是这个分量的运算结果”。
