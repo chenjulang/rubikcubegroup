@@ -21,16 +21,16 @@
     13.prod_list_swap_mem_alternatingGroup_iff_even_length
 2.补充：
     lemma14 -- checked
-        alternatingCornerPermute_eq_3Cycles_to_g_eq_3Cycles_mul_one -- todo简单的
+        alternatingCornerPermute_eq_3Cycles_to_g_eq_3Cycles_mul_one -- checked
     lemma15 -- checked
-        alternatingEdgePermute_eq_3Cycles_to_g_eq_3Cycles_mul_one -- todo简单的
+        alternatingEdgePermute_eq_3Cycles_to_g_eq_3Cycles_mul_one -- checked
     lemma16 -- checked
     oddXoddToEvenXEven -- checked
     EvenPermute_valid_isReachable -- checked
     lemma001 很多Reachable要修改 -- checked
     +lemma002很多Reachable要修改 -- checked
     看看报错信息 -- checked
-    还有一些???要给官网解决就好。
+    还有一些???要给官网解决就好。--todo
 
 
 

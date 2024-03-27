@@ -1930,19 +1930,54 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   ∧
   rubiksList = (threeList.map permFin8_to_RubiksSuperType) -- 映射得来
   := by
-    let result_List: List RubiksSuperType := sorry
+    let result_List: List RubiksSuperType := threeList.map permFin8_to_RubiksSuperType
     let result_rst1: RubiksSuperType := {
       fst := {
-        permute := _
-        orient := _
+        permute := 1
+        orient := g.1.orient
       }
       snd := {
-        permute := _
-        orient := _
+        permute := g.2.permute
+        orient := g.2.orient
       }
     }
-
-    sorry
+    use result_List,result_rst1
+    apply And.intro
+    · simp only
+      ext
+      -- todo
+      {
+        -- h2
+        have prod_map_change: List.prod (List.map permFin8_to_RubiksSuperType threeList)
+        = permFin8_to_RubiksSuperType (List.prod threeList)
+          := by
+          simp only [permFin8_to_RubiksSuperType]
+          --???
+          sorry
+        rw [prod_map_change]
+        simp only [permFin8_to_RubiksSuperType]
+        simp only [Prod.fst_mul, PieceState.mul_def]
+        simp only [ps_mul]
+        simp only [mul_one, Perm.coe_one, Function.comp_id, zero_add]
+        rw [← h2]
+      }
+      {
+        have prod_map_change: List.prod (List.map permFin8_to_RubiksSuperType threeList)
+        = permFin8_to_RubiksSuperType (List.prod threeList)
+          := by
+          simp only [permFin8_to_RubiksSuperType]
+          --???
+          sorry
+        rw [prod_map_change]
+        simp only [permFin8_to_RubiksSuperType]
+        rw [← h2]
+        simp only [Prod.mk_mul_mk, PieceState.mul_def, ps_mul_one]
+      }
+    apply And.intro
+    · exact rfl
+    apply And.intro
+    · exact { left := rfl, right := { left := rfl, right := rfl } }
+    · exact rfl
 
   -- 棱块部分：
   def exist_reachableG_edgePermute_to1
@@ -1987,7 +2022,37 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g.1.orient=rst1.1.orient ∧ g.1.permute=rst1.1.permute ∧ g.2.orient=rst1.2.orient)
   ∧
   rubiksList = (threeList.map permFin12_to_RubiksSuperType) -- 映射得来
-  := by sorry
+  := by
+    let result_List: List RubiksSuperType := threeList.map permFin12_to_RubiksSuperType
+    let result_rst1: RubiksSuperType := {
+      fst := {
+        permute := g.1.permute
+        orient := g.1.orient
+      }
+      snd := {
+        permute := 1
+        orient := g.2.orient
+      }
+    }
+    use result_List,result_rst1
+    apply And.intro
+    · simp only
+      ext
+      {
+        simp only [Prod.fst_mul, PieceState.mul_def]
+        sorry
+        --???
+      }
+      {
+        simp only [Prod.snd_mul, PieceState.mul_def]
+        sorry
+        --???
+      }
+    apply And.intro
+    · exact rfl
+    apply And.intro
+    · exact { left := rfl, right := { left := rfl, right := rfl } }
+    · exact rfl
 
 
   lemma lemma31_001 : Solved = ({ permute := List.formPerm ([1,2,3]:(List (Fin 8))), orient := 0 }, { permute := 1, orient := 0 }) * (G4Perm)
