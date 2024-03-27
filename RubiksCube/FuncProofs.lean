@@ -1913,10 +1913,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul]
     decide
   lemma lemma31_003 : Solved =  ({ permute := List.formPerm ([1,3,5]:(List (Fin 8))), orient := 0 }, { permute := 1, orient := 0 }) *
-    (G4Perm * (D' * L * L * G4Perm * L * L * D)⁻¹)⁻¹ -- 记得最后加一个逆号
+    (G4Perm*(conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹
+    -- (G4Perm * (D' * L * L * G4Perm * L * L * D)⁻¹)⁻¹ -- 记得最后加一个逆号
     := by
     simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
-    simp only [G4Perm]
+    simp only [conjugate_formula,G4Perm]
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
     decide
 
@@ -2073,7 +2074,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         -- simp [ha0,p3,h2,h3,h4]
         --很明显了
         sorry
-      let solution := (G4Perm*(D'*L*L*G4Perm*L*L*D)⁻¹)⁻¹
+      let solution := (G4Perm*(conjugate_formula (D'*L*L) G4Perm )⁻¹)⁻¹
       have Solution_mul_rubiksp3_isOne: rubiks_p3 * solution = 1
         := by
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
