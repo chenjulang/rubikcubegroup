@@ -2942,18 +2942,18 @@ theorem reachable_valid
         done
       }
     }
-  | split x y h1 h2 h3 h4 =>
-    have h_split1: x⁻¹ ∈ ValidCube := by
-      apply RubiksGroup.inv_mem'
-      exact h4
-    have h_split2:= RubiksGroup.mul_mem' h_split1 h3 -- 注意：条件不够就会分段报错
-    have h_split_eq: (x⁻¹ * (x * y)) = y := by
-      rw [← mul_assoc]
-      simp only [mul_left_inv, one_mul]
-    have h_split3: (y) ∈ ValidCube := by
-      rw [← h_split_eq]
-      exact h_split2
-    exact h_split3
+  -- | split x y h1 h2 h3 h4 =>
+  --   have h_split1: x⁻¹ ∈ ValidCube := by
+  --     apply RubiksGroup.inv_mem'
+  --     exact h4
+  --   have h_split2:= RubiksGroup.mul_mem' h_split1 h3 -- 注意：条件不够就会分段报错
+  --   have h_split_eq: (x⁻¹ * (x * y)) = y := by
+  --     rw [← mul_assoc]
+  --     simp only [mul_left_inv, one_mul]
+  --   have h_split3: (y) ∈ ValidCube := by
+  --     rw [← h_split_eq]
+  --     exact h_split2
+    -- exact h_split3
   done
 
 
@@ -2988,7 +2988,7 @@ theorem valid_reachable
   have cornerpermute_Remains : (x * h1_2 * h2_3).1.permute = x.1.permute := by
     simp only [h2_7,h1_6]
   have edgepermute_Remains : (x * h1_2 * h2_3).2.permute = x.2.permute := by
-    simp only [h2_8,h1_7]
+    simp only [h2_7,h1_6]
   have corner_eqPermuteSign_edge : sign (x * h1_2 * h2_3).1.permute = sign (x * h1_2 * h2_3).2.permute := by
     simp only [cornerpermute_Remains,edgepermute_Remains,hvx.1]
   cases h3 with
