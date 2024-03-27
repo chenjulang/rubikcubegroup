@@ -2135,20 +2135,20 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     simp only [G3Perm]
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
     decide
-  -- lemma lemma31_002 : Solved =  ({ permute := List.formPerm ([1,0,6]:(List (Fin 8))) , orient := 0 }, { permute := 1, orient := 0 }) *
-  --   (B * B * VariantFaceTurn_B_List [R', F', F', F', R', B, B, R', R', R', F', R', B, B, R', R'] * B * B)⁻¹
-  --   := by
-  --   simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one, mul_inv_rev]
-  --   simp only [VariantFaceTurn_B_List,VariantFaceTurn_B]
-  --   simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul]
-  --   decide
-  -- lemma lemma31_003 : Solved =  ({ permute := List.formPerm ([1,3,5]:(List (Fin 8))), orient := 0 }, { permute := 1, orient := 0 }) *
-  --   (G4Perm * (D' * L * L * G4Perm * L * L * D)⁻¹)⁻¹ -- 记得最后加一个逆号
-  --   := by
-  --   simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
-  --   simp only [G4Perm]
-  --   simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
-  --   decide
+  lemma lemma32_002 : Solved =  ({ permute := 1, orient := 0 }, { permute := List.formPerm ([0,1,5]:(List (Fin 12))), orient := 0 }) *
+    (conjugate_formula (M_UD * L') G3Perm)⁻¹
+    := by
+    simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one, mul_inv_rev]
+    simp only [G3Perm,conjugate_formula]
+    simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul]
+    decide
+  lemma lemma32_003 : Solved =   ({ permute := 1, orient := 0 }, { permute := List.formPerm ([0,6,11]:(List (Fin 12))), orient := 0 }) *
+    (conjugate_formula L2 (conjugate_formula (M_UD*R) G3Perm))⁻¹
+    := by
+    simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+    simp only [G3Perm,conjugate_formula]
+    simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
+    decide
 
 
   /-- 如果状态x的棱块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
@@ -2165,6 +2165,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     have x_eq_Solvedx : x = Solved * x := by exact self_eq_mul_left.mpr rfl
     let p1 := List.formPerm ([0,3,1]:(List (Fin 12))) -- (1,4,2) == 这里的[0,3,1]
     let p2 := List.formPerm ([0,1,5]:(List (Fin 12))) -- {1,2,6} == 这里的[0,1,5]
+    let p3 := List.formPerm ([0,6,11]:(List (Fin 12))) -- {1,7,12} == 这里的[0,6,11]
 
     by_cases ha0:x.2.permute = p1
       -- 执行：G3Perm
@@ -2224,12 +2225,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       --   -- sorry
     }
     by_cases ha2:x.2.permute = p2
-    -- todo1 --
-      -- 首先定义中层操作M_UD
       -- 执行：(M_UD L' (R U' R U R U R U' R' U' R R) L M_UD')⁻¹
       -- 即可完成。此时制造一个RubiksSuperType
     {
-      let rubiks_p1:RubiksSuperType := {
+      let rubiks_p2:RubiksSuperType := {
         fst := {
           permute := 1
           orient := 0
@@ -2239,27 +2238,84 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           orient := 0
         }
       }
-      -- x 和 rubiks_p1 是一回事：
-      have x_eq_rubiks_p1: x = rubiks_p1
+      -- x 和 rubiks_p2 是一回事：
+      have x_eq_rubiks_p2: x = rubiks_p2
         := by
         simp only [mul_one]
         simp only [← h2,← h3,← h4]
         -- simp [ha0,p3,h2,h3,h4]
         --很明显了
         sorry
-      let solution := (G3Perm)
-      have Solution_mul_rubiksp1_isOne: rubiks_p1 * solution = 1
+      let solution := (conjugate_formula (M_UD*L') G3Perm)⁻¹
+      have Solution_mul_rubiksp2_isOne: rubiks_p2 * solution = 1
         := by
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
-        rw [← Solved_eq_1,lemma32_001]
+        rw [← Solved_eq_1,lemma32_002]
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
       rw [x_eq_Solvedx]
       apply Reachable.mul
       · exact Reachable.Solved
-      · rw [x_eq_rubiks_p1]
-        have R_rubiksp1_mul_Solution: Reachable (rubiks_p1 * solution) := by
-          rw [Solution_mul_rubiksp1_isOne];exact Reachable.Solved
-        have testaaa1 := Reachable.split_fst (rubiks_p1) (solution) R_rubiksp1_mul_Solution
+      · rw [x_eq_rubiks_p2]
+        have R_rubiksp2_mul_Solution: Reachable (rubiks_p2 * solution) := by
+          rw [Solution_mul_rubiksp2_isOne];exact Reachable.Solved
+        have testaaa1 := Reachable.split_fst (rubiks_p2) (solution) R_rubiksp2_mul_Solution
+        apply testaaa1
+        sorry
+      --   -- -- 很明显了
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.mul
+      --   -- apply Reachable.inv;apply Reachable.FT;exact FaceTurn.R
+      --   -- -- 很明显了，如何简化？
+      --   -- sorry
+    }
+    by_cases ha3:x.2.permute = p3
+      -- 执行：(L2 (1,4,7) L2)⁻¹ = (L2 (M_UD R G3Perm R' M_UD') L2)⁻¹
+      -- 即可完成。此时制造一个RubiksSuperType
+    {
+      let rubiks_p3:RubiksSuperType := {
+        fst := {
+          permute := 1
+          orient := 0
+        }
+        snd := {
+          permute := p3
+          orient := 0
+        }
+      }
+      -- x 和 rubiks_p3 是一回事：
+      have x_eq_rubiks_p3: x = rubiks_p3
+        := by
+        simp only [mul_one]
+        simp only [← h2,← h3,← h4]
+        -- simp [ha0,p3,h2,h3,h4]
+        --很明显了
+        sorry
+      let solution := (conjugate_formula L2 (conjugate_formula (M_UD*R) G3Perm))⁻¹
+      have Solution_mul_rubiksp3_isOne: rubiks_p3 * solution = 1
+        := by
+        simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+        rw [← Solved_eq_1,lemma32_003]
+        simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+      rw [x_eq_Solvedx]
+      apply Reachable.mul
+      · exact Reachable.Solved
+      · rw [x_eq_rubiks_p3]
+        have R_rubiksp3_mul_Solution: Reachable (rubiks_p3 * solution) := by
+          rw [Solution_mul_rubiksp3_isOne];exact Reachable.Solved
+        have testaaa1 := Reachable.split_fst (rubiks_p3) (solution) R_rubiksp3_mul_Solution
         apply testaaa1
         sorry
       --   -- -- 很明显了
@@ -2284,18 +2340,20 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     }
     sorry
 
-    -- def perm_Test001 := List.formPerm ([1,3,5]:(List (Fin 8)))
+  -- def perm_Test001 := List.formPerm ([0,6,11]:(List (Fin 12)))
   -- #eval perm_Test001
-  -- def solutionTest001 := (G4Perm * (D' * L * L * G4Perm * L * L * D)⁻¹)
+  -- -- ![6, 1, 2, 3, 4, 5, 11, 7, 8, 9, 10, 0]
+  -- def solutionTest001 := conjugate_formula L2 (conjugate_formula (M_UD * R) G3Perm)
   -- #eval solutionTest001
+  -- --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
+  -- --  { permute := ![6, 1, 2, 3, 4, 5, 11, 7, 8, 9, 10, 0], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
   -- def rubik_test001:RubiksSuperType := {
   --       fst := {
-  --         permute := perm_Test001
-  --         -- swap 1 0 * swap 0 6
+  --         permute := 1
   --         orient := 0
   --       }
   --       snd := {
-  --         permute := 1
+  --         permute := perm_Test001
   --         orient := 0
   --       }
   --     }

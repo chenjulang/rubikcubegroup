@@ -466,7 +466,14 @@ section FACE_TURNS
       {permute := cyclePieces [2, 3, 7,6 ], orient := Orient 8 3 [(2, 2), (3, 1), (6, 1), (7, 2)]},
       {permute := cyclePieces [2, 7, 10,6 ], orient := Orient 12 2 [(2, 0), (6, 0), (7, 0), (10, 0)]}
     ⟩
-  -- #eval B^4 = Solved
+  /-- 中层（U和D的中层）的顺时针90旋转-/
+  def M_UD : RubiksSuperType :=
+    ⟨
+      {permute := 1, orient := 0 },
+      -- todo -- 5,8,7,6 == [4,7,6,5]
+      {permute := cyclePieces [4,7,6,5], orient := Orient 12 2 [(4, 1), (5, 1), (6, 1), (7, 1)]}
+    ⟩
+  -- #eval M_UD^4 = Solved
   def U2 := U^2
   def D2 := D^2
   def R2 := R^2
@@ -479,6 +486,8 @@ section FACE_TURNS
   def L' := L⁻¹
   def F' := F⁻¹
   def B' := B⁻¹
+  def M_UD' := M_UD⁻¹
+
 
 
   def Corner_Absolute_Orient
