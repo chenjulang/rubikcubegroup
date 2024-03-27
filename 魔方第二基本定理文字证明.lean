@@ -24,7 +24,7 @@
         alternatingCornerPermute_eq_3Cycles_to_g_eq_3Cycles_mul_one -- todo简单的
     lemma15 -- checked
         alternatingEdgePermute_eq_3Cycles_to_g_eq_3Cycles_mul_one -- todo简单的
-    lemma16
+    lemma16 -- checked
     lemma13_oddXoddToEvenXEven
     lemma13_EvenPermute_valid_isReachable
     还有一些???要给官网解决就好。

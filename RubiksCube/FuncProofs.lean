@@ -2563,14 +2563,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       {exact c2}
       {exact e2}
     apply And.intro
-    · -- 用 c3,e3,还有计算结果
-      sorry
-      -- done
+    · apply And.intro
+      · simp only [← mul_assoc,e6,c3]-- e6 c3
+      · simp only [← mul_assoc,e3] -- e3
     · exact
-      {left := by
-        rw [← mul_assoc]
-        simp only [c5,e5],
-       right := by simp only [← mul_assoc,c6,e6]}
+      {left := by simp only [← mul_assoc,e4,c4]
+       right := by simp only [← mul_assoc,e5,c5]}
     done
 
   -- 化归思想，所有lemma12_condition1_restriction中的情况1可以通过魔方群操作变成情况2。
