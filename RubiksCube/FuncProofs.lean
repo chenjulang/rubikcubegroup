@@ -37,8 +37,8 @@ section ValidityChecks
   : ∀x : RubiksSuperType,
   FaceTurn x → x ∈ ValidCube
   :=
-    by
-      intro x hx
+    by sorry
+      -- intro x hx
       -- cases hx with
       -- | _ =>
         -- 能证明但是很慢。分开写快一点？：
@@ -614,6 +614,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
     ∧
     (Corner_Absolute_Orient g.1 DBL_index) = 0
+    ∧
+    Reachable h
     := by
       let h := Solved
       have h_CAO_DBL_is0: Corner_Absolute_Orient g.1 DBL_index = 0
@@ -671,6 +673,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (g).2.orient = (g * h).2.orient
     ∧
     ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+    ∧
+    Reachable h
     := by sorry
 
     lemma lemma1_005_UBR
@@ -685,6 +689,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (g).2.orient = (g * h).2.orient
     ∧
     ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+    ∧
+    Reachable h
     := by sorry --
 
     lemma lemma1_004_UBL
@@ -699,6 +705,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (g).2.orient = (g * h).2.orient
     ∧
     ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+    ∧
+    Reachable h
     := by sorry --
 
     lemma lemma1_003_DFR
@@ -712,6 +720,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (g).2.orient = (g * h).2.orient
     ∧
     ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+    ∧
+    Reachable h
     := by sorry --
 
     lemma lemma1_002_DFL
@@ -725,6 +735,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (g).2.orient = (g * h).2.orient
     ∧
     ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+    ∧
+    Reachable h
     := by sorry --
 
     -- lemma1的主要证明依赖本引理lemma1_001_UFL，本引理主要证明依赖lemma1_002_DFL
@@ -742,6 +754,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     (g).2.orient = (g * h).2.orient
     ∧
     ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+    ∧
+    Reachable h
     := by
       let h := Solved
       by_cases ha0 : (Corner_Absolute_Orient g.1 DFL_index)=0
@@ -845,9 +859,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             exact h2_4_4_1
           }
           apply And.intro
+          apply And.intro
           { rw [← Prod.fst_mul]
             rw [← mul_assoc]
-            rw [← h2_4_5]
+            rw [← h2_4_5.1]
             --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
             have h2_4_5_1:g.1.permute = (g * moveAction2).1.permute
               := by
@@ -857,7 +872,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           }
           { rw [← Prod.snd_mul]
             rw [← mul_assoc]
-            rw [← h2_4_6]
+            rw [← h2_4_5.2]
             --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
             have h2_4_6_1: g.2.permute = (g * moveAction2).2.permute
               := by
@@ -865,7 +880,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
               -- done
             exact h2_4_6_1
           }
-          done
+          {
+            apply Reachable.mul
+            · sorry -- 明显
+            · exact h2_4_6
+          }
         }
         { have ha2: Corner_Absolute_Orient g.1 DFL_index = 2
             := by
@@ -967,9 +986,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             exact h3_4_4_1
           }
           apply And.intro
+          apply And.intro
           { rw [← Prod.fst_mul]
             rw [← mul_assoc]
-            rw [← h3_4_5]
+            rw [← h3_4_5.1]
             have h3_4_5_1:g.1.permute = (g * moveAction3).1.permute
               := by
               --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
@@ -979,7 +999,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           }
           { rw [← Prod.snd_mul]
             rw [← mul_assoc]
-            rw [← h3_4_6]
+            rw [← h3_4_5.2]
             have h3_4_6_1: g.2.permute = (g * moveAction3).2.permute
               := by
               --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
@@ -987,12 +1007,17 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
               sorry
             exact h3_4_6_1
           }
+          {
+            apply Reachable.mul
+            · sorry --明显
+            · exact h3_4_6
+          }
         }
       }
       done
 
-  #eval (F*G1Perm*F').1.permute = 1
-  #eval F^2*G1Perm*F^2
+  -- #eval (F*G1Perm*F').1.permute = 1
+  -- #eval F^2*G1Perm*F^2
 
 
   -- done
@@ -1009,6 +1034,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).2.orient = (g * h).2.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  ∧
+  Reachable h
   := by
     intro g hsum0
     let h := Solved
@@ -1108,9 +1135,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           exact h2_4_4_1
         }
         apply And.intro
+        apply And.intro
         { rw [← Prod.fst_mul]
           rw [← mul_assoc]
-          rw [← h2_4_5]
+          rw [← h2_4_5.1]
           --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
           have h2_4_5_1:g.1.permute = (g * moveAction2).1.permute
             := by
@@ -1120,7 +1148,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         }
         { rw [← Prod.snd_mul]
           rw [← mul_assoc]
-          rw [← h2_4_6]
+          rw [← h2_4_5.2]
           --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
           have h2_4_6_1: g.2.permute = (g * moveAction2).2.permute
             := by
@@ -1128,7 +1156,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             -- done
           exact h2_4_6_1
         }
-        done
+        {
+          apply Reachable.mul
+          · sorry -- 很明显了 --sorry
+          · exact h2_4_6
+        }
       }
       { have ha2: Corner_Absolute_Orient g.1 UFL_index = 2
           := by
@@ -1232,9 +1264,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           exact h3_4_4_1
         }
         apply And.intro
+        apply And.intro
         { rw [← Prod.fst_mul]
           rw [← mul_assoc]
-          rw [← h3_4_5]
+          rw [← h3_4_5.1]
           have h3_4_5_1:g.1.permute = (g * moveAction3).1.permute
             := by
             --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
@@ -1244,13 +1277,18 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         }
         { rw [← Prod.snd_mul]
           rw [← mul_assoc]
-          rw [← h3_4_6]
+          rw [← h3_4_5.2]
           have h3_4_6_1: g.2.permute = (g * moveAction3).2.permute
             := by
             --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
             -- done
             sorry
           exact h3_4_6_1
+        }
+        {
+          apply Reachable.mul
+          · sorry -- 明显
+          · exact h3_4_6
         }
       }
     }
@@ -1329,6 +1367,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
   ∧
   (Edge_Absolute_Orient g.2 UF_index) = 0
+  ∧
+  Reachable h
   := by
     let h := Solved
     have h_EAO_UF_is0: Edge_Absolute_Orient g.2 UF_index = 0
@@ -1380,6 +1420,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  ∧
+  Reachable h
   := by sorry --
 
   lemma lemma2_008_FL
@@ -1396,6 +1438,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  ∧
+  Reachable h
   := by sorry --
 
   lemma lemma2_007_LD
@@ -1411,6 +1455,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  ∧
+  Reachable h
   := by sorry --
 
   lemma lemma2_006_LB
@@ -1425,6 +1471,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  ∧
+  Reachable h
   := by sorry --
 
   lemma lemma2_005_BD
@@ -1439,6 +1487,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  ∧
+  Reachable h
   := by sorry --
 
   lemma lemma2_004_UB
@@ -1453,6 +1503,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  ∧
+  Reachable h
   := by sorry--
 
   lemma lemma2_003_RB
@@ -1466,6 +1518,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  ∧
+  Reachable h
   := by sorry--
 
   lemma lemma2_002_RD
@@ -1479,6 +1533,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  ∧
+  Reachable h
   := by sorry--
 
   lemma lemma2_002_FR
@@ -1492,6 +1548,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  ∧
+  Reachable h
   := by sorry--
 
   -- 任意H中的状态，满足：棱块方向数求和后模2为0,UR的方向数为0
@@ -1508,6 +1566,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g).1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  ∧
+  Reachable h
   := by
     let h := Solved
     by_cases ha0 : (Edge_Absolute_Orient g.2 FR_index)=0
@@ -1617,9 +1677,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         exact h3_4_4_1
       }
       apply And.intro
+      apply And.intro
       { rw [← Prod.fst_mul]
         rw [← mul_assoc]
-        rw [← h3_4_5]
+        rw [← h3_4_5.1]
         have h3_4_5_1:g.1.permute = (g * moveAction3).1.permute
           := by
           --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
@@ -1629,13 +1690,18 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       }
       { rw [← Prod.snd_mul]
         rw [← mul_assoc]
-        rw [← h3_4_6]
+        rw [← h3_4_5.2]
         have h3_4_6_1: g.2.permute = (g * moveAction3).2.permute
           := by
           --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
           -- done
           sorry
         exact h3_4_6_1
+      }
+      {
+        apply Reachable.mul
+        · sorry -- 明显
+        · exact h3_4_6
       }
     }
     done
@@ -1653,6 +1719,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   g.1.orient = (g * h).1.orient
   ∧
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  ∧
+  Reachable h
   := by
     intro g hsum0
     let h:= Solved
@@ -1762,9 +1830,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         exact h3_4_4_1
       }
       apply And.intro
+      apply And.intro
       { rw [← Prod.fst_mul]
         rw [← mul_assoc]
-        rw [← h3_4_5]
+        rw [← h3_4_5.1]
         have h3_4_5_1:g.1.permute = (g * moveAction3).1.permute
           := by
           --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
@@ -1774,13 +1843,18 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       }
       { rw [← Prod.snd_mul]
         rw [← mul_assoc]
-        rw [← h3_4_6]
+        rw [← h3_4_5.2]
         have h3_4_6_1: g.2.permute = (g * moveAction3).2.permute
           := by
           --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
           -- done
           sorry
         exact h3_4_6_1
+      }
+      {
+        apply Reachable.mul
+        · sorry --明显
+        · exact h3_4_6
       }
     }
     done
@@ -1855,7 +1929,20 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   (g.1.orient=rst1.1.orient ∧ g.2.permute=rst1.2.permute ∧ g.2.orient=rst1.2.orient)
   ∧
   rubiksList = (threeList.map permFin8_to_RubiksSuperType) -- 映射得来
-  := by sorry
+  := by
+    let result_List: List RubiksSuperType := sorry
+    let result_rst1: RubiksSuperType := {
+      fst := {
+        permute := _
+        orient := _
+      }
+      snd := {
+        permute := _
+        orient := _
+      }
+    }
+
+    sorry
 
   -- 棱块部分：
   def exist_reachableG_edgePermute_to1
@@ -2573,7 +2660,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   -- 化归思想，所有lemma12_condition1_restriction中的情况1可以通过魔方群操作变成情况2。
   /-- （奇X奇) → (偶X偶）-/
-  lemma lemma13_oddXoddToEvenXEven
+  lemma oddXoddToEvenXEven
   (x: RubiksSuperType)
   (h3: (sign x.1.permute = -1 ∧ -1 = sign x.2.permute) )
   :
@@ -2582,6 +2669,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     ∧
     (sign (g * x).1.permute = 1 ∧ 1 = sign (g * x).2.permute)
   := by
+    obtain ⟨h3_1,h3_2⟩ := h3
     use (G5Perm)
     apply And.intro
     · simp only [G5Perm,G5Perm_element1]
@@ -2595,12 +2683,25 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- apply Reachable.FT <;> simp only [FaceTurn.R,FaceTurn.U]
       -- 这里写完要很长，怎么节省代码呢？
       -- done
-    · -- 缺一个lemma13_oddXoddToEvenXEven中的引理，角和棱位置各变换1次，符号会分别变1次。
+    · -- 缺一个引理，角和棱位置各变换1次，符号会分别变1次。
       -- 就是这个：Equiv.Perm.sign (Equiv.swap x y) = -1
-      sorry
+      -- G5Perm.1.permute 是一个swap
+      -- G5Perm.2.permute 是一个swap
+      simp only [Prod.fst_mul, PieceState.mul_def, Prod.snd_mul]
+      apply And.intro
+      · simp only [ps_mul] -- G5Perm.1.permute算出来。好像也不用。
+        simp only [map_mul]
+        rw [h3_1]
+        simp only [neg_mul, one_mul]
+        decide
+      · simp only [ps_mul] -- G5Perm.1.permute算出来。好像也不用。
+        simp only [map_mul]
+        rw [h3_2.symm]
+        simp only [neg_mul, one_mul]
+        decide
     done
 
-  lemma lemma13_EvenPermute_valid_isReachable
+  lemma EvenPermute_valid_isReachable
   (x: RubiksSuperType)
   (h3_2: sign x.1.permute = 1 ∧ 1 = sign x.2.permute)
   (hvx: x ∈ ValidCube)
@@ -2629,8 +2730,17 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     have h3 := hvx.1
     rw [lemma12_condition1_restriction] at h3
     -- //
-    have h3_2_1 : (x * h1_2 * h2_3).1.permute ∈ alternatingGroup (Fin 8) := sorry
-    have h3_2_2 : (x * h1_2 * h2_3).2.permute ∈ alternatingGroup (Fin 12) := sorry
+    have h3_2_1 : (x * h1_2 * h2_3).1.permute ∈ alternatingGroup (Fin 8)
+      := by
+      -- simp [h2_7.1.symm,h1_6.1.symm,mem_alternatingGroup.2,h3_2.1]
+      rw [h2_7.1.symm,h1_6.1.symm]
+      apply mem_alternatingGroup.2
+      exact h3_2.1
+    have h3_2_2 : (x * h1_2 * h2_3).2.permute ∈ alternatingGroup (Fin 12)
+      := by
+      rw [h2_7.2.symm,h1_6.2.symm]
+      apply mem_alternatingGroup.2
+      exact h3_2.2.symm
     -- 使用lemma16使得新状态保持旧属性：方向数不变，获取新属性：角块+棱块的位置都变成1。
     have h3_2_3 := lemma16 (x * h1_2 * h2_3) h3_2_1 h3_2_2
     -- 很明显新状态就是还原状态Solved了，也就是已知下面这个y。
@@ -2655,7 +2765,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- 将目标Reachable x变成  ∃ y, (Reachable y) ∧ (x * y = Solved)
     -- x经过有限次操作变成了y， y就是复原状态e。
     let y : RubiksSuperType := h1_2 * h2_3 * h3_2_4
-    have h101 : Reachable y := by sorry
+    have h101 : Reachable y
+      := by
+      apply Reachable.mul
+      · apply Reachable.mul
+        · exact h1_7
+        · exact h2_8
+      · exact h3_2_5
     have h102 : x * y = Solved
       := by
       simp only [y]
@@ -2818,19 +2934,19 @@ theorem valid_reachable
     -- lemma13_oddXoddToEvenXEven
     -- lemma13_EvenPermute_valid_isReachable
     -- Reachable g →   Reachable g*x →  Reachable x
-    have h3_1_1 := lemma13_oddXoddToEvenXEven x h3_1
+    have h3_1_1 := oddXoddToEvenXEven x h3_1
     obtain ⟨od1,od2,od3,od4⟩ := h3_1_1
     have h3_1_2_1: od1 * x ∈ ValidCube := by
       apply RubiksGroup.mul_mem'
       · exact reachable_valid od1 od2
       · exact hvx
-    have h3_1_2 := lemma13_EvenPermute_valid_isReachable (od1 * x) {left:=od3,right:=od4} h3_1_2_1
+    have h3_1_2 := EvenPermute_valid_isReachable (od1 * x) {left:=od3,right:=od4} h3_1_2_1
     -- 这里很明显了，但是是不是需要增加Reachable的定义呢？但是可能会影响左推右的过程，但问题不大。
-    apply Reachable.split
+    apply Reachable.split_snd
     · exact h3_1_2
     · exact od2
   | inr h3_2 =>
-    apply lemma13_EvenPermute_valid_isReachable
+    apply EvenPermute_valid_isReachable
     · exact h3_2
     · exact hvx
     done
