@@ -2550,8 +2550,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       · simp only [BothOne]
     done
 
-  #check closure_three_cycles_eq_alternating
-  #check prod_list_swap_mem_alternatingGroup_iff_even_length
+  -- #check closure_three_cycles_eq_alternating
+  -- #check prod_list_swap_mem_alternatingGroup_iff_even_length
 
   -- 对于任意g状态角块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的角块位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。

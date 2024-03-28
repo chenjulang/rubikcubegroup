@@ -12,47 +12,71 @@ open BigOperators
 
 section RubiksSuperGroup
 
+  -- 举例：
+  -- def testInst1 : (Perm (Fin 8)) where
+  --   toFun := fun
+  --     | .mk val isLt => val +1
+  --   invFun := fun
+  --     | .mk val isLt => val -1
+  --   left_inv := by decide
+  --   right_inv := by decide
+  -- #eval testInst1.toFun -- ![1, 2, 3, 4, 5, 6, 7, 0]
+  -- #check (Repr.reprPrec ∘ testInst1.toFun)
+  -- #eval testInst1.toFun 7  -- 0
+  -- #eval Repr.reprPrec (0:(Fin 8)) 999  -- 0
+  -- #eval (Repr.reprPrec ∘ testInst1.toFun) 7 3 -- 0
+
+  -- 这个实例声明表明对于任意的 n : Nat，类型 Perm (Fin n) 具有 Repr 实例。
+  -- 在 Lean 中，Repr 是一个类型类，用于定义类型的外部表示形式。它提供了将值转换为字符串的方法，以便在打印输出和调试信息中使用。
+  -- 例如，当你在 Lean 中使用 #eval 命令打印一个值时，它将使用 Repr 实例将该值转换为字符串进行显示。
+  -- 该实例声明的右侧是一个匿名构造子，它使用了函数合成操作符 (∘) 来组合两个函数：reprPrec 和 Equiv.toFun。
+  -- reprPrec 是一个内置函数，用于将值转换为字符串的表示形式，而 Equiv.toFun 是一个类型为 Equiv α β → α → β 的函数，
+    -- 它将一个等价关系 Equiv 转换为一个函数。
+  -- 因此，整个实例声明的含义是，对于类型 Perm (Fin n)，我们可以使用函数合成的方式将其转换为字符串表示形式。
+    -- 这意味着在打印输出或调试信息中，Perm (Fin n) 类型的值将以字符串的形式显示。
+  -- 如果去掉：下面代码的structure PieceState 会报错： failed to synthesize instance Repr (Perm (Fin ↑pieces✝))
   instance (n : Nat) : Repr (Perm (Fin n)) :=
     ⟨reprPrec ∘ Equiv.toFun⟩
-  -- 这个实例声明表明对于任意的 n : Nat，类型 Perm (Fin n) 具有 Repr 实例。
-  -- 在 Lean 中，Repr 是一个类型类，用于定义类型的外部表示形式。它提供了将值转换为字符串的方法，以便在打印输出和调试信息中使用。例如，当你在 Lean 中使用 #eval 命令打印一个值时，它将使用 Repr 实例将该值转换为字符串进行显示。
-  -- 该实例声明的右侧是一个匿名构造子，它使用了函数合成操作符 (∘) 来组合两个函数：reprPrec 和 Equiv.toFun。reprPrec 是一个内置函数，用于将值转换为字符串的表示形式，而 Equiv.toFun 是一个类型为 Equiv α β → α → β 的函数，它将一个等价关系 Equiv 转换为一个函数。
-  -- 因此，整个实例声明的含义是，对于类型 Perm (Fin n)，我们可以使用函数合成的方式将其转换为字符串表示形式。这意味着在打印输出或调试信息中，Perm (Fin n) 类型的值将以字符串的形式显示。
 
-  -- instance (n : Nat) : DecidableEq (Perm (Fin n)) :=
-  --   λ a b => mk.injEq a.toFun a.invFun _ _ b.toFun b.invFun _ _ ▸ inferInstance
-  -- 这个实例声明表明对于任意的 n : Nat，类型 Perm (Fin n) 具有 DecidableEq 实例。
-  -- 在 Lean 中，DecidableEq 是一个类型类，用于定义两个值之间的可决等价性。它提供了一个决策过程，可以确定两个值是否相等。
-  -- 该实例声明的右侧是一个 lambda 函数，它接受两个参数 a 和 b，表示要比较的两个 Perm (Fin n) 类型的值。函数体的逻辑如下：
-  -- mk.injEq 是一个内置函数，用于构造一个类型为 a = b 的等式，其中 a.toFun 和 b.toFun 是两个 Perm (Fin n) 类型值的函数表示形式，而 a.invFun 和 b.invFun 是它们的逆函数表示形式。
-  -- _ 是 Lean 中的占位符，表示需要提供证据的空白。
-  -- ▸ 是等式推理的操作符，它表示将前面的等式应用到后面的表达式上。
-  -- inferInstance 是一个内置函数，用于根据上下文中的信息自动推断出一个实例。
-  -- 因此，整个实例声明的含义是，我们可以通过构造相应的等式来判断两个 Perm (Fin n) 类型的值是否相等。这个等式的构造基于 a 和 b 的函数表示形式以及其逆函数表示形式。inferInstance 函数用于自动推断所需的实例。
-  -- 这个实例声明的效果是，当你在 Lean 中使用 = 运算符来比较两个 Perm (Fin n) 类型的值时，Lean 将使用这个实例提供的决策过程来判断它们是否相等。
-  -- #check ▸
 
+
+  -- 在 Lean 中，instance 关键字用于声明类型类的实例。在这个例子中，instance (n : Nat) : DecidableEq (Perm (Fin n))
+    -- 声明了一个 DecidableEq (Perm (Fin n)) 类型类的实例，其中 (n : Nat) 表示这个实例是一个依赖于 n 的类型。
+  -- DecidableEq 是一个类型类，表示类型具有可判定相等性的能力，即可以判断两个值是否相等。
+    -- 在这个例子中，(Perm (Fin n)) 是一个表示有限集合上的置换的类型，因此这个实例表示对于任意自然数 n，Perm (Fin n) 类型上都存在可判定相等性。
+    -- 而 := inferInstance 则是使用类型类的隐式实例解析机制来推断和生成这个实例。这意味着编译器会根据上下文自动搜索并生成满足
+    -- DecidableEq (Perm (Fin n)) 类型类约束的实例。
+  -- 因此，这行代码的含义是声明了一个依赖于 n 的 DecidableEq 类型类实例，用于在有限集合上的置换类型上判断相等性，
+    -- 并使用了类型类隐式实例解析机制来自动生成这个实例。
+  -- 如果去掉：好像没影响。
   instance (n : Nat) : DecidableEq (Perm (Fin n)) := inferInstance
 
   /- This PieceState structure is used to represent the entire state of both corner pieces and edge pieces.-/
   structure PieceState (pieces orientations: ℕ+) where
     permute : Perm (Fin pieces)
-    orient : Fin pieces → Fin orientations -- 这里应该是增加量，不是绝对量
+    orient : Fin pieces → Fin orientations -- 这里是增加量，不是绝对量
+    -- 去掉这一行结果，
+      -- 1.丢失了一些打印的功能："{repr c}" 报错：failed to synthesize instance Repr RubiksSuperType
+      -- 2.也无法处理相等的判断：if c = Solved then "Solved"： failed to synthesize instance Decidable (c = Solved)
     deriving Repr, DecidableEq
 
+  -- 举例：
+  -- def testP1: Perm (Fin 8) := List.formPerm ([1,2,3])
+  -- def testP2: Perm (Fin 8) := List.formPerm ([2,3,4])
+  -- #eval testP1 -- ![0, 2, 3, 1, 4, 5, 6, 7]
+  -- #eval testP2 -- ![0, 1, 3, 4, 2, 5, 6, 7]
+  -- #eval testP2 * testP1 -- ![0, 3, 4, 1, 2, 5, 6, 7] -- 索引1得到(→2→)数字3；索引2得到(→3→)数字4;索3得到(→1→)数字1;索引4得到(→4→)数字2
+  -- -- 因此permute反着写乘法顺序才能得到“传统意义上的先映射P1，再映射P2”
+  -- #eval testP1 * testP2 -- ![0, 2, 1, 4, 3, 5, 6, 7] -- 索引1得到(→1→)数字2；索引2得到(→3→)数字1;索3得到(→4→)数字4;索引4得到(→2→)数字3
 
-  -- def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
-  --   fun a2 a1 => {
-  --     permute := a1.permute * a2.permute
-  --     orient := (a2.orient ∘ a1.permute.invFun) + a1.orient
-  --   }
-  -- 会不会是在状态a的基础上看的呢？
   def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
     fun a1 a2 => {
-      permute := a2.permute * a1.permute -- *先运算右，再运算左。
-      orient := (a2.orient ∘ a1.permute) + a1.orient -- ∘是右边的函数作用到左边的对象
+      permute := a2.permute * a1.permute -- *先映射右，再映射左。 -- 为什么呢？看例子testP1,testP2
+      orient := (a2.orient ∘ a1.permute) + a1.orient -- 复合函数计算顺序:右→左
+      -- todo 这里举例说明一下
     }
- -- 将上面替换成下面的等价写法，好处：1.可以到处写*，来代替ps_mul，lean系统会自动匹配到这个*的类型用法。
+
+  -- 将上面替换成下面的等价写法，好处：1.可以到处写*，来代替ps_mul，lean系统会自动匹配到这个*的类型用法。
   instance {p o : ℕ+} : Mul (PieceState p o) where
     mul a1 a2 := {
       permute := a2.permute * a1.permute
@@ -61,7 +85,7 @@ section RubiksSuperGroup
 
 
 
-  @[simp] -- 这个同时代表了手写证明中的ρ和σ的同态性质
+  @[simp] -- 这个同时代表了手写证明中的ρ和σ的同态性质：保乘法
   theorem permute_mul {p o : ℕ+} (a1 a2 : PieceState p o)
   -- 这里可以写*，来代替ps_mul
   : (a1 * a2).permute = a2.permute * a1.permute
