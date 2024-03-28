@@ -85,6 +85,7 @@ section RubiksSuperGroup
     -- “索引位置”4的数，经过testP1得到新的“索引位置”4，再经过testP2,得到新的“索引位置”2。总结就是4=>2
     -- 写成向量就是 = ![0,1=>3,2=>4,3=>1,4=>2,5,6,7]
     -- 简化后就是 ![0,3,4,1,2,5,6,7]
+  -- #check Perm.mul_def -- permute的乘法就是这样定义的。
   -- #eval testP2 * testP1 -- ![0, 3, 4, 1, 2, 5, 6, 7]
 
 
@@ -139,7 +140,9 @@ section RubiksSuperGroup
       orient := (a2.orient ∘ a1.permute) + a1.orient -- 复合函数计算顺序:右→左
     }
 
+
   -- 将上面替换成下面的等价写法，好处：1.可以到处写*，来代替ps_mul，lean系统会自动匹配到这个*的类型用法。
+  -- 实际上就是定义了PieceState的其中一种2元乘法运算。当然你最想定义多少种乘法运算都可以。但我们只想要这个，也只有这个能有进展。
   instance {p o : ℕ+} : Mul (PieceState p o) where
     mul a1 a2 := {
       permute := a2.permute * a1.permute
@@ -147,20 +150,20 @@ section RubiksSuperGroup
     }
 
 
-
-  @[simp] -- 这个同时代表了手写证明中的ρ和σ的同态性质：保乘法
-  theorem permute_mul {p o : ℕ+} (a1 a2 : PieceState p o)
   -- 这里可以写*，来代替ps_mul
+  /-- 先“PieceState乘”后p = 先p后“PieceState乘” -/
+  @[simp]
+  theorem permute_mul {p o : ℕ+} (a1 a2 : PieceState p o)
   : (a1 * a2).permute = a2.permute * a1.permute
   := by rfl
-  -- 这里可以写*，来代替ps_mul
   @[simp]
   theorem orient_mul {p o : ℕ+} (a1 a2 : PieceState p o)
-  -- 这里可以写*，来代替ps_mul
   : (a1 * a2).orient = (a2.orient ∘ a1.permute) + a1.orient
   := by rfl
 
+-- #check PieceState.mk.injEq
 
+  /-- PieceState乘法的结合律 -/
   @[simp]
   lemma ps_mul_assoc {p o : ℕ+} :
   ∀ (a b c : PieceState p o),
@@ -168,66 +171,49 @@ section RubiksSuperGroup
   := by
     intro a b c
     simp only [ps_mul]
-    -- simp only [invFun_as_coe]
-    simp only [PieceState.mk.injEq] -- 两同类型对象相等，等价于，各分量相等。
+    simp only [PieceState.mk.injEq] -- ***两同类型对象相等，等价于，各分量相等。
     apply And.intro
     · simp only [Perm.mul_def]
-      simp only [Equiv.trans_assoc] -- A.trans B 指的是映射先看A，再看B
-    · simp only [coe_mul]
+      ext i
+      rw [trans_apply]
+      rw [trans_apply]
+      rw [trans_apply]
+      rw [trans_apply]
+    · simp only [coe_mul] -- 乘法号 和 复合符号 效果是一样的。
       rw [← add_assoc]
       simp only [add_left_inj]
-      rfl
-      -- ext i
-      -- simp only [Pi.add_apply]
-      -- simp only [Function.comp_apply]
-      -- simp only [Pi.add_apply]
-      -- rw [← add_assoc]
-      -- simp only [Function.comp_apply]
-      -- have h1: (c.permute * b.permute).symm  = b.permute.symm ∘ c.permute.symm
-      -- := by
-      --   -- ∘ 先作用右，再作用左
-      --   -- f.trans g 先作用f，再作用g
-      --   simp only [Perm.mul_def]
-      --   exact rfl
-      --   done
-      -- rw [h1]
-      -- clear h1
-      -- simp only [Function.comp_apply]
-      -- -- 直接左右相等了。
+      ext i
+      simp only [Pi.add_apply]
+      simp only [Function.comp_apply] -- 去掉复合符号
+      simp only [Pi.add_apply]
+      simp only [Function.comp_apply]
     done
 
-
+  /-- PieceState乘法的左单位元 -/
   @[simp]
   lemma ps_one_mul {p o : ℕ+} :
   ∀ (a : PieceState p o),
-  ps_mul {permute := 1, orient := 0} a  =  a
+  ps_mul {permute := 1, orient := 0} a = a
   := by
     intro a
     simp only [ps_mul]
-    -- simp only [one_mul]
-    -- simp only [invFun_as_coe]
-    -- simp only [mul_one, Pi.zero_comp, zero_add]
     simp only [mul_one]
-    -- simp only [Pi.zero_comp]
-    -- simp only [zero_add]
     simp only [coe_one, Function.comp_id, add_zero]
     done
 
-
+  /-- PieceState乘法的右单位元 -/
   @[simp]
   lemma ps_mul_one {p o : ℕ+} :
   ∀ (a : PieceState p o),
   ps_mul a {permute := 1, orient := 0} = a := by
     intro a
     simp only [ps_mul]
-    -- simp only [mul_one, invFun_as_coe]
     simp only [one_mul, one_symm, coe_one, Function.comp_id, add_zero]
-    -- simp only [Pi.zero_comp, zero_add]
     simp only [Pi.zero_comp, zero_add]
     done
 
-
-
+  -- todo
+  /-- PieceState乘法的普通元素的右逆 -/
   def ps_inv {p o : ℕ+}
   : PieceState p o → PieceState p o
   :=
@@ -274,6 +260,20 @@ section RubiksSuperGroup
       orient := fun x => (- ps.orient) (ps.permute⁻¹ x)
     }
 
+  /- 证明右逆的定义合理性：-/
+  @[simp]
+  lemma ps_mul_left_inv {p o : ℕ+} :
+  ∀ (a : PieceState p o),
+  ps_mul a (ps_inv a)  = {permute := 1, orient := 0}
+  := by
+    intro a
+    simp only [ps_mul,ps_inv]
+    simp only [mul_left_inv, Pi.neg_apply, PieceState.mk.injEq, true_and]
+    ext i
+    simp only [Pi.add_apply, Function.comp_apply, inv_apply_self, add_left_neg, Fin.val_zero',
+      Pi.zero_apply]
+    done
+
   instance {p o : ℕ+} : Neg (PieceState p o) where
     neg := fun
       | .mk permute orient => {
@@ -282,9 +282,7 @@ section RubiksSuperGroup
       }
 
 
-
-  -- 定义右的逆，证明左也成立：
-
+  -- 定义右的逆，证明左乘也为1：
   @[simp]
   lemma ps_mul_left_inv {p o : ℕ+} :
   ∀ (a : PieceState p o),
