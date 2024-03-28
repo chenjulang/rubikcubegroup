@@ -52,6 +52,7 @@ section RubiksSuperGroup
   instance (n : Nat) : DecidableEq (Perm (Fin n)) := inferInstance
 
   /- This PieceState structure is used to represent the entire state of both corner pieces and edge pieces.-/
+  /-- 可以看成全体角块，或全体棱块。为方便讲解，目前语境先当成是全体角块。-/
   structure PieceState (pieces orientations: ℕ+) where
     permute : Perm (Fin pieces)
     orient : Fin pieces → Fin orientations -- 这里是增加量，不是绝对量
@@ -64,16 +65,78 @@ section RubiksSuperGroup
   -- def testP1: Perm (Fin 8) := List.formPerm ([1,2,3])
   -- def testP2: Perm (Fin 8) := List.formPerm ([2,3,4])
   -- #eval testP1 -- ![0, 2, 3, 1, 4, 5, 6, 7]
+    -- 实际理解应该这样： ![0=>0,1=>2, 2=>3, 3=>1, 4=>4, 5=>5, 6=>6, 7=>7] ;
+    -- 0=>0 定义：“索引位置”0的数A在变换后，新的“索引位置”是0; 换句话说，位置没变。
+    -- 1=>2 定义：“索引位置”1的数A在变换后，新的“索引位置”是2
+    -- 举例testP1代表这样的一个重排列：
+    --        {a,b,c,d,e,f,g,h}
+    --        →
+    --        {a,d,b,c,e,f,g,h}
   -- #eval testP2 -- ![0, 1, 3, 4, 2, 5, 6, 7]
-  -- #eval testP2 * testP1 -- ![0, 3, 4, 1, 2, 5, 6, 7] -- 索引1得到(→2→)数字3；索引2得到(→3→)数字4;索3得到(→1→)数字1;索引4得到(→4→)数字2
-  -- -- 因此permute反着写乘法顺序才能得到“传统意义上的先映射P1，再映射P2”
-  -- #eval testP1 * testP2 -- ![0, 2, 1, 4, 3, 5, 6, 7] -- 索引1得到(→1→)数字2；索引2得到(→3→)数字1;索3得到(→4→)数字4;索引4得到(→2→)数字3
+    -- 实际理解应该这样写： ![0=>0,1=>1, 2=>3, 3=>4, 4=>2, 5=>5, 6=>6, 7=>7] ;
+  -- 那如何理解乘法呢？testP2 * testP1
+    -- 这里看的顺序要从右开始看。先进行testP1变换，在进行testP2变换。
+    -- testP1 = ![0=>0,1=>2, 2=>3, 3=>1, 4=>4, 5=>5, 6=>6, 7=>7]
+    -- testP2 = ![0=>0,1=>1, 2=>3, 3=>4, 4=>2, 5=>5, 6=>6, 7=>7]
+    -- 举例：
+    -- “索引位置”1的数，经过testP1得到新的“索引位置”2，再经过testP2,得到新的“索引位置”3。总结就是1=>3
+    -- “索引位置”2的数，经过testP1得到新的“索引位置”3，再经过testP2,得到新的“索引位置”4。总结就是2=>4
+    -- “索引位置”3的数，经过testP1得到新的“索引位置”1，再经过testP2,得到新的“索引位置”1。总结就是3=>1
+    -- “索引位置”4的数，经过testP1得到新的“索引位置”4，再经过testP2,得到新的“索引位置”2。总结就是4=>2
+    -- 写成向量就是 = ![0,1=>3,2=>4,3=>1,4=>2,5,6,7]
+    -- 简化后就是 ![0,3,4,1,2,5,6,7]
+  -- #eval testP2 * testP1 -- ![0, 3, 4, 1, 2, 5, 6, 7]
+
+
+  -- 举例：(a2.orient ∘ a1.permute) + a1.orient
+    -- 比如，取值如下：
+    -- a.1.permute = ![1,2,0,3,4,5,6,7]
+    -- a.2.orient =  ![o0,o1,o2,o3,o4,o5,o6,o7]
+  -- 问题来了：  ρ(g)^(-1)·v(h) + v(g) 要怎么用a1.orient，a1.permute，a2.orient来表示出来呢？
+  -- 1. 首先v(g)等价于a1.orient。
+  -- 2. 然后v(h)等价于a2.orient。
+  -- 3. ρ(g)的重排列效果 等价于 a.1.permute的重排列效果。
+      -- 先看看a.1.permute和ρ(g)的重排列效果：
+      -- 先写成[0=>1,1=>2,2=>0,3=>3,4=>4,5=>5,6=>6,7=>7]
+      -- 重排列效果也就是：
+      --        {a,b,c,d,e,f,g,h}
+      --        →
+      --        {c,a,b,d,e,f,g,h}
+      -- 然后分析逆操作ρ(g)^(-1)重排列效果：
+      -- 很容易知道就是反着写：[0<=1,1<=2,2<=0,3<=3,4<=4,5<=5,6<=6,7<=7]
+      -- 改写一下 [0=>2,1=>0,2=>1,3=>3,4=>4,5=>5,6=>6,7=>7]
+  -- 4. 因此ρ(g)^(-1)·v(h)的效果是ρ(g)^(-1)重排列作用在v(h)上，
+    -- v(h) = ![o0,o1,o2,o3,o4,o5,o6,o7]
+    -- 经过变换[0=>2,1=>0,2=>1,3=>3,4=>4,5=>5,6=>6,7=>7]
+    -- 得到 ![o1,o2,o0,o3,o4,o5,o6,o7]
+  -- 5. 现在回到原来的问题 ρ(g)^(-1)·v(h) + v(g) 要怎么用a1.orient，a1.permute，a2.orient来表示出来呢？
+    -- 先撇开一个加项v(g)不管
+    -- 问题剩下了：ρ(g)^(-1)·v(h) 要怎么用a1.permute，a2.orient来表示出来呢？
+    -- 也就是![o1,o2,o0,o3,o4,o5,o6,o7] 怎么用a1.permute，a2.orient来表示出来呢？
+      -- 先列出a.1.permute = [0=>1,1=>2,2=>0,3=>3,4=>4,5=>5,6=>6,7=>7]
+      -- a2.orient = ![o0,o1,o2,o3,o4,o5,o6,o7]
+    --
+    -- 不妨去掉不变的部分看的更清晰：
+    -- 也就是![o1,o2,o0,-,-,-,-,-] 怎么用a1.permute，a2.orient来表示出来呢？
+      -- 先列出a.1.permute = [0=>1,1=>2,2=>0,-,-,-,-,-]
+      -- a2.orient = ![o0,o1,o2,-,-,-,-,-]
+    -- [o1,o2,o0,-,-,-,-,-] = F([0=>1,1=>2,2=>0,-,-,-,-,-],[o0,o1,o2,-,-,-,-,-])
+    -- 这样的F要怎么构造呢？
+    -- 左边：输入0，得到o1
+    --      输入0，得到o2
+    --      输入0，得到o0
+    -- 右边：输入0。可以这样构造：先通过第一个参数映射，0就变成了1；再将1代入第二个参数（是一个向量）就得到了o1。
+    --      这样，输入1，得到2,再得到o2
+    --      输入2，得到0，再得到o0
+    -- 刚好左右相等，这样构造就可以了。
+    -- 先通过第一个参数映射，0就变成了1；再将1代入第二个参数：这个过程写成lean就是(a2.orient ∘ a1.permute)
+    -- 因为lean里面这个复合映射(a2.orient ∘ a1.permute)表示先通过a1.permute映射，再通过a2.orient映射。
+
 
   def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
     fun a1 a2 => {
       permute := a2.permute * a1.permute -- *先映射右，再映射左。 -- 为什么呢？看例子testP1,testP2
       orient := (a2.orient ∘ a1.permute) + a1.orient -- 复合函数计算顺序:右→左
-      -- todo 这里举例说明一下
     }
 
   -- 将上面替换成下面的等价写法，好处：1.可以到处写*，来代替ps_mul，lean系统会自动匹配到这个*的类型用法。
@@ -502,7 +565,6 @@ section FACE_TURNS
   def M_UD : RubiksSuperType :=
     ⟨
       {permute := 1, orient := 0 },
-      -- todo -- 5,8,7,6 == [4,7,6,5]
       {permute := cyclePieces [4,7,6,5], orient := Orient 12 2 [(4, 1), (5, 1), (6, 1), (7, 1)]}
     ⟩
   -- #eval M_UD^4 = Solved
@@ -736,7 +798,7 @@ section RubiksGroup
       --   simp only [ne_eq, Finset.coe_insert, Finset.coe_singleton]
       -- · exact h2
       ---
-      -- todo -- 下面一长串提取出来吧：
+      -- 下面一长串提取出来吧：
       . apply Finset.sum_bijective
         . exact a.1.permute.bijective
         . intro i
