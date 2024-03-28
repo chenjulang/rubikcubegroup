@@ -342,31 +342,25 @@ end RubiksSuperGroup
 
 -- 下面开始为魔方的6个基本操作的定义做铺垫：
 
+-- List.lookup用法,换句话说就是找匹配第一个分量，如果匹配到返回存在，还有该项的第二个分量：
+#eval List.lookup 3 [(1, 2), (3, 4), (3, 5)] = some 4
+#eval List.lookup 2 [(1, 2), (3, 4), (3, 5)] = none
+
+
 /- Creates an orientation function given a list of input-output pairs
 (with 0 for anything left unspecified). -/
-/-- 为了方便定义每个操作的方向数增加量orient,然后定义的这两个东西： -/
--- todo
+/-- 为了方便定义每个操作的"方向数增加量"orient,然后定义的这两个东西： -/
 def Orient
 (p o : ℕ+)
 (pairs : List ((Fin p) × (Fin o)))
 : Fin p → Fin o :=
   fun i =>
     match pairs.lookup i with
-    -- pairs.lookup用法：
-      -- lookup 3 [(1, 2), (3, 4), (3, 5)] = some 4
-      -- lookup 2 [(1, 2), (3, 4), (3, 5)] = none
     | some x => x
     | none => 0
 -- 举例说明：
--- #eval Orient 3 2 [(0, 1), (1, 0), (2, 1)] -- ![1, 0, 1]
--- #eval Orient 3 2 [(0, 1), (1, 0), (3, 1)] -- ![1, 0, 0]
--- 换句话说，首先需要我们提供一组这样的数组：每一项形式为(Fin p)×(Fin o)，也就是都是2个分量的向量。
--- 函数结果得到一个数组，有3项，每一项结果x满足：0 <= x < 2 。
--- 得到的数组的每一项值是这样决定的：
-  -- 如果索引能遍历找每一项的第一个分量，找到相同的值，则返回第二个分量，
-  -- 反之遍历找每一项的第一个分量都找不到，直接返回0。
--- #eval Orient 8 3 [(0, 1), (1, 0), (2, 2), (3, 2), (4, 0), (5, 1), (6, 0), (7, 0)]
-  -- 比如为了创建这个向量：![1, 0, 2, 2, 0, 1, 0, 0]， 可以上面这样输入参数。8项分量，每一项为Fin 3,即小于3。
+-- 比如为了创建这个向量：![1, 0, 2, 2, 0, 1, 0, 0]，这样输入参数。8项分量，每一项为Fin 3,即小于3。
+-- #eval Orient 8 3 [(0, 1), (1, 0), (2, 2), (3, 2), (4, 0), (5, 1), (6, 0), (7, 0)] -- ![1, 0, 2, 2, 0, 1, 0, 0]
 
 
 def Solved
@@ -383,16 +377,6 @@ where
 
 @[simp]
 lemma Solved_eq_1: Solved = 1 :=by rfl
-
--- def Solved2
--- : RubiksSuperType → Prop :=
---   fun x => (x.1.permute=1 ∧ x.2.permute=1 ∧ x.1.orient=0 ∧ x.2.orient=0)
-
--- inductive Solved3
--- : RubiksSuperType → Prop
--- where
---   | Solved : Solved3 Solved
---   | AllSatisfy :  ∀x : RubiksSuperType, (x.1.permute=1 ∧ x.2.permute=1 ∧ x.1.orient=0 ∧ x.2.orient=0) → Solved3 x
 
 @[simp]
 lemma Solved_iff
@@ -428,30 +412,23 @@ lemma Solved_iff
 
 section FACE_TURNS
 
-  /- These two functions (from kendfrey's repository) create a cycle permutation,
-  which is useful for defining the rotation of any given face, as seen directly below. -/
-  -- 为了方便定义每个操作的排列permute,然后定义的这两个东西：
+  -- 为了方便定义每个操作的“位置变化”：排列permute,然后定义的这个东西：
 
-  -- def cycleImpl {α : Type*} [DecidableEq α]
-  -- : α → List α → Perm α
-  --   | _, [] => 1 -- “_”指的是第一个元素。可以写成a吗???
-  --   | a, (x :: xs) => (cycleImpl x xs) * (swap a x)  -- “a”指的是第一个参数
-
-  -- def cyclePieces {α : Type*} [DecidableEq α] -- 这里如何文字上理解也是个问题，输入旧位置，得到新位置？
-  -- : List α → Perm α
-  --   | [] => 1
-  --   | (x :: xs) => cycleImpl x xs
-
-  def cyclePieces {α : Type*} [DecidableEq α] -- 这里如何文字上理解也是个问题，输入旧位置，得到新位置？
-  : List α → Perm α
-  := fun list =>  List.formPerm list
-
-
+  -- todo
   -- -- 只用formPerm可以办到，但是输入时要转一下脑筋：
   -- def lista : List (Fin 8) := [0,3,2,1] -- 这样写得到的Perm意思是：
   --   --[0,3,2,1]表示： index输入0，得到3；输入3，得到2；输入2，得到1；输入1，得到0
   -- -- 所以要表示[3,0,1,2]， 需要输入[0,3,2,1]
   -- #eval List.formPerm lista
+
+  /- These two functions (from kendfrey's repository) create a cycle permutation,
+  which is useful for defining the rotation of any given face, as seen directly below. -/
+  def cyclePieces {α : Type*} [DecidableEq α]
+  : List α → Perm α
+  := fun list =>  List.formPerm list
+
+
+
 
 
   -- 举例说明Perm之间的乘法：，从右往左：
