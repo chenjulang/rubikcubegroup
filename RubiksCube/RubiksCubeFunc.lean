@@ -217,49 +217,23 @@ section RubiksSuperGroup
   def ps_inv {p o : ℕ+}
   : PieceState p o → PieceState p o
   :=
-    fun ps =>
+    fun A =>
     {
-      permute := ps.permute⁻¹
-      -- 0 1 2
-      -- 举例:如果原方向增加量orient为(1,2,...)，那么逆操作应该是(-1,-2,...) , 也就是(+2,+1,...)
-      -- 比如 a:F {
-      --  permute: Perm (Fin 8) := (1=>2,2=>6,3,4,5=>1,6=>5,7,8) -- 有8项
-      --  orient : Vector (Fin 3) 8 := (2,1,0,0,1,2,0,0) -- 有8项
-      --}
-      -- 那么 -a:F' {
-      --  permute: Perm (Fin 8) := (1<=2,2<=6,3,4,5<=1,6<=5,7,8) -- 有8项
-      --  orient : Vector (Fin 3) 8 := (2,1,0,0,1,2,0,0) -- 有8项
-      --}
-      --
-      -- 关键是经过a操作增量后，再经过a'增量，应该为0
-      -- 也就是需要满足 ps_mul a a' = {orient:0}
-      -- a'.orient ∘ a.permute.invFun + a.orient = 0
-      -- 因此 a'.orient ∘ a.permute.invFun = -a.orient
-      --  a'.orient = (-a.orient) ∘ a.permute
-      -- orient := (-ps.orient) ∘ ps.permute
-      -- orient := fun x => - ps.orient (ps.permute⁻¹ x)
-
-      -- 满足结合律的运算定义是这样的：(a1.orient ∘ a2.permute.invFun) + a2.orient
-      -- 要满足ps_mul a a' = {orient:0}
-      -- (a.orient ∘ a'.permute.invFun) + a'.orient  = 0
-      -- a'.orient = -(a.orient ∘ a'.permute.invFun)
-      -- orient := -(ps.orient ∘ ps.permute⁻¹.invFun)
-
-      -- 要满足ps_mul a a' = {orient:0}
-      -- (a'.orient ∘ a.permute) + a.orient = 0
-      -- (a'.orient ∘ a.permute) = -a.orient
-      -- (a'.orient ∘ a.permute) i = (-a.orient) i
-      -- a'.orient ∘ (a.permute i) = (-a.orient) i
-      -- 比如ps.permute = (第1=>2,2=>3,3=>1)
-      -- i取第1，则(a.permute i)就是第2
-        -- 因此 a'.orient的第2项 = (-a.orient)的第1项
-        -- 要想找到 a'.orient的第1项，则反推需要(a.permute i)就是第1，继续反推i取第3才对
-      -- 正向检验： i取第3，则(a.permute i)就是第1
-        -- a'.orient的第1项 = (-a.orient)的第3项
-        -- a'.orient的第n项 = (-a.orient)的第(ps.permute.invFun n)项
-      orient := fun x => (- ps.orient) (ps.permute⁻¹ x)
+      permute := A.permute⁻¹
+      orient := fun x => (- A.orient) (A.permute⁻¹ x)
+      -- 问题是：如何定义这个PieceState对象，使得A*B = 1, 也就是(ps_mul A ?）.orient = 0 呢？
+      -- 解开(ps_mul A ?）.orient 看一下：
+      -- (ps_mul A ?）.orient =  (a2.orient ∘ A.permute) + A.orient
+      -- 如果要上面这个等于0，只需要满足：(a2.orient ∘ A.permute) + A.orient = 0
+      -- 只需要满足 ：(a2.orient ∘ A.permute)  = -A.orient
+      -- 只需要满足 ：(a2.orient ∘ A.permute) x = (-A.orient) x
+      -- 只需要满足 ：a2.orient (A.permute x) = (-A.orient) x
+      -- a2.orient y = (-A.orient) x ; y= (A.permute x)
+      -- A.permute⁻¹ y = A.permute⁻¹ (A.permute x) = x
+      -- 只需要满足 ：a2.orient (y) = (-A.orient) (A.permute⁻¹ y)
     }
 
+  -- 当然，上面的推理过程也是可以证明的，来看看lean是怎么证明的，截然不同的思路：
   /- 证明右逆的定义合理性：-/
   @[simp]
   lemma ps_mul_left_inv {p o : ℕ+} :
