@@ -709,7 +709,6 @@ section RubiksGroup
   -- #eval sign (permtest1 * permtest2) -- 1
 
 
-  --todo
 
   /-- 因为是从这个定义ValidCube，构建一个RubiksSuperGroup的子群，然后再分析如何与Reachable（可操作到达）联系起来。
     所以首先证明群所需的性质之一：封闭性  -/
@@ -751,7 +750,6 @@ section RubiksGroup
       apply mul_mem'_permuteRemainsSum_2
       exact h2
     }
-    --todo
     {-- 乘积的角块方向数增加量orient各分量求和为0（mod 3）
       have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8,9,10,11} a.2.orient = 0
         := by apply hav.right.right
@@ -775,7 +773,7 @@ section RubiksGroup
 --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
 
   /-- 因为是从这个定义ValidCube，构建一个RubiksSuperGroup的子群，然后再分析如何与Reachable（可操作到达）联系起来。
-    所以首先证明群所需的性质之一：父群中的单位元也在该子群中。  -/
+    所以首先证明群所需的性质之一：父群中的单位元也在该子群中；换句话说，子群里有单位元。  -/
   @[simp]
   lemma one_mem'
   : 1 ∈ ValidCube
@@ -788,56 +786,80 @@ section RubiksGroup
       { apply Eq.refl }
     }
 
-  -- todo
+  -- -- -- sign映射是同态的，简单举例：
+  -- def permtest1: Perm (Fin 8) := (swap 0 1)
+  -- #eval sign permtest1 -- -1
+  -- #eval (sign permtest1⁻¹) -- -1
+  -- #eval (sign permtest1)⁻¹ -- -1
 
+
+  -- todo
+  /-- 因为是从这个定义ValidCube，构建一个RubiksSuperGroup的子群，然后再分析如何与Reachable（可操作到达）联系起来。
+    所以首先证明群所需的性质之一：父群中的逆函数生成的元素也在该子群中；换句话说，子群中每个元素都有逆元素。  -/
   @[simp]
   theorem inv_mem' {x : RubiksSuperType}
-  : x∈ValidCube → x⁻¹ ∈ ValidCube
+  :x ∈ ValidCube
+  →
+  x⁻¹ ∈ ValidCube
   := by
     intro hxv
-    simp [ValidCube, PieceState.inv_def, ps_inv]
-    -- repeat' apply And.intro
+    simp only [ValidCube]
+    simp only [Set.mem_setOf_eq]
+    simp only [Prod.fst_inv]
+    simp only [Prod.snd_inv]
+    simp only [PieceState.inv_def]
+    simp only [ps_inv]
     apply And.intro
-    { apply hxv.left }
+    {
+      simp only [map_inv] -- 举例
+      simp only [Int.units_inv_eq_self] -- 因为sign映射成整数{1,-1}, {1,-1}都满足逆是本身。
+      apply hxv.left
+    }
     apply And.intro
     { have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} x.1.orient = 0
         := by apply hxv.right.left
-      -- 和“mul_mem'”一样的问题，很容易看出来，不知道怎么写：
       apply mul_mem'_permuteRemainsSum_2
+      simp only [Pi.neg_apply]
+      simp only [Finset.sum_neg_distrib]
+      simp only [neg_eq_zero]
       exact h1
     }
     {
       have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8,9,10,11} x.2.orient = 0
         := by apply hxv.right.right
-      -- 和“mul_mem'”一样的问题，很容易看出来，不知道怎么写：
       apply mul_mem'_permuteRemainsSum
+      simp only [Pi.neg_apply]
+      simp only [Finset.sum_neg_distrib]
+      simp only [neg_eq_zero]
       exact h1
     }
 
 
-  /- Defining the subgroup of valid Rubik's cube positions. -/
+  /-- 因为是从这个定义ValidCube，构建一个RubiksSuperGroup的子群，然后再分析如何与Reachable（可操作到达）联系起来。
+    所以首先证明群所需的性质都准备好了，正式定义这个群  -/
   instance RubiksGroup : Subgroup RubiksSuperType := {
-    carrier := ValidCube
+    carrier := ValidCube -- 提供一个RubiksSuperType群的子集合ValidCube。
     mul_mem' := mul_mem' -- 封闭性质
     one_mem' := one_mem' -- 单位1元素
-    inv_mem' := inv_mem' -- 逆元素
-    -- 结合律不用证明，父群已经证明。
-    -- 左乘1=本身不用证明
-    -- 右乘1=本身不用证明
-    -- 左乘逆=1不用证明
-    -- 右乘逆=1不用证明
+    inv_mem' := inv_mem' -- 沿用父群的逆函数定义，需要证明这样定义产生的逆元素也在提供的子集合ValidCube中。
+    -- 结合律的性质，父群已经证明。
+    -- 左乘单位元=本身的性质，已经证明
+    -- 右乘单位元=本身，已经证明
+    -- 左乘逆函数产生的逆元=单位元，已经证明
+    -- 右乘逆函数产生的逆元=单位元，已经证明
   }
 
 
+  /-- 这个就是直觉的魔方状态集合定义。后面将用一个定理证明这两个定义的集合是等价的。 -/
   /- Defining the intuitively valid set of Rubik's cube positions. -/
   inductive Reachable
   : RubiksSuperType → Prop
   where
-    | Solved : Reachable Solved
+    | Solved : Reachable Solved -- 已还原状态"是Reachable的"
+    -- 下面是3种方法，从定义上构造“xx是Reachable的”：
     | FT : ∀x : RubiksSuperType, FaceTurn x → Reachable x
     | mul : ∀x y : RubiksSuperType, Reachable x → Reachable y → Reachable (x * y)
     | inv :  ∀x : RubiksSuperType, Reachable x → Reachable x⁻¹
-    -- | split : ∀x y : RubiksSuperType, Reachable (x * y) → Reachable x → Reachable y -- 这个其实可以被推出
 
   def Reachable.split_fst: ∀x y : RubiksSuperType, Reachable (x * y) → Reachable y → Reachable x
   := by
