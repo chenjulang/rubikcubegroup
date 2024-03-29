@@ -2883,18 +2883,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     exact hvx
     done
 
--- todo -- 这里出错了，如果引入M_UD，就无法保证sign同号。因为4循环相当于3次2轮换，符号变了。
--- 所以必须找到M_UD以外的方法代替M_UD操作。
-def testP1: Perm (Fin 8) := List.formPerm [4, 7, 6, 5]
-#eval sign testP1 -- -1
-
--- lemma testSignM_UD: sign M_UD.1.permute = sign M_UD.2.permute
--- := by
---   simp only [M_UD]
---   simp only [cyclePieces]
---   sorry
---   -- decide
-
 -- 魔方第二基本定理的左推右部分：done
 theorem reachable_valid
 : ∀x : RubiksSuperType, Reachable x → x ∈ ValidCube
@@ -2910,15 +2898,14 @@ theorem reachable_valid
         { apply Eq.refl }
         { apply Eq.refl } }
   | FT c hc =>
-    -- sorry
-    --这里能证明，但是运行很慢：
     cases hc with
     | _ =>
         simp only [ValidCube]
         apply And.intro
         {
+          --这里能证明，但是运行有点慢，要一分钟左右：
           -- decide
-          -- apply Eq.refl
+          sorry
         }
         { apply And.intro
           { apply Eq.refl }
