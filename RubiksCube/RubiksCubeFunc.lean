@@ -662,6 +662,25 @@ section RubiksGroup
   }
 
 
+    /-- 证明8个分量如果求和为0（模3），随意排列组合后，求和还是为0（模3）。 -/
+    @[simp]
+    lemma mul_mem'_permuteRemainsSum_2
+    (apermute : Perm (Fin 8))
+    (borient : (Fin 8) → Fin 3)
+    (h2: Finset.sum {0, 1, 2,3,4,5,6,7} borient = 0)
+    : (Finset.sum {0, 1, 2,3,4,5,6,7} fun x ↦ borient (apermute x)) = 0
+    := by
+      have h1:= Equiv.sum_comp apermute borient -- 常见错误：因为没有输入足够的参数 typeclass instance problem is stuck, it is often due to metavariables
+      have sumEq2 : ∑ i : Fin 8, borient (apermute i)
+        = ∑ x in {0, 1, 2,3,4,5,6,7}, borient (apermute x) := rfl
+      rw [← sumEq2]
+      clear sumEq2
+      rw [h1]
+      clear h1
+      exact h2
+      done
+
+
     /-- 证明12个分量如果求和为0（模2），随意排列组合后，求和还是为0（模2）。 -/
     @[simp]
     lemma mul_mem'_permuteRemainsSum
@@ -715,7 +734,7 @@ section RubiksGroup
       exact Mathlib.Tactic.LinearCombination.mul_pf h2 h1
     }
     apply And.intro
-    {-- 乘积棱块方向数增加量orient各分量求和为0（mod 2）
+    {-- 乘积的棱块方向数增加量orient各分量求和为0（mod 2）
       have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} a.1.orient = 0
         := by apply hav.right.left
       have h2 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} b.1.orient = 0
@@ -723,107 +742,26 @@ section RubiksGroup
       simp only [Prod.fst_mul]
       simp only [PieceState.mul_def]
       simp only [ps_mul]
-      simp only [Finset.mem_singleton, Finset.mem_insert, zero_ne_one, false_or, invFun_as_coe,
-        Pi.add_apply, Function.comp_apply]
+      simp only [Pi.add_apply]
+      simp only [Function.comp_apply]
       simp only [Finset.sum_add_distrib]
       rw [h1]
       clear h1
       simp only [add_zero]
-      trans Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} b.1.orient
-      -- 下面一长串提取出来吧：
-      . apply Finset.sum_bijective
-        . exact a.1.permute.bijective
-        . intro i
-          simp only [Finset.mem_insert, Finset.mem_singleton]
-          have hhh (x:ℕ): x < 8 ↔ x = 0 ∨ x = 1 ∨ x = 2 ∨ x = 3 ∨ x = 4 ∨ x = 5 ∨ x = 6 ∨  x = 7
-            := by
-            obtain _ | _ | _ | _ | _ | _ | _ | _ | _ := x <;> simp
-            -- change 8 ≤ n + 8
-            exact le_add_self
-            done
-          have hhh1 : ∀ x : Fin 8, x = 0 ∨ x = 1 ∨ x = 2 ∨ x = 3 ∨ x = 4 ∨ x = 5 ∨ x = 6 ∨  x = 7
-            := by
-            intro x
-            fin_cases x <;> decide
-          constructor
-          · intro h
-            cases h with
-            | inl h =>
-              have h0 : a.1.permute i = a.1.permute 0
-                := by exact congrArg (a.1.permute) h
-              rw [h0]
-              clear h0
-              have lem1 := hhh1 (a.1.permute 0)
-              exact lem1
-            | inr h => cases h with
-            | inl h =>
-              have h0 : a.1.permute i = a.1.permute 1
-                := by exact congrArg (a.1.permute) h
-              rw [h0]
-              clear h0
-              have lem1 := hhh1 (a.1.permute 1)
-              exact lem1
-            | inr h => cases h with
-            | inl h =>
-              have h0 : a.1.permute i = a.1.permute 2
-                := by exact congrArg (a.1.permute) h
-              rw [h0]
-              clear h0
-              have lem1 := hhh1 (a.1.permute 2)
-              exact lem1
-            | inr h => cases h with
-            | inl h =>
-              have h0 : a.1.permute i = a.1.permute 3
-                := by exact congrArg (a.1.permute) h
-              rw [h0]
-              clear h0
-              have lem1 := hhh1 (a.1.permute 3)
-              exact lem1
-            | inr h => cases h with
-            | inl h =>
-              have h0 : a.1.permute i = a.1.permute 4
-                := by exact congrArg (a.1.permute) h
-              rw [h0]
-              clear h0
-              have lem1 := hhh1 (a.1.permute 4)
-              exact lem1
-            | inr h => cases h with
-            | inl h =>
-              have h0 : a.1.permute i = a.1.permute 5
-                := by exact congrArg (a.1.permute) h
-              rw [h0]
-              clear h0
-              have lem1 := hhh1 (a.1.permute 5)
-              exact lem1
-            | inr h => cases h with
-            | inl h =>
-              have h0 : a.1.permute i = a.1.permute 6
-                := by exact congrArg (a.1.permute) h
-              rw [h0]
-              clear h0
-              have lem1 := hhh1 (a.1.permute 6)
-              exact lem1
-            | inr h =>
-              have h0 : a.1.permute i = a.1.permute 7
-                := by exact congrArg (a.1.permute) h
-              rw [h0]
-              clear h0
-              have lem1 := hhh1 (a.1.permute 7)
-              exact lem1
-          · exact fun a ↦ hhh1 i
-        · exact fun i a_1 ↦ rfl
-      · exact h2
+      apply mul_mem'_permuteRemainsSum_2
+      exact h2
     }
-    {
+    --todo
+    {-- 乘积的角块方向数增加量orient各分量求和为0（mod 3）
       have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8,9,10,11} a.2.orient = 0
         := by apply hav.right.right
       have h2 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8,9,10,11} b.2.orient = 0
         := by apply hbv.right.right
-      simp only [Finset.mem_singleton, Finset.mem_insert, zero_ne_one, false_or, Prod.snd_mul,
-        PieceState.mul_def]
+      simp only [Prod.snd_mul]
+      simp only [PieceState.mul_def]
       simp only [ps_mul]
-      simp only [Finset.mem_singleton, Finset.mem_insert, zero_ne_one, false_or, invFun_as_coe,
-        Pi.add_apply, Function.comp_apply]
+      simp only [Pi.add_apply]
+      simp only [Function.comp_apply]
       simp only [Finset.sum_add_distrib]
       rw [h1]
       clear h1
