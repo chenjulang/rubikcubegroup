@@ -55,23 +55,20 @@ section ValidityChecks
       done
 
   -- todo
-  /-- 单个角块旋转了次。不符合非直觉定义。 -/
+  /-- 单个角块旋转了1次。不符合非直觉定义。 -/
   @[simp]
   lemma CornerTwistInvalid : CornerTwist ∉ ValidCube
   := by
       simp only [CornerTwist, ValidCube]
-      simp only [Fin.zero_eta, imp_false, Finset.mem_singleton, Finset.mem_insert, zero_ne_one,
-        false_or, Set.mem_setOf_eq, map_one, forall_true_left, Pi.zero_apply, Finset.sum_const_zero,
-        and_true, true_and]
-      exact Fin.pos_iff_ne_zero.mp Nat.le.refl
+      simp only [Set.mem_setOf_eq]
+      decide
       done
 
   @[simp]
   lemma EdgeFlipInvalid : EdgeFlip ∉ ValidCube :=
     by
       simp only [EdgeFlip, ValidCube]
-      simp only [Set.mem_setOf_eq, map_one, Pi.zero_apply, Finset.sum_const_zero, true_and]
-      exact Fin.exists_succ_eq.mp (Exists.intro { val := Nat.zero, isLt := Nat.le.refl } rfl)
+      decide
       done
 
 end ValidityChecks
@@ -95,8 +92,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   section rubikCubeFormula
 
-  def G1Perm_element : RubiksSuperType
-  := R' * D * D * R * B' * U * U * B
+    def G1Perm_element : RubiksSuperType
+    := R' * D * D * R * B' * U * U * B -- 仿佛是两个共轭的交换子，先不深究。
   /-- g1:
   方向：UFR和DBL以外的块的方向不变。
   位置：UFR和DBL以外的块的位置不变。
@@ -107,17 +104,18 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- #eval G1Perm
   --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 2, 0, 0, 0, 0, 0, 1] },
   --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
-  def G2Perm_element1 : RubiksSuperType
-  := L*F*R'*F'*L'
-  def G2Perm_element2 : RubiksSuperType
-  := U^2*R*U*R*U'*R^2*U^2
+    def G2Perm_element1 : RubiksSuperType
+    := L*F*R'*F'*L'
+    def G2Perm_element2 : RubiksSuperType
+    := U^2*R*U*R*U'*R^2*U^2
   /-- 可以保持其他块的方向和位置，只改变UF和UR的方向，分别是UF的方向+1，UR的方向的方向+1。-/
   def G2Perm : RubiksSuperType
   := G2Perm_element1 * G2Perm_element2 * R
   -- #eval G2Perm
   --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
   --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
-  -- 如何定义G2的“L,R,B”变式呢？直接推算，还是写一个函数映射呢？
+
+ -- 如何定义G2的“L,R,B”变式呢？直接推算，还是写一个函数映射呢？
     -- 先写3个映射，然后列表映射即可。
     def VariantFaceTurn_L : RubiksSuperType → RubiksSuperType :=
     fun x =>
@@ -184,13 +182,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       else if x = F' then B'
       else if x = B' then F'
       else 1
-
-    -- def G1Perm_L : Array RubiksSuperType := #[R' ,D ,D ,R ,B' ,U ,U ,B,R' ,D ,D ,R ,B' ,U ,U ,B]
-    -- -- #eval toString $ G1Perm_L.toList.toArray.toList
-    -- -- #eval toString $ (G1Perm_L.map VariantFaceTurn_L).toList
-    -- #eval (G1Perm_L.map VariantFaceTurn_L).toList.prod --注意，这样toList不会去掉重复？
-    -- -- ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 1, 0] },
-    -- --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
 
     -- def testG1Perm_L : List RubiksSuperType := [R' ,D ,D ,R ,B' ,U ,U ,B,R' ,D ,D ,R ,B' ,U ,U ,B]
     def VariantFaceTurn_L_List : (l:List RubiksSuperType) → RubiksSuperType
@@ -1780,13 +1771,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     apply And.intro
     · simp only
       ext
-      -- todo
       {
-        -- h2
         have prod_map_change: List.prod (List.map permFin8_to_RubiksSuperType threeList)
         = permFin8_to_RubiksSuperType (List.prod threeList)
           := by
           simp only [permFin8_to_RubiksSuperType]
+          -- 很明显
           --???
           sorry
         rw [prod_map_change]
@@ -1801,6 +1791,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         = permFin8_to_RubiksSuperType (List.prod threeList)
           := by
           simp only [permFin8_to_RubiksSuperType]
+          -- 很明显
           --???
           sorry
         rw [prod_map_change]
@@ -1875,13 +1866,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       ext
       {
         simp only [Prod.fst_mul, PieceState.mul_def]
+        -- 明显
         sorry
-        --???
       }
       {
         simp only [Prod.snd_mul, PieceState.mul_def]
+        -- 明显
         sorry
-        --???
       }
     apply And.intro
     · exact rfl
@@ -2090,8 +2081,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
     decide
 
-  #check closure_three_cycles_eq_alternating
-
 
   /-- 如果状态x的棱块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
   lemma lemma32
@@ -2108,7 +2097,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     let p1 := List.formPerm ([0,3,1]:(List (Fin 12))) -- (1,4,2) == 这里的[0,3,1]
     let p2 := List.formPerm ([0,1,5]:(List (Fin 12))) -- {1,2,6} == 这里的[0,1,5]
     let p3 := List.formPerm ([0,6,11]:(List (Fin 12))) -- {1,7,12} == 这里的[0,6,11]
-
     by_cases ha0:x.2.permute = p1
       -- 执行：G3Perm
       -- 即可完成。此时制造一个RubiksSuperType
@@ -2240,24 +2228,22 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     sorry
 
 
-  -- 检验一下
-  def perm_Test001 := List.formPerm ([0,6,11]:(List (Fin 12)))
-  -- #eval perm_Test001
-  def solutionTest001 :=  (conjugate_formula (U2*L2*U2) (conjugate_formula B (VariantFaceTurn_R_List G3Perm_List)))
-  -- #eval solutionTest001
-  def rubik_test001:RubiksSuperType := {
-        fst := {
-          permute := 1
-          orient := 0
-        }
-        snd := {
-          permute := perm_Test001
-          orient := 0
-        }
-      }
-  #eval 1= rubik_test001 * solutionTest001
-
-
+  -- -- 检验一下
+  -- def perm_Test001 := List.formPerm ([0,6,11]:(List (Fin 12)))
+  -- -- #eval perm_Test001
+  -- def solutionTest001 :=  (conjugate_formula (U2*L2*U2) (conjugate_formula B (VariantFaceTurn_R_List G3Perm_List)))
+  -- -- #eval solutionTest001
+  -- def rubik_test001:RubiksSuperType := {
+  --       fst := {
+  --         permute := 1
+  --         orient := 0
+  --       }
+  --       snd := {
+  --         permute := perm_Test001
+  --         orient := 0
+  --       }
+  --     }
+  -- #eval 1= rubik_test001 * solutionTest001
 
 
   -- 右推左的限制条件1使得只能选这2种情况进行分类讨论。
@@ -2358,8 +2344,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     · exact unChanged3.2.2.symm
     · exact unChanged3.2.1.symm
     done
-
-
 
 
   -- 对于任意g状态棱块位置置换属于偶置换的状态，
@@ -2532,7 +2516,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- //
     have h3_2_1 : (x * h1_2 * h2_3).1.permute ∈ alternatingGroup (Fin 8)
       := by
-      -- simp [h2_7.1.symm,h1_6.1.symm,mem_alternatingGroup.2,h3_2.1]
       rw [h2_7.1.symm,h1_6.1.symm]
       apply mem_alternatingGroup.2
       exact h3_2.1
@@ -2616,7 +2599,6 @@ theorem reachable_valid
 : ∀x : RubiksSuperType, Reachable x → x ∈ ValidCube
 := by
   intro x hrx
-  -- cases hrx with
   induction hrx with
   | Solved =>
       simp only [Solved, ValidCube]
@@ -2643,10 +2625,8 @@ theorem reachable_valid
       -- *** 精华在这里，前面写了几百行，就是为了这几行：
       apply RubiksGroup.mul_mem' -- 反推一步，两个元素都是
       simp only [Subsemigroup.mem_carrier, Submonoid.mem_toSubsemigroup, Subgroup.mem_toSubmonoid]
-      exact a_ih
-      exact a_ih_1
-      -- method 2:
-      -- all_goals assumption
+      · exact a_ih
+      · exact a_ih_1
   | inv c hc hc2 =>
     simp only [Solved, ValidCube]
     simp only [Set.mem_setOf_eq, Prod.fst_inv, PieceState.inv_def, Prod.snd_inv]
@@ -2755,18 +2735,17 @@ theorem RubikCube_BasicRule_2
   done
 
 
-
-def swaptest :Perm (Fin 8) := (swap 1 2) * (swap 2 6) * (swap 6 5)*(swap 1 2)*(swap 2 6)*(swap 6 5)*(swap 1 2)*
- (swap 2 6) * (swap 6 5) * (swap 1 2) * (swap 2 6) * (swap 6 5)
-lemma computeSwapTest (i:Fin 8): swaptest i = i
-  := by fin_cases i <;> rfl
-lemma SwapDef (i: Fin 8): ((swap 1 2)
-      ((swap 2 6)
-        ((swap 6 5)
-          ((swap 1 2)
-            ((swap 2 6)
-              ((swap 6 5) ((swap 1 2) ((swap 2 6) ((swap 6 5) ((swap 1 2) ((swap 2 6) ((swap 6 5) i)))))))))))) = i
-  := by fin_cases i <;> rfl
+-- def swaptest :Perm (Fin 8) := (swap 1 2) * (swap 2 6) * (swap 6 5)*(swap 1 2)*(swap 2 6)*(swap 6 5)*(swap 1 2)*
+--  (swap 2 6) * (swap 6 5) * (swap 1 2) * (swap 2 6) * (swap 6 5)
+-- lemma computeSwapTest (i:Fin 8): swaptest i = i
+--   := by fin_cases i <;> rfl
+-- lemma SwapDef (i: Fin 8): ((swap 1 2)
+--       ((swap 2 6)
+--         ((swap 6 5)
+--           ((swap 1 2)
+--             ((swap 2 6)
+--               ((swap 6 5) ((swap 1 2) ((swap 2 6) ((swap 6 5) ((swap 1 2) ((swap 2 6) ((swap 6 5) i)))))))))))) = i
+--   := by fin_cases i <;> rfl
 
 @[simp]
 lemma four_rs_eq_solved
@@ -2811,7 +2790,6 @@ IsSolved (R * R * R * R)
   rw [h1]
   exact solved_is_solved
 
--- #check Equiv.Perm.permGroup.mul_assoc
 
 
 end RubikCube_BasicRule_2
