@@ -661,7 +661,7 @@ section RubiksGroup
       Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) c.snd.orient = 0
   }
 
-
+    -- 用于mul_mem'，inv_mem'的证明
     /-- 证明8个分量如果求和为0（模3），随意排列组合后，求和还是为0（模3）。 -/
     @[simp]
     lemma mul_mem'_permuteRemainsSum_2
@@ -680,7 +680,7 @@ section RubiksGroup
       exact h2
       done
 
-
+    -- 用于mul_mem'的证明
     /-- 证明12个分量如果求和为0（模2），随意排列组合后，求和还是为0（模2）。 -/
     @[simp]
     lemma mul_mem'_permuteRemainsSum
@@ -711,10 +711,10 @@ section RubiksGroup
 
   --todo
 
-  /-- 因为是从这个定义ValidCube，构建一个群，然后再分析如何与Reachable（可操作到达）联系起来。
+  /-- 因为是从这个定义ValidCube，构建一个RubiksSuperGroup的子群，然后再分析如何与Reachable（可操作到达）联系起来。
     所以首先证明群所需的性质之一：封闭性  -/
   @[simp]
-  lemma mul_mem' {a b : RubiksSuperType}
+  theorem mul_mem' {a b : RubiksSuperType}
   : a ∈ ValidCube → b ∈ ValidCube → a * b ∈ ValidCube
   := by
     intro hav hbv
@@ -770,8 +770,12 @@ section RubiksGroup
       exact h2
     }
 
+  -- #eval (1: RubiksSuperType)
+--   { permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
+--  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
 
-
+  /-- 因为是从这个定义ValidCube，构建一个RubiksSuperGroup的子群，然后再分析如何与Reachable（可操作到达）联系起来。
+    所以首先证明群所需的性质之一：父群中的单位元也在该子群中。  -/
   @[simp]
   lemma one_mem'
   : 1 ∈ ValidCube
@@ -784,27 +788,10 @@ section RubiksGroup
       { apply Eq.refl }
     }
 
+  -- todo
 
   @[simp]
-  lemma inv_mem'_permuteRemainsSum
-    (apermute : Perm (Fin 8))
-    (borient : (Fin 8) → Fin 3)
-    (h2: Finset.sum {0, 1, 2,3,4,5,6,7} borient = 0)
-    : (Finset.sum {0, 1, 2,3,4,5,6,7} fun x ↦ borient (apermute x)) = 0
-    := by
-      have h1:= Equiv.sum_comp apermute borient -- 常见错误：因为没有输入足够的参数 typeclass instance problem is stuck, it is often due to metavariables
-      have sumEq2 : ∑ i : Fin 8, borient (apermute i) = ∑ x in {0, 1, 2,3,4,5,6,7}, borient (apermute x) := rfl
-      rw [← sumEq2]
-      clear sumEq2
-      rw [h1]
-      clear h1
-      have sumEq1 : ∑ i : Fin 8, borient i = Finset.sum {0, 1, 2,3,4,5,6,7} borient := rfl
-      rw [sumEq1]
-      exact h2
-      done
-
-  @[simp]
-  lemma inv_mem' {x : RubiksSuperType}
+  theorem inv_mem' {x : RubiksSuperType}
   : x∈ValidCube → x⁻¹ ∈ ValidCube
   := by
     intro hxv
@@ -816,7 +803,7 @@ section RubiksGroup
     { have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} x.1.orient = 0
         := by apply hxv.right.left
       -- 和“mul_mem'”一样的问题，很容易看出来，不知道怎么写：
-      apply inv_mem'_permuteRemainsSum
+      apply mul_mem'_permuteRemainsSum_2
       exact h1
     }
     {
