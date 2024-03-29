@@ -373,7 +373,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- #eval G3Perm
   --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
   --  { permute := ![1, 3, 2, 0, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
-
+  def G3Perm_List:List RubiksSuperType := [R,U',R,U,R,U,R,U',R',U',R,R]
 
   /-- 创建一阶交换子公式。不强制要求：r1影响到的块的集合A，与r2影响到的块的集合B，交集有且仅有1个（这就是为什么称作一阶）。 -/
   def conjugate_formula : RubiksSuperType → RubiksSuperType → RubiksSuperType
@@ -2293,14 +2293,14 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
     decide
   lemma lemma32_002 : Solved =  ({ permute := 1, orient := 0 }, { permute := List.formPerm ([0,1,5]:(List (Fin 12))), orient := 0 }) *
-    (conjugate_formula (M_UD * L') G3Perm)⁻¹
+    (conjugate_formula (U*L2*U'*L2) (conjugate_formula (F') G3Perm))
     := by
     simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one, mul_inv_rev]
     simp only [G3Perm,conjugate_formula]
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul]
     decide
   lemma lemma32_003 : Solved =   ({ permute := 1, orient := 0 }, { permute := List.formPerm ([0,6,11]:(List (Fin 12))), orient := 0 }) *
-    (conjugate_formula L2 (conjugate_formula (M_UD*R) G3Perm))⁻¹
+    (conjugate_formula (U2*L2*U2) (conjugate_formula B (VariantFaceTurn_R_List G3Perm_List)))
     := by
     simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
     simp only [G3Perm,conjugate_formula]
@@ -2382,7 +2382,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       --   -- sorry
     }
     by_cases ha2:x.2.permute = p2
-      -- 执行：(M_UD L' (R U' R U R U R U' R' U' R R) L M_UD')⁻¹
+      -- 执行：
       -- 即可完成。此时制造一个RubiksSuperType
     {
       let rubiks_p2:RubiksSuperType := {
@@ -2403,11 +2403,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         -- simp [ha0,p3,h2,h3,h4]
         --很明显了
         sorry
-      let solution := (conjugate_formula (M_UD*L') G3Perm)⁻¹
+      let solution := conjugate_formula (U*L2*U'*L2) (conjugate_formula (F') G3Perm)
       -- g3:R U' R U R U R U' R' U' R R
       --           σ(g3) =(1,2,4)
       -- 找一个替代解法，先搞一个(2,4,6): F' g3 F : F' R U' R U R U R U' R' U' R R F
-      -- 然后：:
+      -- 舞台上必须站着1
+      -- 然后：:U L L U' L L (2,4,6) L L U L L U'
       have Solution_mul_rubiksp2_isOne: rubiks_p2 * solution = 1
         := by
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
@@ -2443,7 +2444,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       --   -- sorry
     }
     by_cases ha3:x.2.permute = p3
-      -- 执行：(L2 (1,4,7) L2)⁻¹ = (L2 (M_UD R G3Perm R' M_UD') L2)⁻¹
+      -- 执行：
       -- 即可完成。此时制造一个RubiksSuperType
     {
       let rubiks_p3:RubiksSuperType := {
@@ -2464,8 +2465,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         -- simp [ha0,p3,h2,h3,h4]
         --很明显了
         sorry
-      let solution := (conjugate_formula L2 (conjugate_formula (M_UD*R) G3Perm))⁻¹
-      -- 换一种解法：现有(1,2,3) : G3Perm 的R变式。
+      let solution := (conjugate_formula (U2*L2*U2) (conjugate_formula B (VariantFaceTurn_R_List G3Perm_List)))
+      -- 换一种解法：现有(1,2,3) : G3Perm 的R变式。VariantFaceTurn_R_List G3Perm_List
       -- 然后得到：(1,2,7): B (1,2,3) B' : B R R U' F F R R F F U U F F R R F F U' R R B'
       -- 然后得到：（1，7，12）：U2 L2 U2 (1,2,7) U2 L2 U2 : 替换成功！
       have Solution_mul_rubiksp3_isOne: rubiks_p3 * solution = 1
@@ -2504,24 +2505,23 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     }
     sorry
 
-  -- def perm_Test001 := List.formPerm ([0,6,11]:(List (Fin 12)))
+
+  -- 检验一下
+  def perm_Test001 := List.formPerm ([0,6,11]:(List (Fin 12)))
   -- #eval perm_Test001
-  -- -- ![6, 1, 2, 3, 4, 5, 11, 7, 8, 9, 10, 0]
-  -- def solutionTest001 := conjugate_formula L2 (conjugate_formula (M_UD * R) G3Perm)
+  def solutionTest001 :=  (conjugate_formula (U2*L2*U2) (conjugate_formula B (VariantFaceTurn_R_List G3Perm_List)))
   -- #eval solutionTest001
-  -- --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
-  -- --  { permute := ![6, 1, 2, 3, 4, 5, 11, 7, 8, 9, 10, 0], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
-  -- def rubik_test001:RubiksSuperType := {
-  --       fst := {
-  --         permute := 1
-  --         orient := 0
-  --       }
-  --       snd := {
-  --         permute := perm_Test001
-  --         orient := 0
-  --       }
-  --     }
-  -- #eval 1= rubik_test001 * solutionTest001⁻¹
+  def rubik_test001:RubiksSuperType := {
+        fst := {
+          permute := 1
+          orient := 0
+        }
+        snd := {
+          permute := perm_Test001
+          orient := 0
+        }
+      }
+  #eval 1= rubik_test001 * solutionTest001
 
 
 
