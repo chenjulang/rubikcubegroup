@@ -414,12 +414,11 @@ section FACE_TURNS
 
   -- 为了方便定义每个操作的“位置变化”：排列permute,然后定义的这个东西：
 
-  -- todo
   -- -- 只用formPerm可以办到，但是输入时要转一下脑筋：
-  -- def lista : List (Fin 8) := [0,3,2,1] -- 这样写得到的Perm意思是：
-  --   --[0,3,2,1]表示： index输入0，得到3；输入3，得到2；输入2，得到1；输入1，得到0
-  -- -- 所以要表示[3,0,1,2]， 需要输入[0,3,2,1]
-  -- #eval List.formPerm lista
+  def lista : List (Fin 8) := [0,3,2,1] -- 这样写得到的Perm意思是：
+  -- [0,3,2,1]表示：0=>3；3=>2；2=>1；1=>0
+  -- 整理后就是： [0=>3,1=>0,2=>1,3=>2]
+  #eval List.formPerm lista
 
   /- These two functions (from kendfrey's repository) create a cycle permutation,
   which is useful for defining the rotation of any given face, as seen directly below. -/
@@ -430,50 +429,24 @@ section FACE_TURNS
 
 
 
-
-  -- 举例说明Perm之间的乘法：，从右往左：
-  -- #eval ((swap 1 2):Perm (Fin 12)) -- 指的是输入index为1，得到2；输入index为2，得到1 -- ![0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-  -- #eval ((swap 1 3):Perm (Fin 12)) -- 指的是输入index为1，得到3；输入index为3，得到1 -- ![0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-  -- #eval (cyclePieces [1, 2] : Perm (Fin 12)) -- ![0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-  -- #eval (cyclePieces [2, 3] : Perm (Fin 12)) -- ![0, 1, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11]
-  -- #eval (cyclePieces [1, 2] : Perm (Fin 12)) * (cyclePieces [2, 3] : Perm (Fin 12))
-  -- ![0, 2, 3, 1, 4, 5, 6, 7, 8, 9, 10, 11]
-
-
-
-
   -- 第1大括号"{}"内描述的是：角块
-    -- permute描述的是位置，orient描述的是方向数。
+    -- permute描述的是位置变化，orient描述的是方向数变化。
   -- 第2大括号"{}"内描述的是：棱块
-    -- permute描述的是位置，orient描述的是方向数。
-    -- #eval (cyclePieces [0, 1, 2, 3] : Perm (Fin 12))
-      -- 为了创建位置4循环(0,1,2,3)，就像上述那样写。
-    -- #eval Orient 8 3 [(0, 1), (1, 0), (2, 2), (3, 2), (4, 0), (5, 1), (6, 0), (7, 0)]
-      -- 比如为了创建这个方向数向量：![1, 0, 2, 2, 0, 1, 0, 0]
-
-  -- 当然也是可以定义中间层转动，两层同时转动等等...
-  -- ,,,   :  :  :  :
-  --   => [, , , ]  Orient X X [(, ), (, ), (, ), (, )]
-
-  -- (a,b) -- input index a get b , index b get a
-  -- (b,c) -- index b get c , index c get b
-  -- (c,d) -- index c get d , index d get c
-
-
-
+    -- permute描述的是位置变化，orient描述的是方向数变化。
 
   -- 这里注释一下下面每个位置对应的块是哪个，比如UFR这样的：
   --   ({ permute := ![UFL, UFR, UBR, UBL, DFL, DFR, DBR, DBL],
   --    orient := ![UFL, UFR, UBR, UBL, DFL, DFR, DBR, DBL] },
   --  { permute := ![UF, UR, UB, UL, FL, FR, RB, LB, FD, RD, BD, LD],
   --    orient := ![UF, UR, UB, UL, FL, FR, RB, LB, FD, RD, BD, LD] })
+
   def U : RubiksSuperType :=
     ⟨
       {permute := cyclePieces [0,3,2,1], orient := 0},
-      -- ![3, 0, 1, 2, 4, 5, 6, 7]
+      -- 即：0=>3,3=>2,2=>1,1=>0
+      -- 整理：[3,0,1,2,4,5,6,7]
       {permute := cyclePieces [0,3,2,1], orient := 0}
     ⟩
-  -- #eval (cyclePieces [0,3,2,1]: Perm (Fin 8))
   def D : RubiksSuperType :=
     ⟨
       {permute := cyclePieces [4, 5, 6, 7], orient := 0},
@@ -499,7 +472,8 @@ section FACE_TURNS
       {permute := cyclePieces [2, 3, 7,6 ], orient := Orient 8 3 [(2, 2), (3, 1), (6, 1), (7, 2)]},
       {permute := cyclePieces [2, 7, 10,6 ], orient := Orient 12 2 [(2, 0), (6, 0), (7, 0), (10, 0)]}
     ⟩
-  /-- 中层（U和D的中层）的顺时针90旋转-/
+  -- todo
+  /-- 中层（U和D的中层）的顺时针90旋转。通常用于桥式还原法。-/
   def M_UD : RubiksSuperType :=
     ⟨
       {permute := 1, orient := 0 },
@@ -521,6 +495,7 @@ section FACE_TURNS
   def M_UD' := M_UD⁻¹
 
 
+  --todo
 
   def Corner_Absolute_Orient
   : CornerType → Fin 8 → Fin 3
@@ -533,9 +508,6 @@ section FACE_TURNS
   -- #eval Edge_Absolute_Orient U.2
   -- #eval Corner_Absolute_Orient F.1
 
-
-
-  -- #check Multiplicative.coeToFun
 
   inductive FaceTurn
   : RubiksSuperType → Prop where
@@ -557,6 +529,8 @@ section FACE_TURNS
     | L' : FaceTurn L'
     | F' : FaceTurn F'
     | B' : FaceTurn B'
+    | M_UD : FaceTurn M_UD
+    | M_UD' : FaceTurn M_UD'
 
   inductive FaceTurn_TWGroup1
   : RubiksSuperType → Prop where

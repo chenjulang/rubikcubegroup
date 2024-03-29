@@ -2404,6 +2404,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         --很明显了
         sorry
       let solution := (conjugate_formula (M_UD*L') G3Perm)⁻¹
+      -- g3:R U' R U R U R U' R' U' R R
+      --           σ(g3) =(1,2,4)
+      -- 找一个替代解法，先搞一个(2,4,6): F' g3 F : F' R U' R U R U R U' R' U' R R F
+      -- 然后：:
       have Solution_mul_rubiksp2_isOne: rubiks_p2 * solution = 1
         := by
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
@@ -2461,6 +2465,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         --很明显了
         sorry
       let solution := (conjugate_formula L2 (conjugate_formula (M_UD*R) G3Perm))⁻¹
+      -- 换一种解法：现有(1,2,3) : G3Perm 的R变式。
+      -- 然后得到：(1,2,7): B (1,2,3) B' : B R R U' F F R R F F U U F F R R F F U' R R B'
+      -- 然后得到：（1，7，12）：U2 L2 U2 (1,2,7) U2 L2 U2 : 替换成功！
       have Solution_mul_rubiksp3_isOne: rubiks_p3 * solution = 1
         := by
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
@@ -2876,6 +2883,17 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     exact hvx
     done
 
+-- todo -- 这里出错了，如果引入M_UD，就无法保证sign同号。因为4循环相当于3次2轮换，符号变了。
+-- 所以必须找到M_UD以外的方法代替M_UD操作。
+def testP1: Perm (Fin 8) := List.formPerm [4, 7, 6, 5]
+#eval sign testP1 -- -1
+
+-- lemma testSignM_UD: sign M_UD.1.permute = sign M_UD.2.permute
+-- := by
+--   simp only [M_UD]
+--   simp only [cyclePieces]
+--   sorry
+--   -- decide
 
 -- 魔方第二基本定理的左推右部分：done
 theorem reachable_valid
@@ -2892,17 +2910,20 @@ theorem reachable_valid
         { apply Eq.refl }
         { apply Eq.refl } }
   | FT c hc =>
-    sorry
+    -- sorry
     --这里能证明，但是运行很慢：
-    -- cases hc with
-    -- | _ =>
-    --     simp only [ValidCube]
-    --     apply And.intro
-    --     { apply Eq.refl }
-    --     { apply And.intro
-    --       { apply Eq.refl }
-    --       { apply Eq.refl } }
-    --     done
+    cases hc with
+    | _ =>
+        simp only [ValidCube]
+        apply And.intro
+        {
+          -- decide
+          -- apply Eq.refl
+        }
+        { apply And.intro
+          { apply Eq.refl }
+          { apply Eq.refl } }
+        done
   | mul x y hrx hry a_ih a_ih_1 =>
       -- 归纳证明：
       -- *** 精华在这里，前面写了几百行，就是为了这几行：
@@ -2942,18 +2963,6 @@ theorem reachable_valid
         done
       }
     }
-  -- | split x y h1 h2 h3 h4 =>
-  --   have h_split1: x⁻¹ ∈ ValidCube := by
-  --     apply RubiksGroup.inv_mem'
-  --     exact h4
-  --   have h_split2:= RubiksGroup.mul_mem' h_split1 h3 -- 注意：条件不够就会分段报错
-  --   have h_split_eq: (x⁻¹ * (x * y)) = y := by
-  --     rw [← mul_assoc]
-  --     simp only [mul_left_inv, one_mul]
-  --   have h_split3: (y) ∈ ValidCube := by
-  --     rw [← h_split_eq]
-  --     exact h_split2
-    -- exact h_split3
   done
 
 
