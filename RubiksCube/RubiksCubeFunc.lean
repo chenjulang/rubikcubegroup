@@ -647,6 +647,7 @@ def EdgeFlip : RubiksSuperType
 section RubiksGroup
 
   -- 魔方第二基本定理直接就定义了～～～两个定义需要互推。
+  /-- 关于魔方状态集合的非直觉定义。-/
   def ValidCube :
   Set RubiksSuperType
   :=
@@ -793,7 +794,6 @@ section RubiksGroup
   -- #eval (sign permtest1)⁻¹ -- -1
 
 
-  -- todo
   /-- 因为是从这个定义ValidCube，构建一个RubiksSuperGroup的子群，然后再分析如何与Reachable（可操作到达）联系起来。
     所以首先证明群所需的性质之一：父群中的逆函数生成的元素也在该子群中；换句话说，子群中每个元素都有逆元素。  -/
   @[simp]
@@ -850,7 +850,8 @@ section RubiksGroup
   }
 
 
-  /-- 这个就是直觉的魔方状态集合定义。后面将用一个定理证明这两个定义的集合是等价的。 -/
+  /-- 这个就是直觉的魔方状态集合定义。后面将用一个定理证明这两个定义的集合是等价的。
+  我后面可能会简称“可达”。 -/
   /- Defining the intuitively valid set of Rubik's cube positions. -/
   inductive Reachable
   : RubiksSuperType → Prop
@@ -861,31 +862,33 @@ section RubiksGroup
     | mul : ∀x y : RubiksSuperType, Reachable x → Reachable y → Reachable (x * y)
     | inv :  ∀x : RubiksSuperType, Reachable x → Reachable x⁻¹
 
+  /-- 从以上的4种基础定义，可以推出第5种基础定义：xy可达，y可达，那么x也可达。 -/
   def Reachable.split_fst: ∀x y : RubiksSuperType, Reachable (x * y) → Reachable y → Reachable x
   := by
     intro x y Rxy Ry
     have h1 := Reachable.inv (x * y) Rxy
-    simp at h1 -- Reachable (y⁻¹ * x⁻¹)
-    -- have h2 := Reachable.inv (x) Rx
-    -- simp at h2
+    simp at h1 -- Reachable (y⁻¹ * x⁻¹) -- 想知道simp做了什么，可以用print，或者另开一个have。
+      -- 这里简单举例说明：
+      -- (x*y)⁻¹  = (y⁻¹ * x⁻¹) -- 这里应该是因为：左右同乘一个(x*y)来的
+      -- 1 = 1 -- 是因为满足结合律，还有左逆，所以有这个推理。
     have h3 := Reachable.mul (y) (y⁻¹ * x⁻¹) Ry h1
     simp at h3
     have h4 := Reachable.inv (x⁻¹) h3
     simp at h4
     exact h4
+
+
+  /-- 第6种基础定义: 同样xy可达，x可达，那么y也可达。-/
   def Reachable.split_snd: ∀x y : RubiksSuperType, Reachable (x * y) → Reachable x → Reachable y
   := by
     intro x y Rxy Rx
     have h1 := Reachable.inv (x * y) Rxy
     simp at h1 -- Reachable (y⁻¹ * x⁻¹)
-    -- have h2 := Reachable.inv (x) Rx
-    -- simp at h2
     have h3 := Reachable.mul (y⁻¹ * x⁻¹) (x) h1 Rx
     simp at h3
     have h4 := Reachable.inv (y⁻¹) h3
     simp at h4
     exact h4
-
 
 
   -- inductive Reachable_TWGroup1
@@ -1020,32 +1023,32 @@ end RubiksGroup
 /- Useful predicates for the SolutionAlgorithm, as well as for some minor proofs. -/
 -- section SolutionState
 
---   def CornersSolved :
---   RubiksSuperType → Prop
---   :=
---     fun c =>
---       -- 定义需要满足：
---       c.fst.permute = 1
---       ∧
---       c.fst.orient = 0
+  def CornersSolved :
+  RubiksSuperType → Prop
+  :=
+    fun c =>
+      -- 定义需要满足：
+      c.fst.permute = 1
+      ∧
+      c.fst.orient = 0
 
---   def EdgesSolved
---   : RubiksSuperType → Prop
---   :=
---     fun c =>
---       -- 定义需要满足：
---       c.snd.permute = 1
---       ∧
---       c.snd.orient = 0
+  def EdgesSolved
+  : RubiksSuperType → Prop
+  :=
+    fun c =>
+      -- 定义需要满足：
+      c.snd.permute = 1
+      ∧
+      c.snd.orient = 0
 
---   def IsSolved
---   : RubiksSuperType → Prop
---   :=
---     fun c =>
---       -- 定义需要满足：
---       CornersSolved c
---       ∧
---       EdgesSolved c
+  def IsSolved
+  : RubiksSuperType → Prop
+  :=
+    fun c =>
+      -- 定义需要满足：
+      CornersSolved c
+      ∧
+      EdgesSolved c
 
 --   instance {c} : Decidable (CornersSolved c) := by apply And.decidable
 --   instance {c} : Decidable (EdgesSolved c) := by apply And.decidable

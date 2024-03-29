@@ -16,178 +16,28 @@ set_option maxRecDepth 4000
 variable (α : Type*) [Fintype α] [DecidableEq α]
 
 
-
 section ValidityChecks
-  --例子：
-  @[simp]
-  lemma RValid : R ∈ ValidCube :=
-    by
-      simp only [R, ValidCube]
-      apply And.intro
-      { apply Eq.refl }
-      { apply And.intro
-        · exact rfl
-        · rfl
-      }
-      done
 
-
+  /-- 6个基本操作都符合非直觉定义。 -/
   @[simp]
   lemma ft_valid
   : ∀x : RubiksSuperType,
   FaceTurn x → x ∈ ValidCube
-  :=
-    by sorry
-      -- intro x hx
-      -- cases hx with
-      -- | _ =>
-        -- 能证明但是很慢。分开写快一点？：
-        -- method 1:
-        -- simp only [ValidCube, U, D, R, L, F, B, U2, D2, R2, L2, F2, B2, U', D', R', L', F', B']
-        -- repeat' apply And.intro
-        -- all_goals apply Eq.refl
-        --------------
-        -- method 2:
-        -- simp only [ValidCube, U, D, R, L, F, B, U2, D2, R2, L2, F2, B2, U', D', R', L', F', B']
-        -- <;> apply And.intro;apply Eq.refl;exact Prod.mk_eq_zero.mp rfl
-        -- done
-        -- sorry
-      --- method 3:
-      -- cases hx with
-      -- | U =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | D =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | R =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | L =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | F =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | B =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | U2 =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | D2 =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | R2 =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | L2 =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | F2 =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | B2 =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | U' =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | D' =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | R' =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | L' =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | F' =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- | B' =>
-      --   apply And.intro
-      --   { apply Eq.refl }
-      --   { apply And.intro
-      --     · exact rfl
-      --     · rfl
-      --   }
-      -- done
+  := by
+    intro x hx
+    cases hx with
+    | _ =>
+      simp only [ValidCube, U, D, R, L, F, B, U2, D2, R2, L2, F2, B2, U', D', R', L', F', B']
+      -- 换句话说，就是代入计算的过程。
+      decide
 
+  /-- 举例：某个基本操作的复合，符合非直觉定义。 -/
   @[simp]
   lemma TPermValid : TPerm ∈ ValidCube :=
     by
       simp only [TPerm]
-      repeat apply RubiksGroup.mul_mem'
-      all_goals apply ft_valid
+      repeat apply RubiksGroup.mul_mem' -- RubiksGroup.carrier就是ValidCube
+      all_goals apply ft_valid -- 全部目标都使用反推
       { apply FaceTurn.R } -- 这下面包括这行都是根据定义来的。
       { apply FaceTurn.U }
       { apply FaceTurn.R' }
@@ -204,6 +54,8 @@ section ValidityChecks
       { apply FaceTurn.F' }
       done
 
+  -- todo
+  /-- 单个角块旋转了次。不符合非直觉定义。 -/
   @[simp]
   lemma CornerTwistInvalid : CornerTwist ∉ ValidCube
   := by
@@ -1862,23 +1714,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   end lemma2TrashCode
 
 
-  -- 先看看这个引理是：1.直接在lemma3中使用，还是2.换成已知定理在去lemma3中使用，这时候就要删掉这里了。
-  -- 选择先去掉。
-    -- 涉及定理：closure_three_cycles_eq_alternating
-    -- 涉及定义：3循环： IsThreeCycle
-  -- 通用小引理4.6：假设n>=3，对于任意集合M，假设M包含Sn中全体3循环，则=>， M >= An
-  -- lemma lemma46
-  -- (M:Subgroup (Perm α)):
-  -- ∀ σ:Perm α,
-  --   IsThreeCycle σ
-  --   ∧
-  --   σ ∈ M
-  -- →
-  -- ∀ al ∈ alternatingGroup α,
-  -- al ∈ M
-  -- := by
-  --   have h1:= closure { σ : Perm α | σ ∈ M}
-  --   sorry
 
   def remains_allOrient_and_edgePermute
   (x : RubiksSuperType)  : Prop
@@ -2070,7 +1905,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     decide
   lemma lemma31_003 : Solved =  ({ permute := List.formPerm ([1,3,5]:(List (Fin 8))), orient := 0 }, { permute := 1, orient := 0 }) *
     (G4Perm*(conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹
-    -- (G4Perm * (D' * L * L * G4Perm * L * L * D)⁻¹)⁻¹ -- 记得最后加一个逆号
     := by
     simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
     simp only [conjugate_formula,G4Perm]
@@ -2189,23 +2023,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         apply testaaa1
         sorry
       --   -- -- 很明显了
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.inv;apply Reachable.FT;exact FaceTurn.R
-      --   -- -- 很明显了，如何简化？
       --   -- sorry
     }
     by_cases ha0:x.1.permute = p3
@@ -2246,43 +2063,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         apply testaaa1
         sorry
       --   -- -- 很明显了
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.inv;apply Reachable.FT;exact FaceTurn.R
-      --   -- -- 很明显了，如何简化？
       --   -- sorry
     }
     sorry
-
-  -- def perm_Test001 := List.formPerm ([1,3,5]:(List (Fin 8)))
-  -- #eval perm_Test001
-  -- def solutionTest001 := (G4Perm * (D' * L * L * G4Perm * L * L * D)⁻¹)
-  -- #eval solutionTest001
-  -- def rubik_test001:RubiksSuperType := {
-  --       fst := {
-  --         permute := perm_Test001
-  --         -- swap 1 0 * swap 0 6
-  --         orient := 0
-  --       }
-  --       snd := {
-  --         permute := 1
-  --         orient := 0
-  --       }
-  --     }
-  -- #eval 1= rubik_test001 * solutionTest001⁻¹
 
 
 
@@ -2306,6 +2089,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     simp only [G3Perm,conjugate_formula]
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
     decide
+
+  #check closure_three_cycles_eq_alternating
 
 
   /-- 如果状态x的棱块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
@@ -2362,23 +2147,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         apply testaaa1
         sorry
       --   -- -- 很明显了
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.inv;apply Reachable.FT;exact FaceTurn.R
-      --   -- -- 很明显了，如何简化？
       --   -- sorry
     }
     by_cases ha2:x.2.permute = p2
@@ -2424,23 +2192,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         apply testaaa1
         sorry
       --   -- -- 很明显了
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.inv;apply Reachable.FT;exact FaceTurn.R
-      --   -- -- 很明显了，如何简化？
       --   -- sorry
     }
     by_cases ha3:x.2.permute = p3
@@ -2484,23 +2235,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         apply testaaa1
         sorry
       --   -- -- 很明显了
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.mul
-      --   -- apply Reachable.inv;apply Reachable.FT;exact FaceTurn.R
-      --   -- -- 很明显了，如何简化？
       --   -- sorry
     }
     sorry
@@ -2557,8 +2291,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       · simp only [BothOne]
     done
 
-  -- #check closure_three_cycles_eq_alternating
-  -- #check prod_list_swap_mem_alternatingGroup_iff_even_length
 
   -- 对于任意g状态角块位置置换属于偶置换的状态，
     -- 则存在操作x1使得(g*x1)的角块位置置换变成1，而且保持(g*x1)的棱块位置不变，而且所有块的方向数不变。
@@ -2582,7 +2314,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- ???可能要用归纳法证明。思路：将偶置换表示成一长串3循环的乘积。
       sorry
     obtain ⟨permList,h2_2,h2_3⟩ := h2
-    -- 4. 此处需要一个引理lalternatingCornerPermute_eq_3Cycles_to_g_eq_3Cycles_mul_one来带入这个结论
+    -- 4. 此处需要一个引理alternatingCornerPermute_eq_3Cycles_to_g_eq_3Cycles_mul_one来带入这个结论
       -- g可以表示成若干RubiksSuperType和一个rst1:RubiksSuperType的乘积，这里记为rubiksList.
       -- rubiksList满足：{对所有元素a，IsThreeCycle a.1.p；a.1.orient=0; a.2.permute=1; a.2.orient=0}
       -- rst1满足：{a.1.p = 1 ; a.1.orient=g.1.orient; a.2.permute=g.2.permute ; a.2.orient=g.2.orient}
@@ -2748,10 +2480,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- 这个很明显了
       sorry
       -- apply Reachable.mul
-      -- apply Reachable.mul
-      -- apply Reachable.mul
-      -- apply Reachable.mul
-      -- apply Reachable.mul
       -- apply Reachable.FT <;> simp only [FaceTurn.R,FaceTurn.U]
       -- 这里写完要很长，怎么节省代码呢？
       -- done
@@ -2903,8 +2631,7 @@ theorem reachable_valid
         simp only [ValidCube]
         apply And.intro
         {
-          --这里能证明，但是运行有点慢，要一分钟左右：
-          -- decide
+          -- decide -- 这个可以证明。但是会拖慢后面的编译
           sorry
         }
         { apply And.intro
@@ -2937,16 +2664,16 @@ theorem reachable_valid
         simp only [Pi.neg_apply, Finset.sum_neg_distrib, neg_eq_zero]
         simp only [ValidCube] at hc2
         obtain ⟨hc3,hc4,hc5⟩:= hc2
-        -- hc4 -- 很明显的重排求和不变
-        sorry
+        apply mul_mem'_permuteRemainsSum_2
+        exact hc4
         done
       }
       { simp only [ps_inv]
         simp only [Pi.neg_apply, Finset.sum_neg_distrib, neg_eq_zero]
         simp only [ValidCube] at hc2
         obtain ⟨hc3,hc4,hc5⟩:= hc2
-        -- hc5 很明显的重排求和不变
-        sorry
+        apply mul_mem'_permuteRemainsSum
+        exact hc5
         done
       }
     }
@@ -3011,7 +2738,7 @@ theorem valid_reachable
     · exact h3_2
     · exact hvx
     done
-  -- 这里为啥还要证明已知的x ∈ ValidCube？原来是假设被拆散用了...
+  -- 这里为啥还要证明已知的x ∈ ValidCube？原来是前面假设被拆散用了...
   exact hvx
   done
 
@@ -3028,9 +2755,6 @@ theorem RubikCube_BasicRule_2
   done
 
 
-
--- instance {n : ℕ} {α : Type*} [DecidableEq α] : DecidableEq (Fin n → α) :=
---   fun f g => Fintype.decidablePiFintype f g
 
 def swaptest :Perm (Fin 8) := (swap 1 2) * (swap 2 6) * (swap 6 5)*(swap 1 2)*(swap 2 6)*(swap 6 5)*(swap 1 2)*
  (swap 2 6) * (swap 6 5) * (swap 1 2) * (swap 2 6) * (swap 6 5)
@@ -3056,75 +2780,18 @@ lemma four_rs_eq_solved
   simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one, Perm.coe_mul]
   apply And.intro
   · apply And.intro
-    · ext i
-      simp only [Perm.coe_mul, Function.comp_apply, Perm.coe_one, id_eq]
-      have h1 := SwapDef i
+    · decide
       -- swapTest2_1
-      sorry
-      -- done
-    · -- orientTest2_1
-      sorry
-      -- done
+    · decide
   · apply And.intro
-    · ext i
-      simp only [Perm.coe_mul, Function.comp_apply, Perm.coe_one, id_eq]
-      -- swapTest2_2
-      sorry
-      -- done
-    · -- orientTest2_2
-      sorry
-      -- done
-  -- done
+    · decide
+    · decide
+  done
 
 
 -- def swapTest2_1 :Perm (Fin 8) := (swap 1 2) * (swap 2 6) * (swap 6 5)*(swap 1 2)*(swap 2 6)*(swap 6 5)*(swap 1 2)*
 --  (swap 2 6) * (swap 6 5) * (swap 1 2) * (swap 2 6) * (swap 6 5)
--- def swapTest2_2 :Perm (Fin 12) := (swap 1 6)*(swap 6 9)*(swap 9 5)*(swap 1 6)*(swap 6 9)*(swap 9 5)*(swap 1 6)*(swap 6 9)*(swap 9 5)*
---   (swap 1 6)*(swap 6 9)*(swap 9 5)
--- def swapTest2 :Perm (Fin 12) := (swap 1 6)*(swap 6 9)*(swap 9 5)*(swap 1 6)*(swap 6 9)*(swap 9 5)*(swap 1 6)*(swap 6 9)*(swap 9 5)*
---   (swap 1 6)*(swap 6 9)*(swap 9 5)
--- #eval swapTest2 0 -- 0
--- #eval swapTest2 1 -- 1
--- #eval swapTest2 2 -- 2
--- #eval swapTest2 3 -- 3
--- #eval swapTest2 4 -- 4
--- #eval swapTest2 5 -- 5
--- #eval swapTest2 6 -- 6
--- #eval swapTest2 7 -- 7
--- #eval swapTest2 8 -- 8
--- #eval swapTest2 9 -- 9
--- #eval swapTest2 10 -- 10
--- #eval swapTest2 11 -- 11
--- def orientTest2_1 : Fin 8 → Fin 3 := ((Orient 8 3 [(1, 2), (2, 1), (5, 1), (6, 2)] ∘ ⇑(swap 1 2) ∘ ⇑(swap 2 6) ∘ ⇑(swap 6 5) +
---             Orient 8 3 [(1, 2), (2, 1), (5, 1), (6, 2)]) ∘
---           ⇑(swap 1 2) ∘ ⇑(swap 2 6) ∘ ⇑(swap 6 5) +
---         Orient 8 3 [(1, 2), (2, 1), (5, 1), (6, 2)]) ∘
---       ⇑(swap 1 2) ∘ ⇑(swap 2 6) ∘ ⇑(swap 6 5) +
---     Orient 8 3 [(1, 2), (2, 1), (5, 1), (6, 2)]
--- def orientTest2_2 : Fin 12 → Fin 2 := ((Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)] ∘ ⇑(swap 1 6) ∘ ⇑(swap 6 9) ∘ ⇑(swap 9 5) +
---             Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)]) ∘
---           ⇑(swap 1 6) ∘ ⇑(swap 6 9) ∘ ⇑(swap 9 5) +
---         Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)]) ∘
---       ⇑(swap 1 6) ∘ ⇑(swap 6 9) ∘ ⇑(swap 9 5) +
---     Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)]
--- def orientTest2 : Fin 12 → Fin 2 := ((Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)] ∘ ⇑(swap 1 6) ∘ ⇑(swap 6 9) ∘ ⇑(swap 9 5) +
---             Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)]) ∘
---           ⇑(swap 1 6) ∘ ⇑(swap 6 9) ∘ ⇑(swap 9 5) +
---         Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)]) ∘
---       ⇑(swap 1 6) ∘ ⇑(swap 6 9) ∘ ⇑(swap 9 5) +
---     Orient 12 2 [(1, 1), (5, 1), (6, 1), (9, 1)]
--- #eval orientTest2 0 -- 0
--- #eval orientTest2 1 -- 0
--- #eval orientTest2 2 -- 0
--- #eval orientTest2 3 -- 0
--- #eval orientTest2 4 -- 0
--- #eval orientTest2 5 -- 0
--- #eval orientTest2 6 -- 0
--- #eval orientTest2 7 -- 0
--- #eval orientTest2 8 -- 0
--- #eval orientTest2 9 -- 0
--- #eval orientTest2 10 -- 0
--- #eval orientTest2 11 -- 0
+
 
 @[simp]
 lemma solved_is_solved
