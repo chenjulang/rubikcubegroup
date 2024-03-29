@@ -494,7 +494,6 @@ section FACE_TURNS
   def B' := B⁻¹
 
 
-  --todo
   -- 举例：
   -- #eval 1*R
   --   ({ permute := ![0, 2, 6, 3, 4, 1, 5, 7], orient := ![0, 2, 1, 0, 0, 1, 2, 0] },
@@ -528,10 +527,10 @@ section FACE_TURNS
   -- #eval Edge_Absolute_Orient U.2
   -- #eval Corner_Absolute_Orient F.1
 
-
+  /-- 定义了哪些是属于G中6个操作的，{UDFBLR} -/
   inductive FaceTurn
   : RubiksSuperType → Prop where
-    | U : FaceTurn U
+    | U : FaceTurn U -- 就是说，U是其中搞一个操作。
     | D : FaceTurn D
     | R : FaceTurn R
     | L : FaceTurn L
@@ -550,37 +549,38 @@ section FACE_TURNS
     | F' : FaceTurn F'
     | B' : FaceTurn B'
 
-  inductive FaceTurn_TWGroup1
-  : RubiksSuperType → Prop where
-    | U : FaceTurn_TWGroup1 U
-    | D : FaceTurn_TWGroup1 D
-    | R2 : FaceTurn_TWGroup1 R2
-    | L2 : FaceTurn_TWGroup1 L2
-    | F : FaceTurn_TWGroup1 F
-    | B : FaceTurn_TWGroup1 B
+  -- inductive FaceTurn_TWGroup1
+  -- : RubiksSuperType → Prop where
+  --   | U : FaceTurn_TWGroup1 U
+  --   | D : FaceTurn_TWGroup1 D
+  --   | R2 : FaceTurn_TWGroup1 R2
+  --   | L2 : FaceTurn_TWGroup1 L2
+  --   | F : FaceTurn_TWGroup1 F
+  --   | B : FaceTurn_TWGroup1 B
 
-  inductive FaceTurn_TWGroup2
-  : RubiksSuperType → Prop where
-    | U : FaceTurn_TWGroup2 U
-    | D : FaceTurn_TWGroup2 D
-    | R2 : FaceTurn_TWGroup2 R2
-    | L2 : FaceTurn_TWGroup2 L2
-    | F2 : FaceTurn_TWGroup2 F2
-    | B2 : FaceTurn_TWGroup2 B2
+  -- inductive FaceTurn_TWGroup2
+  -- : RubiksSuperType → Prop where
+  --   | U : FaceTurn_TWGroup2 U
+  --   | D : FaceTurn_TWGroup2 D
+  --   | R2 : FaceTurn_TWGroup2 R2
+  --   | L2 : FaceTurn_TWGroup2 L2
+  --   | F2 : FaceTurn_TWGroup2 F2
+  --   | B2 : FaceTurn_TWGroup2 B2
 
-  inductive FaceTurn_TWGroup3
-  : RubiksSuperType → Prop where
-    | U2 : FaceTurn_TWGroup3 U2
-    | D2 : FaceTurn_TWGroup3 D2
-    | R2 : FaceTurn_TWGroup3 R2
-    | L2 : FaceTurn_TWGroup3 L2
-    | F2 : FaceTurn_TWGroup3 F2
-    | B2 : FaceTurn_TWGroup3 B2
+  -- inductive FaceTurn_TWGroup3
+  -- : RubiksSuperType → Prop where
+  --   | U2 : FaceTurn_TWGroup3 U2
+  --   | D2 : FaceTurn_TWGroup3 D2
+  --   | R2 : FaceTurn_TWGroup3 R2
+  --   | L2 : FaceTurn_TWGroup3 L2
+  --   | F2 : FaceTurn_TWGroup3 F2
+  --   | B2 : FaceTurn_TWGroup3 B2
 
   -- #check FaceTurn_TWGroup1.L2 -- Prop
 
+  /-- 使用#eval的时候要怎么打印出来 -/
   instance : ToString RubiksSuperType where
-    toString : RubiksSuperType → String :=
+  toString : RubiksSuperType → String :=
     fun c =>
       if c = Solved then "Solved"
       else if c = U then "U"
@@ -601,34 +601,35 @@ section FACE_TURNS
       else if c = L' then "L'"
       else if c = F' then "F'"
       else if c = B' then "B'"
-      else s!"{repr c}"
+      else s!"{repr c}" -- 如果都不匹配的话，直接打印出permute，orient的结构体。repr的作用。
 
   -- def aRubikSuperType : RubiksSuperType :=
   --   ⟨
   --     {permute := cyclePieces [0, 1, 2, 3], orient := 0},
   --     {permute := cyclePieces [0, 1, 2, 3], orient := 0}
   --   ⟩
-  --举例使用：它会把这个RubiksSuperType类型的东西对比来得到字符串。
-  -- #eval aRubikSuperType
-  -- #eval toString $ aRubikSuperType
+  -- --举例使用：它会把这个RubiksSuperType类型的东西对比来得到字符串。
+  -- #eval aRubikSuperType -- 直接打印
+  -- #eval toString aRubikSuperType -- 字符串打印
 
-
-  -- instance : Multiplicative.coeToFun RubiksSuperType := {coe := fun (a : RubiksSuperType) => fun (b : RubiksSuperType) => a * b }
-  --? How do I get the line above to work?
 
 end FACE_TURNS
 
+-- 这个*是在哪里定义的呢？
+-- 因为RubiksSuperType是笛卡尔积CornerType × EdgeType，其乘法就是两个分量分别乘积
+-- 这里*实际上是两个分量的ps_mul,要从左往右→运算。
+
 
 def TPerm : RubiksSuperType
--- 这个*是在哪里定义的呢？看定义就知道，因为RubiksSuperType是笛卡尔积CornerType × EdgeType，其乘法就是两个分量分别乘积
--- 这里*实际上是两个分量的ps_mul,要从左往右→运算。
   := R * U * R' * U' * R' * F * R2 * U' * R' * U' * R * U * R' * F'
 def AlteredYPerm : RubiksSuperType
   := R * U' * R' * U' * R * U * R' * F' * R * U * R' * U' * R' * F * R
 def MyTestActions : RubiksSuperType
   := R *U'* R* U* R* U* R* U'* R'* U'* R* R
 
--- 以下两个定义，形容两个不可能的魔方状态：只旋转一次角块，还有只旋转一次棱块
+-- 以下两个定义，形容两个不可能的魔方状态：只旋转一次角块，还有只旋转一次棱块。
+-- 后文将会证明这两种状态不存在。
+
 def CornerTwist : RubiksSuperType
   := (
       {permute := 1, orient := (fun | 0 => 1 | _ => 0) },
@@ -645,22 +646,23 @@ def EdgeFlip : RubiksSuperType
 
 section RubiksGroup
 
-  -- 魔方第二基本定理直接就定义了～～～其实也不全是，只是两个定义，两个定义需要互推。（要推生成集）
-  -- def ValidCube : Set RubiksSuperType := {c | Perm.sign c.fst.permute = Perm.sign c.snd.permute ∧ Fin.foldl 8 (fun acc n => acc + c.fst.orient n) 0 = 0 ∧ Fin.foldl 12 (fun acc n => acc + c.snd.orient n) 0 = 0}
+  -- 魔方第二基本定理直接就定义了～～～两个定义需要互推。
   def ValidCube :
   Set RubiksSuperType
   :=
-  -- 这样的一个集合：所有满足后面这些条件的c
+  -- 这样的一个集合：其中的任意元素c，c满足后面这些条件。
   {
     c |
-    Perm.sign c.fst.permute = Perm.sign c.snd.permute
-    -- c.fst指的是角块 , c.snd指的是棱块
-    ∧
-    Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) c.fst.orient = 0
-    ∧
-    Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) c.snd.orient = 0
+      Perm.sign c.fst.permute = Perm.sign c.snd.permute
+      -- c.fst指的是角块 , c.snd指的是棱块。1，2也行。
+      ∧
+      Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) c.fst.orient = 0
+      ∧
+      Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) c.snd.orient = 0
   }
 
+
+    /-- 证明12个分量如果求和为0（模2），随意排列组合后，求和还是为0（模2）。 -/
     @[simp]
     lemma mul_mem'_permuteRemainsSum
     (apermute : Perm (Fin 12))
@@ -669,49 +671,57 @@ section RubiksGroup
     : (Finset.sum {0, 1, 2,3,4,5,6,7,8,9,10,11} fun x ↦ borient (apermute x)) = 0
     := by
       have h1:= Equiv.sum_comp apermute borient -- 常见错误：因为没有输入足够的参数 typeclass instance problem is stuck, it is often due to metavariables
-      have sumEq2 : ∑ i : Fin 12, borient (apermute i) = ∑ x in {0, 1, 2,3,4,5,6,7,8,9,10,11}, borient (apermute x) := rfl
+      have sumEq2 : ∑ i : Fin 12, borient (apermute i)
+        = ∑ x in {0, 1, 2,3,4,5,6,7,8,9,10,11}, borient (apermute x) := rfl
       rw [← sumEq2]
       clear sumEq2
       rw [h1]
       clear h1
-      have sumEq1 : ∑ i : Fin 12, borient i = Finset.sum {0, 1, 2,3,4,5,6,7,8,9,10,11} borient := rfl
-      rw [sumEq1]
       exact h2
       done
 
+
+  -- -- sign映射是同态的，简单举例：
+  -- def permtest1: Perm (Fin 8) := (swap 0 1)
+  -- def permtest2: Perm (Fin 8) := (swap 2 3)
+  -- #eval sign permtest1 -- -1
+  -- #eval sign permtest2 -- -1
+  -- #eval (sign permtest1) * (sign permtest2) -- 1
+  -- #eval sign (permtest1 * permtest2) -- 1
+
+
+  --todo
+
+  /-- 因为是从这个定义ValidCube，构建一个群，然后再分析如何与Reachable（可操作到达）联系起来。
+    所以首先证明群所需的性质之一：封闭性  -/
   @[simp]
   lemma mul_mem' {a b : RubiksSuperType}
-  -- {i1 i2 i3 i4 i5 i6 i7 i8: Fin 8}
-  -- (s : Finset (Fin 8):= {i1,i2,i3,i4,i5,i6,i7,i8})
-  -- (notEq: ∀ x∈s ,∀ y∈s , x≠y)
   : a ∈ ValidCube → b ∈ ValidCube → a * b ∈ ValidCube
   := by
     intro hav hbv
     simp only [ValidCube]
-    -- simp only [PieceState.mul_def]
-    -- simp only [ps_mul]
-    -- repeat' apply And.intro
     apply And.intro
-    {
+    { -- 1.符号不变：
       have h1 : sign a.1.permute = sign a.2.permute
         := by apply hav.left
       have h2 : sign b.1.permute = sign b.2.permute
         := by apply hbv.left
-      simp only [Prod.fst_mul, PieceState.mul_def, Prod.snd_mul]
+      simp only [Prod.fst_mul]
+      simp only [PieceState.mul_def]
+      simp only [Prod.snd_mul]
+      simp only [PieceState.mul_def]
       simp only [ps_mul]
-      simp only [map_mul]
-      -- exact Mathlib.Tactic.LinearCombination.mul_pf h1 h2
+      simp only [map_mul] -- sign映射是同态的，简单举例.
       exact Mathlib.Tactic.LinearCombination.mul_pf h2 h1
     }
     apply And.intro
-    {
+    {-- 乘积棱块方向数增加量orient各分量求和为0（mod 2）
       have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} a.1.orient = 0
         := by apply hav.right.left
       have h2 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} b.1.orient = 0
         := by apply hbv.right.left
-      -- rw [PieceState.orient, PieceState.orient]
-      -- rw [Finset.sum_add_distrib, h2]
-      simp only [Finset.mem_singleton, Finset.mem_insert, zero_ne_one, false_or, Prod.fst_mul,PieceState.mul_def]
+      simp only [Prod.fst_mul]
+      simp only [PieceState.mul_def]
       simp only [ps_mul]
       simp only [Finset.mem_singleton, Finset.mem_insert, zero_ne_one, false_or, invFun_as_coe,
         Pi.add_apply, Function.comp_apply]
@@ -719,15 +729,7 @@ section RubiksGroup
       rw [h1]
       clear h1
       simp only [add_zero]
-      -- refine Equiv.Perm.prod_comp
-      -- apply h2
-      -- rw [Finset.sum_range_succ]
       trans Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} b.1.orient
-      -- apply Perm.sum_comp
-      -- · intro x1
-      --   simp only [ne_eq, Finset.coe_insert, Finset.coe_singleton]
-      -- · exact h2
-      ---
       -- 下面一长串提取出来吧：
       . apply Finset.sum_bijective
         . exact a.1.permute.bijective
@@ -742,11 +744,7 @@ section RubiksGroup
           have hhh1 : ∀ x : Fin 8, x = 0 ∨ x = 1 ∨ x = 2 ∨ x = 3 ∨ x = 4 ∨ x = 5 ∨ x = 6 ∨  x = 7
             := by
             intro x
-          --这个是能证明的，耗时很长，但是需要用lean4 web版本。
-          -- this line can prove , but needs a moment
-            -- fin_cases x <;> aesop
-            sorry
-            -- done
+            fin_cases x <;> decide
           constructor
           · intro h
             cases h with
@@ -834,8 +832,6 @@ section RubiksGroup
       exact h2
     }
 
-  -- #check Finset.sum
-  -- #check Finset.sum_add_distrib
 
 
   @[simp]
