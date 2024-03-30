@@ -1,3 +1,4 @@
+import Paperproof
 import RubiksCube.RubiksCubeFunc
 import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.GroupTheory.Perm.Fin
@@ -281,19 +282,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     →
     Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * (F^2 * G1Perm * F^2)).1.orient = 0
     := by
-      -- #eval F*G1Perm*F'
-      -- ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 0, 1] },
-      -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
       intro h1
       simp only [Prod.fst_mul]
       have h2: (F^2).1 * G1Perm.1 * (F^2).1 = (F^2 * G1Perm * F^2).1 := by rfl
       simp only [h2]
       simp only [PieceState.mul_def,ps_mul]
-      -- Goal: ∑ x in {0, 1, 2, 3, 4, 5, 6, 7}, ((F^2 * G1Perm * F^2).1.orient ∘ g.1.permute + g.1.orient) x = 0
       -- 直接看计算结果就知道了
-      -- (F * G1Perm * F').1.orient = ![2, 0, 0, 0, 0, 0, 0, 1]，求和模3也为0
-      -- (F * G1Perm * F').1.orient ∘ ⇑g.1.permute ，只是重新排列了，求和模3也为0
-      -- g.1.orient的话由h1知道也是求和为0。
       -- 这个在社区解决了等待写
       sorry
       -- done
@@ -372,72 +366,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       exact h5
       done
 
-
-    -- 这个引理要一般性一点：g和i如果中途相隔一个G中的元素h，也就是gh=i，则某个旧目标g可以达到，可以变成新目标i可以达到。
-    -- 一个举例：
-    -- g∈ RubiksSuperType, h ∈ RubiksGroup,-- 大前提
-    -- (∃ x1 ∈ RubiksGroup, ((g) * x1).1.orient = 0)
-    -- →
-      -- (∃ x2 ∈ RubiksGroup, ((g*h) * x2).1.orient = 0)
-      -- ∧
-      -- ((g*h) * (h⁻¹*x1)).1.orient = 0
-    -- 另一个例子：
-    -- g∈ RubiksSuperType, h ∈ RubiksGroup,-- 大前提
-    -- (∃ x1 ∈ RubiksGroup, ((g) * x1).1.orient有且仅有4个分量是0 )
-    -- →
-      -- (∃ x2 ∈ RubiksGroup, ((g*h) * x2).1.orient有且仅有4个分量是0)
-      -- ∧
-      -- ((g*h) * (h⁻¹*x1)).1.orient有且仅有4个分量是0
-    -- g和i如果中途相隔一个G中的元素h，也就是gh=i，则某个旧目标g可以达到，可以变成新目标i可以达到。
-    -- 一般的例子：
-    -- g∈ RubiksSuperType, h ∈ RubiksGroup,-- 大前提
-    -- (∃ x1 ∈ RubiksGroup, ((g) * x1)作为参数插入某个命题A成立 )
-    -- →
-      -- (∃ x2 ∈ RubiksGroup, ((g*h) * x2)作为参数插入命题A成立)
-      -- ∧
-      -- ((g*h) * (h⁻¹*x1))作为参数插入命题A成立
-    /-- 这个引理理应频繁使用的，不知道为什么这里没用到呢？感觉应该可以比较抽象的解决很多重复代码。 -/
-    -- lemma lemma1_2reachableMove_Exist_same_property
-    -- (g : RubiksSuperType)
-    -- (h : RubiksSuperType)
-    -- (hInG : h ∈ RubiksGroup)
-    -- (somePropA : RubiksSuperType →  Prop)
-    -- :
-    -- ∃ x1:RubiksGroup,
-    -- somePropA ((g) * x1) -- “冒号”写成“属于号”就不行了，请注意
-    -- →
-    --   (∃ x2 ∈ RubiksGroup, somePropA ((g*h) * x2))
-    --   ∧
-    --   somePropA ((g*h) * (h⁻¹*x1))
-    -- := by
-    --
-
-    -- 这个应该可以去掉，暂时保留注释：
-    -- 假设角块的方向数求和后，模3为0,假设8个角块的方向数中，有7个方向数被以上步骤还原为0以后，则=>,第8个角块的方向数也还原成0 ，为什么呢？：
-    -- 其实这里隐藏了一些条件，“以上步骤”里面每一个操作必须保持某个性质才行。
-    -- 还原操作涉及到的只有{F，B和g1},由于这3者之一，任意取一个记为X,都满足∑(8 i=1)v(X)_i=0 (mod 3)：
-    --     F和B通过查v表可知，
-    --     而g1则只需实际操作一次后，看到只修改了全体角块中2个角块的方向数，而且方向数一个+1，一个+2，所以也满足求和模3为0。
-    -- 换句话说，初始状态经过上述{F，B和g1}任意操作后，增加v(X)的各个分量，因为每次操作变化后求和仍然是mod 3为0，因此还原7个以后仍然保持这个性质。
-    --
-    -- 命题描述就是：
-    -- 某状态g满足角方向数求和模3为0（其实等价于：角方向数增加量求和为0），
-    -- 经过集合A（满足角方向数增加量求和为0）中的任意复合操作x1后，
-    -- 且如果(g*x1)的角方向数增加量的前7个分量都为0，
-    -- 则第8个分量也为0。
-    -- expected token 这种错误可能是没open这个符号，比如求和∑,要open BigOperators
-    -- lemma lemma1_008_7Corners_eq_8Corners
-    -- (g : RubiksSuperType)
-    -- (SetA : Set RubiksSuperType := {a: RubiksSuperType | ∑ i in (Finset.range 8), (a.1.orient) i = 0})
-    -- (x1: RubiksSuperType)
-    -- :∑ i in (Finset.range 8), (g.1.orient) i = 0
-    -- ∧
-    -- x1 ∈ SetA
-    -- ∧
-    -- ∀ j : (Fin 7),  (g*x1).1.orient j = 0 -- 注意：当这3个符号报错时 :,∈,in 三个都轮流试一下。
-    -- →
-    -- (g*x1).1.orient 7 = 0
-    -- :=
 
     -- 由于前几个角块的证明过分类似，还没找到复写代码的巧妙方法，直接跳到最后一个引理进行证明，看看如何收尾即可。
     -- 想不到引理1最后一步这么简单，推出矛盾即可。
@@ -873,9 +801,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   ∃ h ∈ RubiksGroup ,
   (g * h).fst.orient = 0
   ∧
-  (g).2.orient = (g * h).2.orient
+  (g).2.orient = (g * h).2.orient -- 不变
   ∧
-  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
+  ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute) -- 不变
   ∧
   Reachable h
   := by
@@ -952,7 +880,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         obtain ⟨h2_4_1,h2_4_2,h2_4_3,h2_4_4,h2_4_5,h2_4_6⟩ := h2_4
         use (moveAction2 * h2_4_1)
         apply And.intro
-        {simp only;
+        { simp only;
           -- 这个就是因为是reachable，也是validcube，所以也是属于rubiksgroup
           sorry
           --done
@@ -1173,19 +1101,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   →
   Finset.sum {0, 1, 2, 3, 4, 5, 6, 7,8,9,10,11} (g*G2Perm).2.orient = 0
   := by
-    -- #eval F*G1Perm*F'
-    -- ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 0, 1] },
-    -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
     intro h1
-    -- simp only [Prod.snd_mul]
     have h2: (G2Perm).2 = (G2Perm).2 := by exact rfl
     -- rw [h2]
     -- simp only [PieceState.mul_def,ps_mul]
-    -- Goal: ∑ x in {0, 1, 2, 3, 4, 5, 6, 7}, ((F * G1Perm ^ 2 * F').1.orient ∘ ⇑g.1.permute + g.1.orient) x = 0
     -- 直接看计算结果就知道了
-    -- (F * G1Perm * F').1.orient = ![2, 0, 0, 0, 0, 0, 0, 1]，求和模3也为0
-    -- (F * G1Perm * F').1.orient ∘ ⇑g.1.permute ，只是重新排列了，求和模3也为0
-    -- g.1.orient的话由h1知道也是求和为0。
     sorry
     -- done
 
@@ -1226,6 +1146,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       use moveAction1
       simp only [moveAction1]
       rw [mul_one]
+      apply And.intro
+      · exact { left := rfl, right := { left := rfl, right := rfl } }
+      apply And.intro
       sorry
       -- done -- 很明显了,Goal很多rfl-- 这个在社区解决了等待写
     }
@@ -1392,7 +1315,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   ((g).1.permute = (g * h).1.permute ∧ (g).2.permute = (g * h).2.permute)
   ∧
   Reachable h
-  := by sorry--
+  := by sorry --
 
   -- 任意H中的状态，满足：棱块方向数求和后模2为0,UR的方向数为0
     -- 则=>存在G中操作h，(g*h)还原所有棱块的方向数，且不改变全体角块的方向数，且不改变所有块的位置。
@@ -1489,7 +1412,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         exact h3_3_1
         done
       have h_b_3:Edge_Absolute_Orient (g * moveAction3).2 UR_index = 0
-        := by sorry --待办--
+        := by sorry
       have h3_4 := lemma2_002_FR (g * moveAction3) h3_3 {
         left := h_b_3
         right := h3
@@ -1619,8 +1542,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             := by
             simp only [Prod.snd_mul]
             rw [permute_mul]
-            -- rw [← Prod.snd_mul]
-            -- rw [← Prod.snd_mul]
             rw [lemma2_003]
             rfl
           rw [_h3_3]
@@ -2265,7 +2186,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       }
       {
         have ha1:(sign x.1.permute = 1)
-          := by sorry -- 这个很明显，但要问社区
+          := by
+          sorry -- 这个很明显，但要问社区
         right
         simp only [ha1,← signEq]
         simp only [and_self]
@@ -2597,7 +2519,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 theorem reachable_valid
 : ∀x : RubiksSuperType, Reachable x → x ∈ ValidCube
 := by
-  --todo
   intro x hrx
   induction hrx with -- 这里induction其实是分类讨论：
   | Solved =>
@@ -2667,9 +2588,10 @@ theorem valid_reachable
 := by
   intro x hvx
   have xIsValid := hvx -- 后面被拆散了，先保留一个。
-  simp [ValidCube] at hvx
+  simp only [ValidCube] at hvx
   let currStat := x
   -- 分类讨论1得到小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
+  --todo
   have h1 := lemma1 x hvx.2.1
   obtain ⟨h1_2,h1_3,h1_4,h1_5,h1_6,h1_7⟩ := h1
   let currStat := x * h1_2
@@ -2709,7 +2631,6 @@ theorem valid_reachable
       · exact reachable_valid od1 od2
       · exact hvx
     have h3_1_2 := EvenPermute_valid_isReachable (od1 * x) {left:=od3,right:=od4} h3_1_2_1
-    -- 这里很明显了，但是是不是需要增加Reachable的定义呢？但是可能会影响左推右的过程，但问题不大。
     apply Reachable.split_snd
     · exact h3_1_2
     · exact od2
@@ -2718,7 +2639,7 @@ theorem valid_reachable
     · exact h3_2
     · exact hvx
     done
-  -- 这里为啥还要证明已知的x ∈ ValidCube？原来是前面假设被拆散用了...
+    -- 这里为啥还要证明已知的x ∈ ValidCube？原来是前面假设被拆散用了...
   exact hvx
   done
 
