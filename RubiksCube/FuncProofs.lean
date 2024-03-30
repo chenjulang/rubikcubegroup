@@ -332,16 +332,32 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     →
     Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * (F^2 * G1Perm^2 * F^2)).1.orient = 0
     := by
-      sorry -- 计算结果可知
-      -- 这个在社区解决了等待写
-      -- done
+      intro hsum
+      set g2 := (F^2 * G1Perm^2 * F^2)
+      have temp: (g * g2).1.orient = (g.1 * g2.1).orient
+       :=by
+        simp only [RubiksSuperType_mul_assoc,
+          Prod.fst_mul, Prod.pow_fst, PieceState.mul_def]
+      rw [temp]
+      clear temp
+      have temp2 (a1:CornerType)(a2:CornerType): (a1 * a2).orient = (a2.orient ∘ a1.permute) + a1.orient
+        := by
+        rfl
+      have h1:= temp2 g.1 g2.1
+      rw [h1]
+      clear h1 temp2
+      simp only [Pi.add_apply] -- ***拆一个求和这么难写吗？
+      simp only [Finset.sum_add_distrib]
+      rw [hsum,add_zero]
+      have h2: Finset.sum {0, 1, 2,3,4,5,6,7} (F ^ 2 * G1Perm ^ 2 * F ^ 2).1.orient = 0 := by decide
+      apply mul_mem'_permuteRemainsSum_2 g.1.permute _ h2
+      done
 
     lemma lemma1_011:(F^2 * G1Perm^2 * F^2).1.permute = 1
     := by
       decide
       done
 
-    -- 这个结论是一个计算的结果吧？
     lemma lemma1_010
     (g:RubiksSuperType)
     :Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0
@@ -687,11 +703,14 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           { rw [← Prod.snd_mul]
             rw [← mul_assoc]
             rw [← h2_4_4]
-            --这个是直接计算结果，因为后者moveAction2的orient全零 --
             have h2_4_4_1: g.2.orient = (g * moveAction2).2.orient
               := by
-              sorry
-              -- done
+              rw [Prod.snd_mul]
+              simp only [PieceState.mul_def]
+              simp only [ps_mul]
+              have temp: (F^2*G1Perm*F^2).2.orient =0 := by decide
+              rw [temp]
+              simp only [Pi.zero_comp, zero_add]
             exact h2_4_4_1
           }
           apply And.intro
@@ -699,21 +718,29 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           { rw [← Prod.fst_mul]
             rw [← mul_assoc]
             rw [← h2_4_5.1]
-            --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
             have h2_4_5_1:g.1.permute = (g * moveAction2).1.permute
               := by
-              sorry
-              -- done
+              simp only [Prod.fst_mul]
+              rw [permute_mul]
+              rw [← Prod.fst_mul]
+              rw [← Prod.fst_mul]
+              have temp: (F^2*G1Perm*F^2).1.permute=1 := by decide
+              rw [temp]
+              rfl
             exact h2_4_5_1
           }
           { rw [← Prod.snd_mul]
             rw [← mul_assoc]
             rw [← h2_4_5.2]
-            --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
             have h2_4_6_1: g.2.permute = (g * moveAction2).2.permute
               := by
-              sorry
-              -- done
+              simp only [Prod.snd_mul]
+              rw [permute_mul]
+              rw [← Prod.snd_mul]
+              rw [← Prod.snd_mul]
+              have temp: (F^2*G1Perm*F^2).2.permute = 1 := by decide
+              rw [temp]
+              rfl
             exact h2_4_6_1
           }
           {
@@ -814,11 +841,14 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           { rw [← Prod.snd_mul]
             rw [← mul_assoc]
             rw [← h3_4_4]
-            --这个是直接计算结果，因为后者moveAction2的orient全零 --
             have h3_4_4_1: g.2.orient = (g * moveAction3).2.orient
               := by
-              -- done
-              sorry
+              rw [Prod.snd_mul]
+              simp only [PieceState.mul_def]
+              simp only [ps_mul]
+              have temp: ((F^2)*(G1Perm^2)*(F^2)).2.orient =0 := by decide
+              rw [temp]
+              simp only [Pi.zero_comp, zero_add]
             exact h3_4_4_1
           }
           apply And.intro
@@ -828,9 +858,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             rw [← h3_4_5.1]
             have h3_4_5_1:g.1.permute = (g * moveAction3).1.permute
               := by
-              --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
-              -- done
-              sorry
+              simp only [Prod.fst_mul]
+              rw [permute_mul]
+              rw [← Prod.fst_mul]
+              rw [← Prod.fst_mul]
+              have temp: ((F^2)*(G1Perm^2)*(F^2)).1.permute=1 := by decide
+              rw [temp]
+              rfl
             exact h3_4_5_1
           }
           { rw [← Prod.snd_mul]
@@ -838,9 +872,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             rw [← h3_4_5.2]
             have h3_4_6_1: g.2.permute = (g * moveAction3).2.permute
               := by
-              --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
-              -- done
-              sorry
+              simp only [Prod.snd_mul]
+              rw [permute_mul]
+              rw [← Prod.snd_mul]
+              rw [← Prod.snd_mul]
+              have temp: ((F^2)*(G1Perm^2)*(F^2)).2.permute = 1 := by decide
+              rw [temp]
+              rfl
             exact h3_4_6_1
           }
           {
@@ -1020,7 +1058,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         }
         {
           apply Reachable.mul
-          · sorry -- 很明显了 --sorry
+          · sorry -- 很明显了
           · exact h2_4_6
         }
       }
@@ -1130,7 +1168,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         { rw [← Prod.snd_mul]
           rw [← mul_assoc]
           rw [← h3_4_4]
-          --这个是直接计算结果，因为后者moveAction2的orient全零 --
           have h3_4_4_1: g.2.orient = (g * moveAction3).2.orient
             := by
             rw [Prod.snd_mul]
@@ -1148,9 +1185,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           rw [← h3_4_5.1]
           have h3_4_5_1:g.1.permute = (g * moveAction3).1.permute
             := by
-            --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
-            -- done
-            sorry
+            simp only [Prod.fst_mul]
+            rw [permute_mul]
+            rw [← Prod.fst_mul]
+            rw [← Prod.fst_mul]
+            have temp: (F * G1Perm ^ 2 * F').1.permute=1 := by decide
+            rw [temp]
+            rfl
           exact h3_4_5_1
         }
         { rw [← Prod.snd_mul]
@@ -1158,9 +1199,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           rw [← h3_4_5.2]
           have h3_4_6_1: g.2.permute = (g * moveAction3).2.permute
             := by
-            --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
-            -- done
-            sorry
+            simp only [Prod.snd_mul]
+            rw [permute_mul]
+            rw [← Prod.snd_mul]
+            rw [← Prod.snd_mul]
+            have temp: (F*(G1Perm^2)*F').2.permute = 1 := by decide
+            rw [temp]
+            rfl
           exact h3_4_6_1
         }
         {
@@ -1543,11 +1588,14 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       { rw [← Prod.fst_mul]
         rw [← mul_assoc]
         rw [← h3_4_4]
-        --这个是直接计算结果，因为后者moveAction2的orient全零 --
         have h3_4_4_1: g.1.orient = (g * moveAction3).1.orient
           := by
-          -- done
-          sorry
+          rw [Prod.fst_mul]
+          simp only [PieceState.mul_def]
+          simp only [ps_mul]
+          have temp: ((R)*(G2Perm)*(R')).1.orient =0 := by decide
+          rw [temp]
+          simp only [Pi.zero_comp, zero_add]
         exact h3_4_4_1
       }
       apply And.intro
@@ -1557,9 +1605,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         rw [← h3_4_5.1]
         have h3_4_5_1:g.1.permute = (g * moveAction3).1.permute
           := by
-          --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
-          -- done
-          sorry
+          simp only [Prod.fst_mul]
+          rw [permute_mul]
+          rw [← Prod.fst_mul]
+          rw [← Prod.fst_mul]
+          have temp: ((R)*(G2Perm)*(R')).1.permute=1 := by decide
+          rw [temp]
+          rfl
         exact h3_4_5_1
       }
       { rw [← Prod.snd_mul]
@@ -1567,9 +1619,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         rw [← h3_4_5.2]
         have h3_4_6_1: g.2.permute = (g * moveAction3).2.permute
           := by
-          --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
-          -- done
-          sorry
+          simp only [Prod.snd_mul]
+          rw [permute_mul]
+          rw [← Prod.snd_mul]
+          rw [← Prod.snd_mul]
+          have temp: ((R)*(G2Perm)*(R')).2.permute = 1 := by decide
+          rw [temp]
+          rfl
         exact h3_4_6_1
       }
       {
@@ -1691,14 +1747,14 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       { rw [← Prod.fst_mul]
         rw [← mul_assoc]
         rw [← h3_4_4]
-        --这个是直接计算结果，因为后者moveAction2的orient全零 --
         have h3_4_4_1: g.1.orient = (g * moveAction3).1.orient
           := by
-          -- #eval F*G1Perm*F'
-          -- ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 0, 1] },
-          -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
-          -- done
-          sorry
+          rw [Prod.fst_mul]
+          simp only [PieceState.mul_def]
+          simp only [ps_mul]
+          have temp: (G2Perm).1.orient =0 := by decide
+          rw [temp]
+          simp only [Pi.zero_comp, zero_add]
         exact h3_4_4_1
       }
       apply And.intro
@@ -1708,9 +1764,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         rw [← h3_4_5.1]
         have h3_4_5_1:g.1.permute = (g * moveAction3).1.permute
           := by
-          --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
-          -- done
-          sorry
+          simp only [Prod.fst_mul]
+          rw [permute_mul]
+          have temp: (G2Perm).1.permute=1 := by decide
+          rw [temp]
+          rfl
         exact h3_4_5_1
       }
       { rw [← Prod.snd_mul]
@@ -1718,9 +1776,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         rw [← h3_4_5.2]
         have h3_4_6_1: g.2.permute = (g * moveAction3).2.permute
           := by
-          --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
-          -- done
-          sorry
+          simp only [Prod.snd_mul]
+          rw [permute_mul]
+          have temp: (G2Perm).2.permute = 1 := by decide
+          rw [temp]
+          rfl
         exact h3_4_6_1
       }
       {
