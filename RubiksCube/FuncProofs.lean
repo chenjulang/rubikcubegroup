@@ -1,4 +1,3 @@
-import Paperproof
 import RubiksCube.RubiksCubeFunc
 import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.GroupTheory.Perm.Fin
@@ -2406,7 +2405,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         decide
     done
 
-  lemma EvenPermute_valid_isReachable
+  theorem EvenPermute_valid_isReachable
   (x: RubiksSuperType)
   (h3_2: sign x.1.permute = 1 ∧ 1 = sign x.2.permute)
   (hvx: x ∈ ValidCube)
@@ -2591,46 +2590,43 @@ theorem valid_reachable
   simp only [ValidCube] at hvx
   let currStat := x
   -- 分类讨论1得到小引理1：假设有状态g∈H,且∑(8在上 i=1) vi(g) = 0 (mod 3),则=>, g能通过有限次作用G中的元素，得到新的性质：v(g)={0,0,...,0}。而且不改变棱块的方向数。
-  --todo
   have h1 := lemma1 x hvx.2.1
-  obtain ⟨h1_2,h1_3,h1_4,h1_5,h1_6,h1_7⟩ := h1
-  let currStat := x * h1_2
+  obtain ⟨lemma1Move,h1_3,h1_4,h1_5,h1_6,h1_7⟩ := h1
+  let currStat := x * lemma1Move
   let currStat_satisfy := h1_4
   -- 分类讨论2得到小引理2:假设有状态g∈H,且∑(12在上 i=1) wi(g) = 0 (mod 2) ， 则=>,g能通过有限次作用G中的元素，得到新的性质：w(g)={0,0,...,0}。并且不改变角块的方向数。
-  have h2 := lemma2 (x * h1_2)
+  -- have h2 := lemma2 (x * lemma1Move)
   have h2_2 := hvx.2.2
   rw [h1_5] at h2_2
-  have h2 := lemma2 (x * h1_2) h2_2
-  obtain ⟨h2_3,h2_4,h2_5,h2_6,h2_7,h2_8⟩ := h2
+  have h2 := lemma2 (x * lemma1Move) h2_2
+  obtain ⟨lemma2Move,h2_4,h2_5,h2_6,h2_7,h2_8⟩ := h2
   have h2_9 := h1_4
   rw [h2_6] at h2_9
-  let currStat := x * h1_2 * h2_3
-  let currStat_satisfy: ((x * h1_2 * h2_3).2.orient = 0) ∧ ((x * h1_2 * h2_3).1.orient = 0)
+  let currStat := x * lemma1Move * lemma2Move
+  let currStat_satisfy: ((x * lemma1Move * lemma2Move).2.orient = 0) ∧ ((x * lemma1Move * lemma2Move).1.orient = 0)
     := { left := h2_5, right := h2_9 }
   -- ValidCube的条件1，限制了当前状态x的范围，所以可以进行2种分类讨论：1.（奇X奇) 2.(偶X偶）
   have h3 := hvx.1
   rw [lemma12_condition1_restriction] at h3
-  have cornerpermute_Remains : (x * h1_2 * h2_3).1.permute = x.1.permute := by
+  have cornerpermute_Remains : (x * lemma1Move * lemma2Move).1.permute = x.1.permute := by
     simp only [h2_7,h1_6]
-  have edgepermute_Remains : (x * h1_2 * h2_3).2.permute = x.2.permute := by
+  have edgepermute_Remains : (x * lemma1Move * lemma2Move).2.permute = x.2.permute := by
     simp only [h2_7,h1_6]
-  have corner_eqPermuteSign_edge : sign (x * h1_2 * h2_3).1.permute = sign (x * h1_2 * h2_3).2.permute := by
+  have corner_eqPermuteSign_edge : sign (x * lemma1Move * lemma2Move).1.permute
+  = sign (x * lemma1Move * lemma2Move).2.permute := by
     simp only [cornerpermute_Remains,edgepermute_Remains,hvx.1]
   cases h3 with
   | inl h3_1 =>
-    -- 操作是g5
     -- 某个过程，存在一个复合操作，作用一次到状态集合（奇X奇)上的某个元素后，
     -- 新状态会属于新的状态集合(偶X偶），归化成inr
-    -- lemma13_oddXoddToEvenXEven
-    -- lemma13_EvenPermute_valid_isReachable
-    -- Reachable g →   Reachable g*x →  Reachable x
     have h3_1_1 := oddXoddToEvenXEven x h3_1
-    obtain ⟨od1,od2,od3,od4⟩ := h3_1_1
-    have h3_1_2_1: od1 * x ∈ ValidCube := by
+    obtain ⟨OddToEvenMove,od2,od3,od4⟩ := h3_1_1
+    have h3_1_2_1: OddToEvenMove * x ∈ ValidCube := by
       apply RubiksGroup.mul_mem'
-      · exact reachable_valid od1 od2
+      · exact reachable_valid OddToEvenMove od2
       · exact hvx
-    have h3_1_2 := EvenPermute_valid_isReachable (od1 * x) {left:=od3,right:=od4} h3_1_2_1
+    have h3_1_2 := EvenPermute_valid_isReachable (OddToEvenMove * x)
+      {left:=od3,right:=od4} h3_1_2_1
     apply Reachable.split_snd
     · exact h3_1_2
     · exact od2
@@ -2639,7 +2635,6 @@ theorem valid_reachable
     · exact h3_2
     · exact hvx
     done
-    -- 这里为啥还要证明已知的x ∈ ValidCube？原来是前面假设被拆散用了...
   exact hvx
   done
 
@@ -2710,6 +2705,25 @@ IsSolved (R * R * R * R)
   have h1:= four_rs_eq_solved
   rw [h1]
   exact solved_is_solved
+
+/-- 单个角块旋转了1次。不符合直觉定义。 -/
+@[simp]
+theorem CornerTwistNotReachable : ¬ Reachable CornerTwist
+:= by
+  intro R_CT
+  apply reachable_valid at R_CT
+  have h1:= CornerTwistInvalid
+  exact h1 R_CT
+  done
+
+@[simp]
+theorem EdgeFlipNotReachable :  ¬ Reachable EdgeFlip  :=
+  by
+  intro R_EF
+  apply reachable_valid at R_EF
+  have h1:= EdgeFlipInvalid
+  exact h1 R_EF
+  done
 
 
 

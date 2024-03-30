@@ -15,7 +15,7 @@ package «rubiks-cube» where
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git"
 
-require Paperproof from git "https://github.com/Paper-Proof/paperproof.git"@"main"/"lean"
+-- require Paperproof from git "https://github.com/Paper-Proof/paperproof.git"@"main"/"lean"
 
 
 @[default_target]
