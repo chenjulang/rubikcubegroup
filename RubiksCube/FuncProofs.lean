@@ -251,6 +251,73 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   def BD_index :Fin 12 := 10
   def LD_index :Fin 12 := 11
 
+    -- 魔方第二基本定理的左推右部分：done
+  theorem reachable_valid
+  : ∀x : RubiksSuperType, Reachable x → x ∈ ValidCube
+  := by
+    intro x hrx
+    induction hrx with -- 这里induction其实是分类讨论：
+    | Solved =>
+        simp only [Solved, ValidCube]
+        decide
+    | FT c hc =>
+      cases hc with
+      | _ =>
+        simp only [ValidCube]
+        all_goals decide
+    | mul x y hrx hry a_ih a_ih_1 =>
+      -- 归纳证明：
+      -- 对于某个项(x*y),假设Reachable (x*y),要推出（x*y） ∈ ValidCube
+      -- 由于Reachable.mul的构造，Reachable (x*y)实际上还有2个前提的真命题：Reachable x , Reachable y
+      -- 归纳证明提供了一个归纳假设：假设乘积项的长度小于(x*y)的都满足原命题；换句话说，对于x,y, 满足: x∈ ValidCube, y ∈ ValidCube
+      -- 现在目标是：推出（x*y） ∈ ValidCube
+      have Rxy: Reachable (x*y) := Reachable.mul x y hrx hry
+      apply RubiksGroup.mul_mem' -- 反推一步，两个元素都是
+      · exact a_ih
+      · exact a_ih_1
+    | inv c hc hc2 =>
+      -- hc2可以理解成：6个基本操作在上面FT都已经证明∈ ValidCube
+      simp only [ValidCube]
+      simp only [Set.mem_setOf_eq]
+      simp only [Prod.fst_inv]
+      simp only [PieceState.inv_def]
+      simp only [Prod.snd_inv]
+      simp only [PieceState.inv_def]
+      apply And.intro
+      {
+        simp only [ps_inv]
+        simp only [map_inv]
+        simp only [Int.units_inv_eq_self]
+        simp only [ValidCube] at hc2
+        simp only [Set.mem_setOf_eq] at hc2
+        exact hc2.1
+      }
+      apply And.intro
+      {
+        simp only [ps_inv]
+        simp only [Pi.neg_apply]
+        simp only [Finset.sum_neg_distrib]
+        simp only [neg_eq_zero]
+        simp only [ValidCube] at hc2
+        obtain ⟨hc3,hc4,hc5⟩:= hc2
+        apply mul_mem'_permuteRemainsSum_2
+        exact hc4
+        done
+      }
+      { simp only [ps_inv]
+        simp only [Pi.neg_apply]
+        simp only [Finset.sum_neg_distrib]
+        simp only [neg_eq_zero]
+        simp only [ValidCube] at hc2
+        obtain ⟨hc3,hc4,hc5⟩:= hc2
+        apply mul_mem'_permuteRemainsSum
+        exact hc5
+        done
+      }
+    done
+
+
+
 
   section lemma1TrashCode
 
@@ -798,7 +865,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0 --角块方形数求和后，模3为0。
   →
   ∃ h ∈ RubiksGroup ,
-  (g * h).fst.orient = 0
+  (g * h).fst.orient = 0 -- 棱块方向增加量归零
   ∧
   (g).2.orient = (g * h).2.orient -- 不变
   ∧
@@ -811,9 +878,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     by_cases ha0 : (Corner_Absolute_Orient g.1 UFL_index)=0
     {
       let moveAction1 := Solved
-      have h1 := lemma1_001_UFL g hsum0 ha0
-      obtain ⟨h1_1,h1_2,h1_3,h1_4,h1_5,h1_6⟩ := h1
-      use h1_1
+      have h1 := lemma1_001_UFL g hsum0 ha0 -- 强力助手lemma1_001_UFL
+      obtain ⟨solution0,h1_2,h1_3,h1_4,h1_5,h1_6⟩ := h1
+      use solution0
       done
     }
     { by_cases ha1: (Corner_Absolute_Orient g.1 UFL_index) = 1
@@ -827,17 +894,28 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         have h2_1: (g.1.orient + moveAction2.1.orient ∘ g.1.permute) (g.1.permute⁻¹ UFL_index)
         = g.1.orient (g.1.permute⁻¹ UFL_index) + moveAction2.1.orient (UFL_index)
         := by
-          simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Pi.add_apply,
-            Function.comp_apply, apply_inv_self]
+          simp only [Prod.fst_mul]
+          simp only [PieceState.mul_def]
+          simp only [ps_mul_assoc]
+          simp only [Pi.add_apply]
+          simp only [Function.comp_apply]
+          simp [Corner_Absolute_Orient] at ha1
+          have temp: g.1.permute⁻¹ = g.1.permute.symm := by exact rfl
+          rw [temp]
+          rw [ha1]
+          simp only [apply_symm_apply]
           done
         simp only [Corner_Absolute_Orient] at ha1
         simp at ha1
         -- 关键引理证明2：先找出从ha1发掘出的这个索引有什么用。原来已知的是这样的。
-        have h2_2: g.1.orient (g.1.permute⁻¹ UFL_index) + moveAction2.1.orient (UFL_index) = 0
+        have h2_2: g.1.orient (g.1.permute⁻¹ UFL_index) + moveAction2.1.orient (UFL_index)
+        = 0
         := by
           simp only [Inv.inv]
           rw [ha1]
-          simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc]
+          simp only [Prod.fst_mul]
+          simp only [PieceState.mul_def]
+          simp only [ps_mul_assoc]
           have h2_2_1: (ps_mul F.1 (ps_mul G1Perm.1 F'.1)).orient UFL_index = 2
           := by rfl
           rw [h2_2_1]
@@ -845,7 +923,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           done
         have h2: (Corner_Absolute_Orient (g*moveAction2).1 UFL_index) = 0
         := by
-          have _h2_1: (g.1.orient + moveAction2.1.orient ∘ ⇑g.1.permute) (g.1.permute⁻¹ UFL_index) = 0 := h2_1.trans h2_2
+          have _h2_1: (g.1.orient + moveAction2.1.orient ∘ ⇑g.1.permute) (g.1.permute⁻¹ UFL_index)
+            = 0 := h2_1.trans h2_2
           simp only [Corner_Absolute_Orient]
           have _h2_3: (g * (F * G1Perm * F')).1.permute = (g).1.permute
             := by
@@ -862,13 +941,16 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             simp only [ps_mul] at _h2_4_1
             simp only [← Prod.fst_mul] at _h2_4_1
             rw [_h2_4_1]
-            simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc]
+            simp only [Prod.fst_mul]
+            simp only [PieceState.mul_def]
+            simp only [ps_mul_assoc]
             rw [add_comm]
             done
           rw [← _h2_4]
           exact _h2_1
           done
-        simp only [Prod.fst_mul, Prod.snd_mul]
+        simp only [Prod.fst_mul]
+        simp only [Prod.snd_mul]
         have h2_3 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * moveAction2).1.orient = 0
           := by
           have h2_3_1 := lemma1_005 g hsum0
@@ -879,10 +961,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         obtain ⟨h2_4_1,h2_4_2,h2_4_3,h2_4_4,h2_4_5,h2_4_6⟩ := h2_4
         use (moveAction2 * h2_4_1)
         apply And.intro
-        { simp only;
+        { simp only
           -- 这个就是因为是reachable，也是validcube，所以也是属于rubiksgroup
-          sorry
-          --done
+          have temp: Reachable (F * G1Perm * F' * h2_4_1) := by sorry
+          have temp2:(F * G1Perm * F' * h2_4_1) ∈ ValidCube
+            := by
+            apply reachable_valid (F * G1Perm * F' * h2_4_1) temp
+          exact temp2
         }
         apply And.intro
         { rw [← Prod.fst_mul]
@@ -893,11 +978,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         { rw [← Prod.snd_mul]
           rw [← mul_assoc]
           rw [← h2_4_4]
-          --这个是直接计算结果，因为后者moveAction2的orient全零 --
           have h2_4_4_1: g.2.orient = (g * moveAction2).2.orient
             := by
             rw [Prod.snd_mul]
-            simp only [PieceState.mul_def,ps_mul]
+            simp only [PieceState.mul_def]
+            simp only [ps_mul]
             rw [lemma1_013]
             simp only [Pi.zero_comp, zero_add]
             done
@@ -908,21 +993,29 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         { rw [← Prod.fst_mul]
           rw [← mul_assoc]
           rw [← h2_4_5.1]
-          --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
           have h2_4_5_1:g.1.permute = (g * moveAction2).1.permute
             := by
-            sorry
-            -- done
+            simp only [Prod.fst_mul]
+            rw [permute_mul]
+            rw [← Prod.fst_mul]
+            rw [← Prod.fst_mul]
+            have temp: (F * G1Perm * F').1.permute =1 := by decide
+            rw [temp]
+            rfl
           exact h2_4_5_1
         }
         { rw [← Prod.snd_mul]
           rw [← mul_assoc]
           rw [← h2_4_5.2]
-          --这个是直接计算结果，因为后者moveAction2的permute为单位元 --
           have h2_4_6_1: g.2.permute = (g * moveAction2).2.permute
             := by
-            sorry
-            -- done
+            simp only [Prod.snd_mul]
+            rw [permute_mul]
+            rw [← Prod.snd_mul]
+            rw [← Prod.snd_mul]
+            have temp: (F * G1Perm * F').2.permute = 1 := by decide
+            rw [temp]
+            rfl
           exact h2_4_6_1
         }
         {
@@ -931,6 +1024,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           · exact h2_4_6
         }
       }
+      -- 最后一个分类:
       { have ha2: Corner_Absolute_Orient g.1 UFL_index = 2
           := by
           -- 怎么使用排除法呢？很明显是对的,非0，1,就是2
@@ -953,8 +1047,15 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         have h3_1: (g.1.orient + moveAction3.1.orient ∘ g.1.permute) (g.1.permute⁻¹ UFL_index)
         = g.1.orient (g.1.permute⁻¹ UFL_index) + moveAction3.1.orient (UFL_index)
         := by
-          simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Pi.add_apply,
-            Function.comp_apply, apply_inv_self]
+          simp only [Prod.fst_mul]
+          simp only [PieceState.mul_def]
+          simp only [ps_mul_assoc]
+          simp only [Pi.add_apply]
+          simp only [Function.comp_apply]
+          simp [Corner_Absolute_Orient] at ha1
+          have temp: g.1.permute⁻¹ = g.1.permute.symm := by exact rfl
+          rw [temp]
+          simp only [apply_symm_apply]
           done
         simp only [Corner_Absolute_Orient] at ha2
         simp at ha2
@@ -963,7 +1064,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         := by
           simp only [Inv.inv]
           rw [ha2]
-          simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc]
+          simp only [Prod.fst_mul]
+          simp only [PieceState.mul_def]
+          simp only [ps_mul_assoc]
           have h3_2_1: (ps_mul F.1 (ps_mul (G1Perm ^ 2).1 F'.1)).orient UFL_index = 1
           := by rfl
           rw [h3_2_1]
@@ -991,7 +1094,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             simp only [ps_mul] at _h3_4_1
             simp only [← Prod.fst_mul] at _h3_4_1
             rw [_h3_4_1]
-            simp only [Prod.fst_mul, PieceState.mul_def, ps_mul_assoc]
+            simp only [Prod.fst_mul]
+            simp only [PieceState.mul_def]
+            simp only [ps_mul_assoc]
             rw [add_comm]
             done
           rw [← _h3_4]
@@ -1008,10 +1113,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         obtain ⟨h3_4_1,h3_4_2,h3_4_3,h3_4_4,h3_4_5,h3_4_6⟩ := h3_4
         use (moveAction3 * h3_4_1)
         apply And.intro
-        {simp only;
+        { simp only
           -- 这个就是因为是reachable，也是validcube，所以也是属于rubiksgroup
-          sorry
-          --done
+          have temp: Reachable (F * G1Perm ^ 2 * F' * h3_4_1) := by sorry
+          have temp2:(F * G1Perm ^ 2 * F' * h3_4_1) ∈ ValidCube
+            := by
+            apply reachable_valid (F * G1Perm ^ 2 * F' * h3_4_1) temp
+          exact temp2
         }
         apply And.intro
         { rw [← Prod.fst_mul]
@@ -1025,11 +1133,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           --这个是直接计算结果，因为后者moveAction2的orient全零 --
           have h3_4_4_1: g.2.orient = (g * moveAction3).2.orient
             := by
-            -- #eval F*G1Perm*F'
-            -- ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 0, 1] },
-            -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
-            -- done
-            sorry
+            rw [Prod.snd_mul]
+            simp only [PieceState.mul_def]
+            simp only [ps_mul]
+            have temp: (F*(G1Perm^2)*F').2.orient =0 := by decide
+            simp only [Pi.zero_comp, zero_add]
           exact h3_4_4_1
         }
         apply And.intro
@@ -1148,6 +1256,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       apply And.intro
       · exact { left := rfl, right := { left := rfl, right := rfl } }
       apply And.intro
+      sorry
       sorry
       -- done -- 很明显了,Goal很多rfl-- 这个在社区解决了等待写
     }
@@ -2514,70 +2623,70 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     exact hvx
     done
 
--- 魔方第二基本定理的左推右部分：done
-theorem reachable_valid
-: ∀x : RubiksSuperType, Reachable x → x ∈ ValidCube
-:= by
-  intro x hrx
-  induction hrx with -- 这里induction其实是分类讨论：
-  | Solved =>
-      simp only [Solved, ValidCube]
-      decide
-  | FT c hc =>
-    cases hc with
-    | _ =>
-      simp only [ValidCube]
-      all_goals decide
-  | mul x y hrx hry a_ih a_ih_1 =>
-    -- 归纳证明：
-    -- 对于某个项(x*y),假设Reachable (x*y),要推出（x*y） ∈ ValidCube
-    -- 由于Reachable.mul的构造，Reachable (x*y)实际上还有2个前提的真命题：Reachable x , Reachable y
-    -- 归纳证明提供了一个归纳假设：假设乘积项的长度小于(x*y)的都满足原命题；换句话说，对于x,y, 满足: x∈ ValidCube, y ∈ ValidCube
-    -- 现在目标是：推出（x*y） ∈ ValidCube
-    have Rxy: Reachable (x*y) := Reachable.mul x y hrx hry
-    apply RubiksGroup.mul_mem' -- 反推一步，两个元素都是
-    · exact a_ih
-    · exact a_ih_1
-  | inv c hc hc2 =>
-    -- hc2可以理解成：6个基本操作在上面FT都已经证明∈ ValidCube
-    simp only [ValidCube]
-    simp only [Set.mem_setOf_eq]
-    simp only [Prod.fst_inv]
-    simp only [PieceState.inv_def]
-    simp only [Prod.snd_inv]
-    simp only [PieceState.inv_def]
-    apply And.intro
-    {
-      simp only [ps_inv]
-      simp only [map_inv]
-      simp only [Int.units_inv_eq_self]
-      simp only [ValidCube] at hc2
-      simp only [Set.mem_setOf_eq] at hc2
-      exact hc2.1
-    }
-    apply And.intro
-    {
-      simp only [ps_inv]
-      simp only [Pi.neg_apply]
-      simp only [Finset.sum_neg_distrib]
-      simp only [neg_eq_zero]
-      simp only [ValidCube] at hc2
-      obtain ⟨hc3,hc4,hc5⟩:= hc2
-      apply mul_mem'_permuteRemainsSum_2
-      exact hc4
-      done
-    }
-    { simp only [ps_inv]
-      simp only [Pi.neg_apply]
-      simp only [Finset.sum_neg_distrib]
-      simp only [neg_eq_zero]
-      simp only [ValidCube] at hc2
-      obtain ⟨hc3,hc4,hc5⟩:= hc2
-      apply mul_mem'_permuteRemainsSum
-      exact hc5
-      done
-    }
-  done
+-- -- 魔方第二基本定理的左推右部分：done
+-- theorem reachable_valid
+-- : ∀x : RubiksSuperType, Reachable x → x ∈ ValidCube
+-- := by
+--   intro x hrx
+--   induction hrx with -- 这里induction其实是分类讨论：
+--   | Solved =>
+--       simp only [Solved, ValidCube]
+--       decide
+--   | FT c hc =>
+--     cases hc with
+--     | _ =>
+--       simp only [ValidCube]
+--       all_goals decide
+--   | mul x y hrx hry a_ih a_ih_1 =>
+--     -- 归纳证明：
+--     -- 对于某个项(x*y),假设Reachable (x*y),要推出（x*y） ∈ ValidCube
+--     -- 由于Reachable.mul的构造，Reachable (x*y)实际上还有2个前提的真命题：Reachable x , Reachable y
+--     -- 归纳证明提供了一个归纳假设：假设乘积项的长度小于(x*y)的都满足原命题；换句话说，对于x,y, 满足: x∈ ValidCube, y ∈ ValidCube
+--     -- 现在目标是：推出（x*y） ∈ ValidCube
+--     have Rxy: Reachable (x*y) := Reachable.mul x y hrx hry
+--     apply RubiksGroup.mul_mem' -- 反推一步，两个元素都是
+--     · exact a_ih
+--     · exact a_ih_1
+--   | inv c hc hc2 =>
+--     -- hc2可以理解成：6个基本操作在上面FT都已经证明∈ ValidCube
+--     simp only [ValidCube]
+--     simp only [Set.mem_setOf_eq]
+--     simp only [Prod.fst_inv]
+--     simp only [PieceState.inv_def]
+--     simp only [Prod.snd_inv]
+--     simp only [PieceState.inv_def]
+--     apply And.intro
+--     {
+--       simp only [ps_inv]
+--       simp only [map_inv]
+--       simp only [Int.units_inv_eq_self]
+--       simp only [ValidCube] at hc2
+--       simp only [Set.mem_setOf_eq] at hc2
+--       exact hc2.1
+--     }
+--     apply And.intro
+--     {
+--       simp only [ps_inv]
+--       simp only [Pi.neg_apply]
+--       simp only [Finset.sum_neg_distrib]
+--       simp only [neg_eq_zero]
+--       simp only [ValidCube] at hc2
+--       obtain ⟨hc3,hc4,hc5⟩:= hc2
+--       apply mul_mem'_permuteRemainsSum_2
+--       exact hc4
+--       done
+--     }
+--     { simp only [ps_inv]
+--       simp only [Pi.neg_apply]
+--       simp only [Finset.sum_neg_distrib]
+--       simp only [neg_eq_zero]
+--       simp only [ValidCube] at hc2
+--       obtain ⟨hc3,hc4,hc5⟩:= hc2
+--       apply mul_mem'_permuteRemainsSum
+--       exact hc5
+--       done
+--     }
+--   done
 
 
 
