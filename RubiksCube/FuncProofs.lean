@@ -54,7 +54,6 @@ section ValidityChecks
       { apply FaceTurn.F' }
       done
 
-  -- todo
   /-- 单个角块旋转了1次。不符合非直觉定义。 -/
   @[simp]
   lemma CornerTwistInvalid : CornerTwist ∉ ValidCube
@@ -2598,64 +2597,65 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 theorem reachable_valid
 : ∀x : RubiksSuperType, Reachable x → x ∈ ValidCube
 := by
+  --todo
   intro x hrx
-  induction hrx with
+  induction hrx with -- 这里induction其实是分类讨论：
   | Solved =>
       simp only [Solved, ValidCube]
-      apply And.intro
-      { apply Eq.refl }
-      { apply And.intro
-        { apply Eq.refl }
-        { apply Eq.refl } }
+      decide
   | FT c hc =>
     cases hc with
     | _ =>
-        simp only [ValidCube]
-        apply And.intro
-        {
-          -- decide -- 这个可以证明。但是会拖慢后面的编译
-          sorry
-        }
-        { apply And.intro
-          { apply Eq.refl }
-          { apply Eq.refl } }
-        done
+      simp only [ValidCube]
+      all_goals decide
   | mul x y hrx hry a_ih a_ih_1 =>
-      -- 归纳证明：
-      -- *** 精华在这里，前面写了几百行，就是为了这几行：
-      apply RubiksGroup.mul_mem' -- 反推一步，两个元素都是
-      simp only [Subsemigroup.mem_carrier, Submonoid.mem_toSubsemigroup, Subgroup.mem_toSubmonoid]
-      · exact a_ih
-      · exact a_ih_1
+    -- 归纳证明：
+    -- 对于某个项(x*y),假设Reachable (x*y),要推出（x*y） ∈ ValidCube
+    -- 由于Reachable.mul的构造，Reachable (x*y)实际上还有2个前提的真命题：Reachable x , Reachable y
+    -- 归纳证明提供了一个归纳假设：假设乘积项的长度小于(x*y)的都满足原命题；换句话说，对于x,y, 满足: x∈ ValidCube, y ∈ ValidCube
+    -- 现在目标是：推出（x*y） ∈ ValidCube
+    have Rxy: Reachable (x*y) := Reachable.mul x y hrx hry
+    apply RubiksGroup.mul_mem' -- 反推一步，两个元素都是
+    · exact a_ih
+    · exact a_ih_1
   | inv c hc hc2 =>
-    simp only [Solved, ValidCube]
-    simp only [Set.mem_setOf_eq, Prod.fst_inv, PieceState.inv_def, Prod.snd_inv]
+    -- hc2可以理解成：6个基本操作在上面FT都已经证明∈ ValidCube
+    simp only [ValidCube]
+    simp only [Set.mem_setOf_eq]
+    simp only [Prod.fst_inv]
+    simp only [PieceState.inv_def]
+    simp only [Prod.snd_inv]
+    simp only [PieceState.inv_def]
     apply And.intro
     {
       simp only [ps_inv]
+      simp only [map_inv]
+      simp only [Int.units_inv_eq_self]
       simp only [ValidCube] at hc2
-      simp only [map_inv, Int.units_inv_eq_self]
-      obtain ⟨hc3,hc4⟩:= hc2
-      exact hc3
+      simp only [Set.mem_setOf_eq] at hc2
+      exact hc2.1
     }
-    { apply And.intro
-      {
-        simp only [ps_inv]
-        simp only [Pi.neg_apply, Finset.sum_neg_distrib, neg_eq_zero]
-        simp only [ValidCube] at hc2
-        obtain ⟨hc3,hc4,hc5⟩:= hc2
-        apply mul_mem'_permuteRemainsSum_2
-        exact hc4
-        done
-      }
-      { simp only [ps_inv]
-        simp only [Pi.neg_apply, Finset.sum_neg_distrib, neg_eq_zero]
-        simp only [ValidCube] at hc2
-        obtain ⟨hc3,hc4,hc5⟩:= hc2
-        apply mul_mem'_permuteRemainsSum
-        exact hc5
-        done
-      }
+    apply And.intro
+    {
+      simp only [ps_inv]
+      simp only [Pi.neg_apply]
+      simp only [Finset.sum_neg_distrib]
+      simp only [neg_eq_zero]
+      simp only [ValidCube] at hc2
+      obtain ⟨hc3,hc4,hc5⟩:= hc2
+      apply mul_mem'_permuteRemainsSum_2
+      exact hc4
+      done
+    }
+    { simp only [ps_inv]
+      simp only [Pi.neg_apply]
+      simp only [Finset.sum_neg_distrib]
+      simp only [neg_eq_zero]
+      simp only [ValidCube] at hc2
+      obtain ⟨hc3,hc4,hc5⟩:= hc2
+      apply mul_mem'_permuteRemainsSum
+      exact hc5
+      done
     }
   done
 
