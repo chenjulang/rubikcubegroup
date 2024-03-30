@@ -1137,6 +1137,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             simp only [PieceState.mul_def]
             simp only [ps_mul]
             have temp: (F*(G1Perm^2)*F').2.orient =0 := by decide
+            rw [temp]
             simp only [Pi.zero_comp, zero_add]
           exact h3_4_4_1
         }
