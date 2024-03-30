@@ -326,6 +326,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       decide
       done
 
+    -- todo -- 整理成小引理：
     lemma lemma1_012
     (g:RubiksSuperType)
     :Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0
@@ -1240,6 +1241,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   →
   Finset.sum {0, 1, 2, 3, 4, 5, 6, 7,8,9,10,11} (g * (R * G2Perm * R')).2.orient = 0
   := by
+    have h2: Finset.sum {0, 1, 2,3,4,5,6,7} (R * G2Perm * R').2.orient = 0 := by decide
     sorry -- 计算结果可知
     -- done
 
