@@ -757,12 +757,6 @@ section RubiksGroup
     (hRemainsP: (g * moveAction).1.permute = g.1.permute)
     (ha1: Corner_Absolute_Orient g.1 index = 1)
     (h_MoveAction: (moveAction).1.orient index = 2)
-    -- (h1: (g.1.orient + moveAction.1.orient ∘ g.1.permute) (g.1.permute⁻¹ index)
-    --     = g.1.orient (g.1.permute⁻¹ index) + moveAction.1.orient (index)
-    -- )
-    -- (h2: g.1.orient (g.1.permute⁻¹ index) + moveAction.1.orient (index)
-    --     = 0
-    -- )
     :
     (Corner_Absolute_Orient (g*moveAction).1 index) = 0
     := by

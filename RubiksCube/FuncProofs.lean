@@ -869,75 +869,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         -- #eval F*G1Perm*F'
         -- ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![2, 0, 0, 0, 0, 0, 0, 1] },
         -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
-        -- 如何说明g*moveAction2满足这个呢？：(Corner_Absolute_Orient (g*moveAction2).1 UFL_index) = 0
-          -- 也就是要证明：UFL方向数为1,操作后为0.
-        -- -- 关键引理证明1:先找出从ha1发掘出的这个索引有什么用。
-        -- have h2_1: (g.1.orient + moveAction2.1.orient ∘ g.1.permute) (g.1.permute⁻¹ UFL_index)
-        -- = g.1.orient (g.1.permute⁻¹ UFL_index) + moveAction2.1.orient (UFL_index)
-        -- := by
-        --   simp only [Prod.fst_mul]
-        --   simp only [PieceState.mul_def]
-        --   simp only [ps_mul_assoc]
-        --   simp only [Pi.add_apply]
-        --   simp only [Function.comp_apply]
-        --   simp [Corner_Absolute_Orient] at ha1
-        --   have temp: g.1.permute⁻¹ = g.1.permute.symm := by exact rfl
-        --   rw [temp]
-        --   rw [ha1]
-        --   simp only [apply_symm_apply]
-        --   done
-        -- simp only [Corner_Absolute_Orient] at ha1
-        -- simp at ha1
-        -- -- 关键引理证明2：先找出从ha1发掘出的这个索引有什么用。原来已知的是这样的。
-        -- have h2_2: g.1.orient (g.1.permute⁻¹ UFL_index) + moveAction2.1.orient (UFL_index)
-        -- = 0
-        -- := by
-        --   simp only [Inv.inv]
-        --   rw [ha1]
-        --   simp only [Prod.fst_mul]
-        --   simp only [PieceState.mul_def]
-        --   simp only [ps_mul_assoc]
-        --   have h2_2_1: (ps_mul F.1 (ps_mul G1Perm.1 F'.1)).orient UFL_index = 2
-        --   := by rfl
-        --   rw [h2_2_1]
-        --   rfl
-        --   done
-        -- todo 将h2_1， h2_2 也整理抽象进来
         have h2: (Corner_Absolute_Orient (g*moveAction2).1 UFL_index) = 0
         := by
-          -- 关键引理证明1:先找出从ha1发掘出的这个索引有什么用。
-          have h2_1: (g.1.orient + moveAction2.1.orient ∘ g.1.permute) (g.1.permute⁻¹ UFL_index)
-          = g.1.orient (g.1.permute⁻¹ UFL_index) + moveAction2.1.orient (UFL_index)
-          := by
-            simp only [Prod.fst_mul]
-            simp only [PieceState.mul_def]
-            simp only [ps_mul_assoc]
-            simp only [Pi.add_apply]
-            simp only [Function.comp_apply]
-            simp [Corner_Absolute_Orient] at ha1
-            have temp: g.1.permute⁻¹ = g.1.permute.symm := by exact rfl
-            rw [temp]
-            rw [ha1]
-            simp only [apply_symm_apply]
-            done
-          simp only [Corner_Absolute_Orient] at ha1
-          simp at ha1
-          -- 关键引理证明2：先找出从ha1发掘出的这个索引有什么用。原来已知的是这样的。
-          have h2_2: g.1.orient (g.1.permute⁻¹ UFL_index) + moveAction2.1.orient (UFL_index)
-          = 0
-          := by
-            simp only [Inv.inv]
-            rw [ha1]
-            simp only [Prod.fst_mul]
-            simp only [PieceState.mul_def]
-            simp only [ps_mul_assoc]
-            have h2_2_1: (ps_mul F.1 (ps_mul G1Perm.1 F'.1)).orient UFL_index = 2
-            := by rfl
-            rw [h2_2_1]
-            rfl
-            done
-          have _h2_1: (g.1.orient + moveAction2.1.orient ∘ ⇑g.1.permute) (g.1.permute⁻¹ UFL_index)
-            = 0 := h2_1.trans h2_2
+          have h_MoveAction: (F * G1Perm * F').1.orient UFL_index  = 2
+            := by decide
           simp only [Corner_Absolute_Orient]
           have _h2_3: (g * (F * G1Perm * F')).1.permute = (g).1.permute
             := by
@@ -947,7 +882,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             rw [← Prod.fst_mul]
             rw [lemma1_006]
             rfl
-          apply mulActon_CornerAbsoluteOrient_OneIndex_is0 g moveAction2 UFL_index _h2_3 h2_1 h2_2
+          apply mulActon_CornerAbsoluteOrient_OneIndex_is0
+          · exact _h2_3
+          · exact ha1
+          · exact h_MoveAction
           done
         simp only [Prod.fst_mul]
         simp only [Prod.snd_mul]
