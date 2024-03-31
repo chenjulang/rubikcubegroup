@@ -624,7 +624,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           -- 这个引理h_b_2_4'需要分类讨论，代码将是很深的嵌套，想想怎么解决。应该要统一一个引理解决，or，一个通用的引理到处用。
           -- 否则每次都要证明对前面已还原的角块的绝对方向数是不变的。
           have h_b_2_4': Corner_Absolute_Orient (g * moveAction2).1 UFL_index = 0
-            := by sorry -- 待办，证明类似lemma1中的h2
+            := by sorry -- ???，证明类似lemma1中的h2
           have h2_4 := lemma1_002_DFL (g * moveAction2) h2_3 {
             left := h_b_2_4' -- Corner_Absolute_Orient (g * moveAction2).1 UFL_index = 0
             right := h2
@@ -762,7 +762,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           have h_b_3:Corner_Absolute_Orient (g * moveAction3).1 UFL_index = 0
             := by
             simp only [Corner_Absolute_Orient]
-            sorry --待办 -- 类似于 (Corner_Absolute_Orient (g*moveAction3).1 DFL_index) = 0的证明，需要从已知出发，先证明两个关键引理。
+            sorry -- ???待办 -- 类似于 (Corner_Absolute_Orient (g*moveAction3).1 DFL_index) = 0的证明，需要从已知出发，先证明两个关键引理。
           have h3_4 := lemma1_002_DFL (g * moveAction3) h3_3 {
             left := h_b_3
             right := h3
@@ -1508,7 +1508,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         exact h3_3_1
         done
       have h_b_3:Edge_Absolute_Orient (g * moveAction3).2 UR_index = 0
-        := by sorry
+        := by sorry -- ???
       have h3_4 := lemma2_002_FR (g * moveAction3) h3_3 {
         left := h_b_3
         right := h3
@@ -2045,7 +2045,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         apply testaaa1
         sorry
       --   -- -- 很明显了
-      --   -- sorry
     }
     by_cases ha0:x.1.permute = p3
       -- 执行：交换子复合g4 : G4Perm*(D'*L*L*G4Perm*L*L*D)⁻¹
@@ -2085,7 +2084,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         apply testaaa1
         sorry
       --   -- -- 很明显了
-      --   -- sorry
     }
     sorry
 
@@ -2166,7 +2164,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         apply testaaa1
         sorry
       --   -- -- 很明显了
-      --   -- sorry
     }
     by_cases ha2:x.2.permute = p2
       -- 执行：
@@ -2211,7 +2208,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         apply testaaa1
         sorry
       --   -- -- 很明显了
-      --   -- sorry
     }
     by_cases ha3:x.2.permute = p3
       -- 执行：
@@ -2254,7 +2250,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         apply testaaa1
         sorry
       --   -- -- 很明显了
-      --   -- sorry
     }
     sorry
 
@@ -2461,7 +2456,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     have cornerPermuteTo1 := lemma14 g h1
     obtain ⟨c1,c2,c3,c4,c5,c6⟩ := cornerPermuteTo1
     have EdgePermute_remains_in_aGroup: (g * c1).2.permute ∈ alternatingGroup (Fin 12)
-      := by sorry
+      := by sorry -- ???
     have edgePermuteTo1 := lemma15 (g * c1) EdgePermute_remains_in_aGroup
     obtain ⟨e1,e2,e3,e4,e5,e6⟩ := edgePermuteTo1
     use (c1 * e1)
