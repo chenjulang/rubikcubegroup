@@ -750,15 +750,16 @@ section RubiksGroup
       rw [gSumOrient,add_zero]
       apply mul_mem'_permuteRemainsSum g.2.permute _ g2SumOrient
 
+    -- 这个引理应该更加一般性一点，A+B=C
     lemma mulActon_CornerAbsoluteOrient_OneIndex_is0
     (g : RubiksSuperType)
     (moveAction : RubiksSuperType)
     (index: Fin 8)
     (hRemainsP: (g * moveAction).1.permute = g.1.permute)
-    (ha1: Corner_Absolute_Orient g.1 index = 1)
-    (h_MoveAction: (moveAction).1.orient index = 2)
+    (ha1: Corner_Absolute_Orient g.1 index = 1) -- A
+    (h_MoveAction: (moveAction).1.orient index = 2) -- B
     :
-    (Corner_Absolute_Orient (g*moveAction).1 index) = 0
+    (Corner_Absolute_Orient (g*moveAction).1 index) = 0 -- C
     := by
       have h1: (g.1.orient + moveAction.1.orient ∘ g.1.permute) (g.1.permute⁻¹ index)
       = g.1.orient (g.1.permute⁻¹ index) + moveAction.1.orient (index)
@@ -784,6 +785,58 @@ section RubiksGroup
         done
       have _h2_1: (g.1.orient + moveAction.1.orient ∘ ⇑g.1.permute) (g.1.permute⁻¹ index)
         = 0 := h1.trans h2
+      simp only [Corner_Absolute_Orient]
+      rw [hRemainsP]
+      have _h2_4: (g.1.orient + moveAction.1.orient ∘ g.1.permute) = (g * moveAction).1.orient
+        := by
+        have _h2_4_1 := PieceState.mul_def g.1 moveAction.1
+        simp only [ps_mul] at _h2_4_1
+        simp only [← Prod.fst_mul] at _h2_4_1
+        rw [_h2_4_1]
+        simp only [Prod.fst_mul]
+        rw [add_comm]
+        done
+      rw [← _h2_4]
+      exact _h2_1
+      done
+
+
+    lemma mulActon_CornerAbsoluteOrient_OneIndex_is0_2
+    (N1 N2 N3: Fin 3)
+    (h1plus2is3: N1+N2=N3)
+    (g : RubiksSuperType)
+    (moveAction : RubiksSuperType)
+    (index: Fin 8)
+    (hRemainsP: (g * moveAction).1.permute = g.1.permute)
+    (ha1: Corner_Absolute_Orient g.1 index = N1) -- A
+    (h_MoveAction: (moveAction).1.orient index = N2) -- B
+    :
+    (Corner_Absolute_Orient (g*moveAction).1 index) = N3 -- C
+    := by
+      have h1: (g.1.orient + moveAction.1.orient ∘ g.1.permute) (g.1.permute⁻¹ index)
+      = g.1.orient (g.1.permute⁻¹ index) + moveAction.1.orient (index)
+      := by
+        simp only [Pi.add_apply]
+        simp only [Function.comp_apply]
+        simp [Corner_Absolute_Orient] at ha1
+        have temp: g.1.permute⁻¹ = g.1.permute.symm := by exact rfl
+        rw [temp]
+        rw [ha1]
+        simp only [apply_symm_apply]
+        done
+      simp only [Corner_Absolute_Orient] at ha1
+      simp at ha1
+      -- 关键引理证明2：先找出从ha1发掘出的这个索引有什么用。原来已知的是这样的。
+      have h2: g.1.orient (g.1.permute⁻¹ index) + moveAction.1.orient (index)
+        = N3
+      := by
+        simp only [Inv.inv]
+        rw [ha1]
+        rw [h_MoveAction]
+        exact h1plus2is3
+        done
+      have _h2_1: (g.1.orient + moveAction.1.orient ∘ ⇑g.1.permute) (g.1.permute⁻¹ index)
+        = N3 := h1.trans h2
       simp only [Corner_Absolute_Orient]
       rw [hRemainsP]
       have _h2_4: (g.1.orient + moveAction.1.orient ∘ g.1.permute) = (g * moveAction).1.orient

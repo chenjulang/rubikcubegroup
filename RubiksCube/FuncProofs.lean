@@ -326,7 +326,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       decide
       done
 
-    -- todo -- 整理成小引理：
     lemma lemma1_012
     (g:RubiksSuperType)
     :Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0
@@ -621,10 +620,23 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             simp only [moveAction2]
             exact h2_3_1
             done
-          -- 这个引理h_b_2_4'需要分类讨论，代码将是很深的嵌套，想想怎么解决。应该要统一一个引理解决，or，一个通用的引理到处用。
-          -- 否则每次都要证明对前面已还原的角块的绝对方向数是不变的。
           have h_b_2_4': Corner_Absolute_Orient (g * moveAction2).1 UFL_index = 0
-            := by sorry -- ???，证明类似lemma1中的h2
+            := by
+            have h_MoveAction: (F^2*G1Perm*F^2).1.orient UFL_index  = 0
+            := by decide
+            have _h2_3: (g * moveAction2).1.permute = (g).1.permute
+              := by
+              simp only [Prod.fst_mul]
+              rw [permute_mul]
+              rw [← Prod.fst_mul]
+              rw [← Prod.fst_mul]
+              have temp: (F ^ 2 * G1Perm * F ^ 2).1.permute = 1:=by decide
+              rw [temp]
+              rfl
+            -- _h2_3 hCAO_UFL_0
+            have temp := mulActon_CornerAbsoluteOrient_OneIndex_is0_2 0 0 0 rfl g moveAction2 UFL_index _h2_3 hCAO_UFL_0 h_MoveAction
+            exact temp
+            done
           have h2_4 := lemma1_002_DFL (g * moveAction2) h2_3 {
             left := h_b_2_4' -- Corner_Absolute_Orient (g * moveAction2).1 UFL_index = 0
             right := h2
@@ -762,7 +774,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           have h_b_3:Corner_Absolute_Orient (g * moveAction3).1 UFL_index = 0
             := by
             simp only [Corner_Absolute_Orient]
-            sorry -- ???待办 -- 类似于 (Corner_Absolute_Orient (g*moveAction3).1 DFL_index) = 0的证明，需要从已知出发，先证明两个关键引理。
+            sorry -- ???1 待办 -- 类似于 (Corner_Absolute_Orient (g*moveAction3).1 DFL_index) = 0的证明，需要从已知出发，先证明两个关键引理。
           have h3_4 := lemma1_002_DFL (g * moveAction3) h3_3 {
             left := h_b_3
             right := h3
@@ -1465,7 +1477,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         exact h3_3_1
         done
       have h_b_3:Edge_Absolute_Orient (g * moveAction3).2 UR_index = 0
-        := by sorry -- ???
+        := by sorry -- ???1
       have h3_4 := lemma2_002_FR (g * moveAction3) h3_3 {
         left := h_b_3
         right := h3
