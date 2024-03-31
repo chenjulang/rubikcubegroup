@@ -701,6 +701,57 @@ section RubiksGroup
       done
 
 
+    lemma psmul0orientAction_orientRemainsSum
+    (g:RubiksSuperType)
+    (g2:RubiksSuperType)
+    (g2SumOrient: Finset.sum {0, 1, 2,3,4,5,6,7} g2.1.orient = 0)
+    (gSumOrient: Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} g.1.orient = 0)
+    :
+    Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * g2).1.orient = 0
+    := by
+      have temp: (g * g2).1.orient = (g.1 * g2.1).orient
+      :=by
+        simp only [RubiksSuperType_mul_assoc,
+          Prod.fst_mul, Prod.pow_fst, PieceState.mul_def]
+      rw [temp]
+      clear temp
+      have temp2 (a1:CornerType)(a2:CornerType): (a1 * a2).orient = (a2.orient ∘ a1.permute) + a1.orient
+        := by
+        rfl
+      have h1:= temp2 g.1 g2.1
+      rw [h1]
+      clear h1 temp2
+      simp only [Pi.add_apply] -- ***拆一个求和这么难写吗？
+      simp only [Finset.sum_add_distrib]
+      rw [gSumOrient,add_zero]
+      apply mul_mem'_permuteRemainsSum_2 g.1.permute _ g2SumOrient
+
+    lemma psmul0orientAction_orientRemainsSum_2
+    (g:RubiksSuperType)
+    (g2:RubiksSuperType)
+    (g2SumOrient: Finset.sum {0, 1, 2, 3, 4, 5, 6, 7,8,9,10,11} g2.2.orient = 0)
+    (gSumOrient: Finset.sum {0, 1, 2, 3, 4, 5, 6, 7,8,9,10,11} g.2.orient = 0)
+    :
+    Finset.sum {0, 1, 2, 3, 4, 5, 6, 7,8,9,10,11} (g * g2).2.orient = 0
+    := by
+      have temp: (g * g2).2.orient = (g.2 * g2.2).orient
+      :=by
+        simp only [RubiksSuperType_mul_assoc,
+          Prod.snd_mul, Prod.pow_fst, PieceState.mul_def]
+      rw [temp]
+      clear temp
+      have temp2 (a1:EdgeType)(a2:EdgeType): (a1 * a2).orient = (a2.orient ∘ a1.permute) + a1.orient
+        := by rfl
+      have h1:= temp2 g.2 g2.2
+      rw [h1]
+      clear h1 temp2
+      simp only [Pi.add_apply] -- ***拆一个求和这么难写吗？
+      simp only [Finset.sum_add_distrib]
+      rw [gSumOrient,add_zero]
+      apply mul_mem'_permuteRemainsSum g.2.permute _ g2SumOrient
+
+
+
   -- -- sign映射是同态的，简单举例：
   -- def permtest1: Perm (Fin 8) := (swap 0 1)
   -- def permtest2: Perm (Fin 8) := (swap 2 3)
