@@ -755,15 +755,39 @@ section RubiksGroup
     (moveAction : RubiksSuperType)
     (index: Fin 8)
     (hRemainsP: (g * moveAction).1.permute = g.1.permute)
-    (h1: (g.1.orient + moveAction.1.orient ∘ g.1.permute) (g.1.permute⁻¹ index)
-        = g.1.orient (g.1.permute⁻¹ index) + moveAction.1.orient (index)
-    )
-    (h2: g.1.orient (g.1.permute⁻¹ index) + moveAction.1.orient (index)
-        = 0
-    )
+    (ha1: Corner_Absolute_Orient g.1 index = 1)
+    (h_MoveAction: (moveAction).1.orient index = 2)
+    -- (h1: (g.1.orient + moveAction.1.orient ∘ g.1.permute) (g.1.permute⁻¹ index)
+    --     = g.1.orient (g.1.permute⁻¹ index) + moveAction.1.orient (index)
+    -- )
+    -- (h2: g.1.orient (g.1.permute⁻¹ index) + moveAction.1.orient (index)
+    --     = 0
+    -- )
     :
     (Corner_Absolute_Orient (g*moveAction).1 index) = 0
     := by
+      have h1: (g.1.orient + moveAction.1.orient ∘ g.1.permute) (g.1.permute⁻¹ index)
+      = g.1.orient (g.1.permute⁻¹ index) + moveAction.1.orient (index)
+      := by
+        simp only [Pi.add_apply]
+        simp only [Function.comp_apply]
+        simp [Corner_Absolute_Orient] at ha1
+        have temp: g.1.permute⁻¹ = g.1.permute.symm := by exact rfl
+        rw [temp]
+        rw [ha1]
+        simp only [apply_symm_apply]
+        done
+      simp only [Corner_Absolute_Orient] at ha1
+      simp at ha1
+      -- 关键引理证明2：先找出从ha1发掘出的这个索引有什么用。原来已知的是这样的。
+      have h2: g.1.orient (g.1.permute⁻¹ index) + moveAction.1.orient (index)
+        = 0
+      := by
+        simp only [Inv.inv]
+        rw [ha1]
+        rw [h_MoveAction]
+        rfl
+        done
       have _h2_1: (g.1.orient + moveAction.1.orient ∘ ⇑g.1.permute) (g.1.permute⁻¹ index)
         = 0 := h1.trans h2
       simp only [Corner_Absolute_Orient]
