@@ -750,7 +750,36 @@ section RubiksGroup
       rw [gSumOrient,add_zero]
       apply mul_mem'_permuteRemainsSum g.2.permute _ g2SumOrient
 
-
+    lemma mulActon_CornerAbsoluteOrient_OneIndex_is0
+    (g : RubiksSuperType)
+    (moveAction : RubiksSuperType)
+    (index: Fin 8)
+    (hRemainsP: (g * moveAction).1.permute = g.1.permute)
+    (h1: (g.1.orient + moveAction.1.orient ∘ g.1.permute) (g.1.permute⁻¹ index)
+        = g.1.orient (g.1.permute⁻¹ index) + moveAction.1.orient (index)
+    )
+    (h2: g.1.orient (g.1.permute⁻¹ index) + moveAction.1.orient (index)
+        = 0
+    )
+    :
+    (Corner_Absolute_Orient (g*moveAction).1 index) = 0
+    := by
+      have _h2_1: (g.1.orient + moveAction.1.orient ∘ ⇑g.1.permute) (g.1.permute⁻¹ index)
+        = 0 := h1.trans h2
+      simp only [Corner_Absolute_Orient]
+      rw [hRemainsP]
+      have _h2_4: (g.1.orient + moveAction.1.orient ∘ g.1.permute) = (g * moveAction).1.orient
+        := by
+        have _h2_4_1 := PieceState.mul_def g.1 moveAction.1
+        simp only [ps_mul] at _h2_4_1
+        simp only [← Prod.fst_mul] at _h2_4_1
+        rw [_h2_4_1]
+        simp only [Prod.fst_mul]
+        rw [add_comm]
+        done
+      rw [← _h2_4]
+      exact _h2_1
+      done
 
   -- -- sign映射是同态的，简单举例：
   -- def permtest1: Perm (Fin 8) := (swap 0 1)

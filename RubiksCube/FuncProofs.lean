@@ -902,6 +902,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           rw [h2_2_1]
           rfl
           done
+        -- todo 将h2_1， h2_2 也整理抽象出来
         have h2: (Corner_Absolute_Orient (g*moveAction2).1 UFL_index) = 0
         := by
           have _h2_1: (g.1.orient + moveAction2.1.orient ∘ ⇑g.1.permute) (g.1.permute⁻¹ UFL_index)
@@ -915,20 +916,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             rw [← Prod.fst_mul]
             rw [lemma1_006]
             rfl
-          rw [_h2_3]
-          have _h2_4: (g.1.orient + moveAction2.1.orient ∘ g.1.permute) = (g * (F * G1Perm * F')).1.orient
-            := by
-            have _h2_4_1 := PieceState.mul_def g.1 (F * G1Perm * F').1
-            simp only [ps_mul] at _h2_4_1
-            simp only [← Prod.fst_mul] at _h2_4_1
-            rw [_h2_4_1]
-            simp only [Prod.fst_mul]
-            simp only [PieceState.mul_def]
-            simp only [ps_mul_assoc]
-            rw [add_comm]
-            done
-          rw [← _h2_4]
-          exact _h2_1
+          apply mulActon_CornerAbsoluteOrient_OneIndex_is0 g moveAction2 UFL_index _h2_3 h2_1 h2_2
           done
         simp only [Prod.fst_mul]
         simp only [Prod.snd_mul]
