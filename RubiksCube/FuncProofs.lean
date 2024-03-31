@@ -773,8 +773,21 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
             done
           have h_b_3:Corner_Absolute_Orient (g * moveAction3).1 UFL_index = 0
             := by
-            simp only [Corner_Absolute_Orient]
-            sorry -- ???1 待办 -- 类似于 (Corner_Absolute_Orient (g*moveAction3).1 DFL_index) = 0的证明，需要从已知出发，先证明两个关键引理。
+            have h_MoveAction: ((F^2)*(G1Perm^2)*(F^2)).1.orient UFL_index  = 0
+            := by decide
+            have _h2_3: (g * moveAction3).1.permute = (g).1.permute
+              := by
+              simp only [Prod.fst_mul]
+              rw [permute_mul]
+              rw [← Prod.fst_mul]
+              rw [← Prod.fst_mul]
+              have temp: ((F^2)*(G1Perm^2)*(F^2)).1.permute = 1:=by decide
+              rw [temp]
+              rfl
+            -- _h2_3 hCAO_UFL_0
+            have temp := mulActon_CornerAbsoluteOrient_OneIndex_is0_2 0 0 0 rfl g moveAction3 UFL_index _h2_3 hCAO_UFL_0 h_MoveAction
+            exact temp
+            done
           have h3_4 := lemma1_002_DFL (g * moveAction3) h3_3 {
             left := h_b_3
             right := h3
@@ -1477,7 +1490,20 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         exact h3_3_1
         done
       have h_b_3:Edge_Absolute_Orient (g * moveAction3).2 UR_index = 0
-        := by sorry -- ???1
+        := by
+        have h_MoveAction: ((R)*(G2Perm)*(R')).2.orient UR_index  = 0
+        := by decide
+        have _h2_3: (g * moveAction3).2.permute = (g).2.permute
+          := by
+          simp only [Prod.snd_mul]
+          rw [permute_mul]
+          rw [← Prod.snd_mul]
+          rw [← Prod.snd_mul]
+          have temp: ((R)*(G2Perm)*(R')).2.permute = 1:=by decide
+          rw [temp]
+          rfl
+        have temp := mulActon_EdgeAbsoluteOrient_OneIndex_is0_2 0 0 0 rfl g moveAction3 UR_index _h2_3 h_EAO_UR_0 h_MoveAction
+        exact temp
       have h3_4 := lemma2_002_FR (g * moveAction3) h3_3 {
         left := h_b_3
         right := h3

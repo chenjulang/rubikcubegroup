@@ -852,6 +852,57 @@ section RubiksGroup
       exact _h2_1
       done
 
+    lemma mulActon_EdgeAbsoluteOrient_OneIndex_is0_2
+    (N1 N2 N3: Fin 2)
+    (h1plus2is3: N1+N2=N3)
+    (g : RubiksSuperType)
+    (moveAction : RubiksSuperType)
+    (index: Fin 12)
+    (hRemainsP: (g * moveAction).2.permute = g.2.permute)
+    (ha1: Edge_Absolute_Orient g.2 index = N1) -- A
+    (h_MoveAction: (moveAction).2.orient index = N2) -- B
+    :
+    (Edge_Absolute_Orient (g*moveAction).2 index) = N3 -- C
+    := by
+      have h1: (g.2.orient + moveAction.2.orient ∘ g.2.permute) (g.2.permute⁻¹ index)
+      = g.2.orient (g.2.permute⁻¹ index) + moveAction.2.orient (index)
+      := by
+        simp only [Pi.add_apply]
+        simp only [Function.comp_apply]
+        simp [Edge_Absolute_Orient] at ha1
+        have temp: g.2.permute⁻¹ = g.2.permute.symm := by exact rfl
+        rw [temp]
+        rw [ha1]
+        simp only [apply_symm_apply]
+        done
+      simp only [Edge_Absolute_Orient] at ha1
+      simp at ha1
+      -- 关键引理证明2：先找出从ha1发掘出的这个索引有什么用。原来已知的是这样的。
+      have h2: g.2.orient (g.2.permute⁻¹ index) + moveAction.2.orient (index)
+        = N3
+      := by
+        simp only [Inv.inv]
+        rw [ha1]
+        rw [h_MoveAction]
+        exact h1plus2is3
+        done
+      have _h2_1: (g.2.orient + moveAction.2.orient ∘ ⇑g.2.permute) (g.2.permute⁻¹ index)
+        = N3 := h1.trans h2
+      simp only [Edge_Absolute_Orient]
+      rw [hRemainsP]
+      have _h2_4: (g.2.orient + moveAction.2.orient ∘ g.2.permute) = (g * moveAction).2.orient
+        := by
+        have _h2_4_1 := PieceState.mul_def g.2 moveAction.2
+        simp only [ps_mul] at _h2_4_1
+        simp only [← Prod.snd_mul] at _h2_4_1
+        rw [_h2_4_1]
+        simp only [Prod.fst_mul]
+        rw [add_comm]
+        done
+      rw [← _h2_4]
+      exact _h2_1
+      done
+
   -- -- sign映射是同态的，简单举例：
   -- def permtest1: Perm (Fin 8) := (swap 0 1)
   -- def permtest2: Perm (Fin 8) := (swap 2 3)
