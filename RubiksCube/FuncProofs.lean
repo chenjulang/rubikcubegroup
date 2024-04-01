@@ -193,6 +193,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     def VariantFaceTurn_B_List : (l:List RubiksSuperType) → RubiksSuperType
     := fun l => (l.map VariantFaceTurn_B).prod
 
+    abbrev VarL := VariantFaceTurn_L_List
+    abbrev VarR := VariantFaceTurn_R_List
+    abbrev VarB := VariantFaceTurn_B_List
+
+
+
   def G5Perm_element1 : RubiksSuperType
   := R*U*R'*U'*R'*F*R*R*U'*R'
   /-- 是2个2循环:2个角块的2循环+2个棱块的2循环,详细: 角块ρ(g5) =(2,3)， 棱块σ(g5) =(1,2) -/
@@ -208,6 +214,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- #eval G4Perm
   -- ({ permute := ![0, 3, 1, 2, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
   --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
+  def G4Perm_List:List RubiksSuperType := [R',F',F',F',R',B,B,R',R',R',F',R',B,B,R',R']
 
   /-- 是一个棱块3循环 ρ(g4) =(1,2,4) 这里指绝对位置1的块的新位置是绝对位置2；相当于逆时针 -/
   def G3Perm : RubiksSuperType -- [R,U',R,U,R,U,R,U',R',U',R,R]
@@ -224,6 +231,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- ({ permute := ![0, 5, 1, 3, 4, 2, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
   -- { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
 
+  abbrev conj := conjugate_formula
 
   end rubikCubeFormula
 
@@ -1928,6 +1936,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
     decide
 
+
   -- 思考：纯3循环就是偶置换说的全体3循环吗？是的，因为魔方还原到目前状态也具有方向数全0的属性，也是一个“纯”的偶置换。
   /-- 如果状态x的角块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
   lemma lemma31 -- 这个命题直接上就是给出其中算法将角块3循环（全体方向数已还原,棱块位置已还原）还原到1。
@@ -2082,6 +2091,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     }
     sorry
 
+
+  -- 游戏演示
+  -- #eval L2*F'*L2
+
+  -- #eval conjugate_formula (R2*D'*B2*D*R2) (VariantFaceTurn_R_List G4Perm_List)
 
 
   lemma lemma32_001 : Solved = ({ permute := 1, orient := 0 }, { permute := List.formPerm ([0,3,1]:(List (Fin 12))) , orient := 0 })  * (G3Perm)
