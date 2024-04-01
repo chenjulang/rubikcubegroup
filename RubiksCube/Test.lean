@@ -4,22 +4,34 @@ import RubiksCube.FuncProofs
 def statusA := D'*F2*U2*F2*U'*F2*D'*B2*D'*U'*L'*B*R2*B*D2*F2*U2*R'*D*U'
 -- D' F2 U2 F2 U' F2 D' B2 D' U' L' B R2 B D2 F2 U2 R' D U'
 -- D' F F U U F F U' F F D' B B D' U' L' B R R B D D F F U U R' D U'
+-- #eval statusA
+-- #eval Corner_Absolute_Orient (D'*F2*U2*F2*U'*F2*D'*B2*D'*U'*L'*B*R2*B*D2*F2*U2*R'*D*U').1
+-- ![1, 1, 1, 0, 1, 1, 1, 0]
+
 -- 奇排列，变偶排列：
 def OddToEven := G5Perm
 def reshow_OddToEven := G5Perm⁻¹
 
--- #eval statusA
+
 -- 4个分别还原操作：
 def reshow_Corner_Permute:= (conj R2 (VarR G4Perm_List)⁻¹)
 * (VarL G4Perm_List)
 * (conj (D*L'*D'*F2*L) (VarL G4Perm_List))
 * (conj L2 (G4Perm)⁻¹)
 
--- def reshow_Edge_Permute:= sorry
+def reshow_Edge_Permute := (conj (U'*L2*U*B') (VarL G3Perm_List))
+* (conj F (G3Perm)⁻¹)
+* (conj F2 (VarR G3Perm_List)⁻¹)
+* (conj (D'*L2) G3Perm)
 
-def reshow_Corner_Orient:= (conj U G1Perm) * (conj (U'*D') G1Perm) * (conj (U2*D) G1Perm)
+def reshow_Corner_Orient:=
+((conj D G1Perm)
+* (conj (U'*D) G1Perm)
+* (conj (U*D') G1Perm)
+* (conj D' G1Perm)
+* (conj D2 G1Perm) * (conj D2 G1Perm))⁻¹
 
--- def reshow_Edge_Orient:= sorry
+def reshow_Edge_Orient:= 1
 
 
 -- 检验：
@@ -29,13 +41,25 @@ def reshow_Corner_Orient:= (conj U G1Perm) * (conj (U'*D') G1Perm) * (conj (U2*D
 #eval (VarL G4Perm_List) --ok
 #eval (conj (D*L'*D'*F2*L) (VarL G4Perm_List)) -- ok
 #eval (conj L2 (G4Perm)⁻¹) --ok
-#eval (reshow_Corner_Permute * reshow_OddToEven ).1.permute = statusA.1.permute
+#eval (reshow_Corner_Permute * reshow_OddToEven ).1.permute = statusA.1.permute -- true
 
 --2:
+#eval (reshow_Edge_Permute * reshow_OddToEven ).2.permute = statusA.2.permute -- true
 
 --3:
-#eval (reshow_Corner_Orient * reshow_OddToEven ).1.orient
-#eval statusA.1.orient
-
+-- 一步步检查问题：
+#eval (conj D G1Perm) --ok
+#eval (conj (U'*D) G1Perm) --ok
+#eval (conj (U*D') G1Perm) --ok
+#eval (conj D' G1Perm) --ok
+#eval  (conj D2 G1Perm) * (conj D2 G1Perm)
+#eval reshow_Corner_Orient.1.orient = (Corner_Absolute_Orient statusA.1) -- true
 
 --4:
+#eval (reshow_Corner_Orient * reshow_OddToEven).2.orient = statusA.2.orient -- true
+
+
+#eval (reshow_Corner_Permute*reshow_Edge_Permute*reshow_Corner_Orient) * reshow_OddToEven = statusA
+#eval statusA
+-- 问题1:顺序一定要这样吗？？？？？
+-- 问题2:程序里顺序是先方向数后顺序的，是否是错的？
