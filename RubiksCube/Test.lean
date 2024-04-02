@@ -1,5 +1,25 @@
 import RubiksCube.FuncProofs
 
+def List.invert : List RubiksSuperType → List RubiksSuperType
+  | [] => []
+  | c :: cs =>
+      -- dbg_trace "add1: {cs}";
+      invert cs ++ [c⁻¹]
+
+def conjList
+(l1:List RubiksSuperType)
+(l2:List RubiksSuperType)
+: List RubiksSuperType
+:=
+  l1 ++ l2 ++ (l1.invert)
+
+def V_L_List : (l:List RubiksSuperType) → List RubiksSuperType
+:= fun l => (l.map VariantFaceTurn_L)
+def V_R_List : (l:List RubiksSuperType) → List RubiksSuperType
+:= fun l => (l.map VariantFaceTurn_R)
+def V_B_List : (l:List RubiksSuperType) → List RubiksSuperType
+:= fun l => (l.map VariantFaceTurn_B)
+
 -- 当前状态A：
 def statusA := D'*F2*U2*F2*U'*F2*D'*B2*D'*U'*L'*B*R2*B*D2*F2*U2*R'*D*U'
 -- D' F2 U2 F2 U' F2 D' B2 D' U' L' B R2 B D2 F2 U2 R' D U'
@@ -14,15 +34,38 @@ def reshow_OddToEven := G5Perm⁻¹
 
 
 -- 4个分别还原操作：
-def solve_Corner_Permute:= ((conj R2 (VarR G4Perm_List)⁻¹)
+def solve_Corner_Permute:= (
+  (conj R2 (VarR G4Perm_List)⁻¹)
 * (VarL G4Perm_List)
 * (conj (D*L'*D'*F2*L) (VarL G4Perm_List))
-* (conj L2 (G4Perm)⁻¹))⁻¹
+* (conj L2 (G4Perm)⁻¹)
+)⁻¹
 
-def solve_Edge_Permute := ((conj (U'*L2*U*B') (VarL G3Perm_List))
+-- #eval toString$
+--   (
+--   (conjList [R,R] (V_R_List G4Perm_List).invert)
+--   ++ (V_L_List G4Perm_List)
+--   ++ (conjList [D,L',D',F2,L] (V_L_List G4Perm_List))
+--   ++ (conjList [L,L] G4Perm_List.invert)
+--   ).invert
+
+
+def solve_Edge_Permute :=
+(
+  (conj (U'*L2*U*B') (VarL G3Perm_List))
 * (conj F (G3Perm)⁻¹)
 * (conj F2 (VarR G3Perm_List)⁻¹)
-* (conj (D'*L2) G3Perm))⁻¹
+* (conj (D'*L2) G3Perm)
+)⁻¹
+
+-- #eval toString$
+--   (
+--   (conjList [U',L,L,U,B'] (V_L_List G3Perm_List))
+--   ++ (conjList [F] G3Perm_List.invert)
+--   ++ (conjList [F,F] (V_R_List G3Perm_List).invert)
+--   ++ (conjList [D',L,L] G3Perm_List)
+--   ).invert
+
 
 def solve_Corner_Orient:=
 (conj D G1Perm)
@@ -30,6 +73,9 @@ def solve_Corner_Orient:=
 * (conj (U*D') G1Perm)
 * (conj D' G1Perm)
 * (conj D2 G1Perm) * (conj D2 G1Perm)
+
+#eval (conj D2 G1Perm) * (conj D2 G1Perm)
+
 
 def reshow_Edge_Orient:= 1
 
@@ -76,3 +122,6 @@ def reshow_Edge_Orient:= 1
 
 #eval statusA * (solve_Corner_Orient * OddToEven * solve_Edge_Permute * solve_Corner_Permute)
   = Solved -- true
+
+
+#eval solve_Corner_Orient

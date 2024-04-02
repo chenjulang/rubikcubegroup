@@ -98,7 +98,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   位置：UFR和DBL以外的块的位置不变。
   可以保持UFR和DBL以外的块的方向和位置，只改变UFR和DBL的方向，
   分别是UFR的方向数+2，DBL的方向数+1。 -/
-  def G1Perm : RubiksSuperType
+  def G1Perm : RubiksSuperType -- R' D D R B' U U B R' D D R B' U U B
   := G1Perm_element^2
   -- #eval G1Perm
   --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 2, 0, 0, 0, 0, 0, 1] },
@@ -108,7 +108,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     def G2Perm_element2 : RubiksSuperType
     := U^2*R*U*R*U'*R^2*U^2
   /-- 可以保持其他块的方向和位置，只改变UF和UR的方向，分别是UF的方向+1，UR的方向的方向+1。-/
-  def G2Perm : RubiksSuperType
+  def G2Perm : RubiksSuperType -- L F R' F' L' U2 R U R U' R2 U2 R
   := G2Perm_element1 * G2Perm_element2 * R
   -- #eval G2Perm
   --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
@@ -209,7 +209,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   -- { permute := ![1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
 
   /-- 是一个角块3循环 ρ(g4) =(2,4,3) 这里指绝对位置2的块的新位置是绝对位置4；相当于顺时针 -/
-  def G4Perm : RubiksSuperType -- [R',F',F',F',R',B,B,R',R',R',F',R',B,B,R',R']
+  def G4Perm : RubiksSuperType -- R' F' F' F' R' B B R' R' R' F' R' B B R' R'
   := R'*F'*F'*F'*R'*B*B*R'*R'*R'*F'*R'*B*B*R'*R'
   -- #eval G4Perm
   -- ({ permute := ![0, 3, 1, 2, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
@@ -217,7 +217,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   def G4Perm_List:List RubiksSuperType := [R',F',F',F',R',B,B,R',R',R',F',R',B,B,R',R']
 
   /-- 是一个棱块3循环 ρ(g4) =(1,2,4) 这里指绝对位置1的块的新位置是绝对位置2；相当于逆时针 -/
-  def G3Perm : RubiksSuperType -- [R,U',R,U,R,U,R,U',R',U',R,R]
+  def G3Perm : RubiksSuperType -- R U' R U R U R U' R' U' R R
   := R*U'*R*U*R*U*R*U'*R'*U'*R*R
   -- #eval G3Perm
   --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
