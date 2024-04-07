@@ -106,11 +106,14 @@ def reshow_Edge_Orient:= 1
 
 
 -- 还原方向数：
-#eval (statusA * solve_Corner_Orient).1.orient = 0
+#eval (statusA * solve_Corner_Orient)
+-- = 0
 -- 还原角块位置：
-#eval (statusA*OddToEven * solve_Corner_Permute).1.permute = 1
+#eval (statusA*OddToEven * solve_Corner_Permute)
+-- .1.permute = 1
 -- 还原棱块位置：
-#eval (statusA*OddToEven * solve_Edge_Permute).2.permute = 1
+#eval (statusA*OddToEven * solve_Edge_Permute)
+-- .2.permute = 1
 
 -- 还原魔方：
 -- 1.先方向，后位置(先角后棱)

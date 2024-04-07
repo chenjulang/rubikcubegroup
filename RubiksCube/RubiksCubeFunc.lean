@@ -479,7 +479,9 @@ section FACE_TURNS
   --     {permute := cyclePieces [4,7,6,5], orient := Orient 12 2 [(4, 1), (5, 1), (6, 1), (7, 1)]}
   --   ⟩
 
+  #eval U*R*L*L*R*B
   #eval U^4 = Solved
+
   def U2 := U^2
   def D2 := D^2
   def R2 := R^2
@@ -643,6 +645,7 @@ def EdgeFlip : RubiksSuperType
      )
 
 
+#eval F
 
 section RubiksGroup
 
