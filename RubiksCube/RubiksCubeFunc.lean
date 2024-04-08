@@ -12,7 +12,7 @@ open BigOperators
 
 section RubiksSuperGroup
 
-  -- 举例：
+  -- -- 举例：
   -- def testInst1 : (Perm (Fin 8)) where
   --   toFun := fun
   --     | .mk val isLt => val +1
@@ -24,7 +24,7 @@ section RubiksSuperGroup
   -- #check (Repr.reprPrec ∘ testInst1.toFun)
   -- #eval testInst1.toFun 7  -- 0
   -- #eval Repr.reprPrec (0:(Fin 8)) 999  -- 0
-  -- #eval (Repr.reprPrec ∘ testInst1.toFun) 7 3 -- 0
+  -- #eval (Repr.reprPrec ∘ testInst1.toFun) 7 999 -- 0
 
   -- 这个实例声明表明对于任意的 n : Nat，类型 Perm (Fin n) 具有 Repr 实例。
   -- 在 Lean 中，Repr 是一个类型类，用于定义类型的外部表示形式。它提供了将值转换为字符串的方法，以便在打印输出和调试信息中使用。
@@ -134,7 +134,9 @@ section RubiksSuperGroup
     -- 因为lean里面这个复合映射(a2.orient ∘ a1.permute)表示先通过a1.permute映射，再通过a2.orient映射。
 
 
-  def ps_mul {p o : ℕ+} : PieceState p o → PieceState p o → PieceState p o :=
+  def ps_mul {p o : ℕ+} -- 复合操作
+  : PieceState p o → PieceState p o → PieceState p o
+  :=
     fun a1 a2 => {
       permute := a2.permute * a1.permute -- *先映射右，再映射左。 -- 为什么呢？看例子testP1,testP2
       orient := (a2.orient ∘ a1.permute) + a1.orient -- 复合函数计算顺序:右→左
@@ -343,8 +345,8 @@ end RubiksSuperGroup
 -- 下面开始为魔方的6个基本操作的定义做铺垫：
 
 -- List.lookup用法,换句话说就是找匹配第一个分量，如果匹配到返回存在，还有该项的第二个分量：
-#eval List.lookup 3 [(1, 2), (3, 4), (3, 5)] = some 4
-#eval List.lookup 2 [(1, 2), (3, 4), (3, 5)] = none
+-- #eval List.lookup 3 [(1, 2), (3, 4), (3, 5)] = some 4
+-- #eval List.lookup 2 [(1, 2), (3, 4), (3, 5)] = none
 
 
 /- Creates an orientation function given a list of input-output pairs
@@ -418,7 +420,7 @@ section FACE_TURNS
   def lista : List (Fin 8) := [0,3,2,1] -- 这样写得到的Perm意思是：
   -- [0,3,2,1]表示：0=>3；3=>2；2=>1；1=>0
   -- 整理后就是： [0=>3,1=>0,2=>1,3=>2]
-  #eval List.formPerm lista
+  -- #eval List.formPerm lista
 
   /- These two functions (from kendfrey's repository) create a cycle permutation,
   which is useful for defining the rotation of any given face, as seen directly below. -/
@@ -472,6 +474,10 @@ section FACE_TURNS
       {permute := cyclePieces [2, 3, 7,6 ], orient := Orient 8 3 [(2, 2), (3, 1), (6, 1), (7, 2)]},
       {permute := cyclePieces [2, 7, 10,6 ], orient := Orient 12 2 [(2, 0), (6, 0), (7, 0), (10, 0)]}
     ⟩
+
+  #eval F -- 索引位置0，新位置是索引位置1；1号位置的去了2号位置。
+  #eval R
+  #eval F*R
   -- 中层（U和D的中层）的顺时针90旋转。通常用于桥式还原法。
   -- def M_UD : RubiksSuperType :=
   --   ⟨
@@ -479,8 +485,8 @@ section FACE_TURNS
   --     {permute := cyclePieces [4,7,6,5], orient := Orient 12 2 [(4, 1), (5, 1), (6, 1), (7, 1)]}
   --   ⟩
 
-  #eval U*R*L*L*R*B
-  #eval U^4 = Solved
+  -- #eval U*R*L*L*R*B
+  -- #eval U^4 = Solved
 
   def U2 := U^2
   def D2 := D^2
@@ -645,7 +651,7 @@ def EdgeFlip : RubiksSuperType
      )
 
 
-#eval F
+-- #eval F
 
 section RubiksGroup
 
@@ -1226,7 +1232,7 @@ end RubiksGroup
   --   )
 
 /- Useful predicates for the SolutionAlgorithm, as well as for some minor proofs. -/
--- section SolutionState
+section SolutionState
 
   def CornersSolved :
   RubiksSuperType → Prop
@@ -1260,4 +1266,4 @@ end RubiksGroup
 --   instance {c} : Decidable (IsSolved c) := by apply And.decidable
 
 
--- end SolutionState
+end SolutionState

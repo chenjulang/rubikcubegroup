@@ -16,7 +16,8 @@ require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git"
 
 -- require Paperproof from git "https://github.com/Paper-Proof/paperproof.git"@"main"/"lean"
-
+-- lake update Paperproof
+-- lake exe cache get
 
 @[default_target]
 lean_lib «RubiksCube» where
