@@ -88,11 +88,10 @@ section RubiksSuperGroup
   -- #check Perm.mul_def -- permute的乘法就是这样定义的。
   -- #eval testP2 * testP1 -- ![0, 3, 4, 1, 2, 5, 6, 7]
 
-
   -- 举例：(a2.orient ∘ a1.permute) + a1.orient
     -- 比如，取值如下：
-    -- a.1.permute = ![1,2,0,3,4,5,6,7]
-    -- a.2.orient =  ![o0,o1,o2,o3,o4,o5,o6,o7]
+    -- a1.permute = ![1,2,0,3,4,5,6,7]
+    -- a2.orient =  ![o0,o1,o2,o3,o4,o5,o6,o7]
   -- 问题来了：  ρ(g)^(-1)·v(h) + v(g) 要怎么用a1.orient，a1.permute，a2.orient来表示出来呢？
   -- 1. 首先v(g)等价于a1.orient。
   -- 2. 然后v(h)等价于a2.orient。
@@ -133,6 +132,21 @@ section RubiksSuperGroup
     -- 先通过第一个参数映射，0就变成了1；再将1代入第二个参数：这个过程写成lean就是(a2.orient ∘ a1.permute)
     -- 因为lean里面这个复合映射(a2.orient ∘ a1.permute)表示先通过a1.permute映射，再通过a2.orient映射。
 
+-- 最简单分析：
+  -- ρ(g)^(-1)作用：
+  -- {a,b,c} = v(h)
+  --  →
+  -- {c,b,a}
+  -- 输入索引2，得到v(h)的索引位置0的项
+
+  -- ρ(g)作用
+  -- {c,b,a}
+  --  →
+  -- {a,b,c}
+  -- 问题：同样输入索引2，如何同样得到v(h)的索引位置0的项？
+  -- 很简单：
+  -- 经过a1.permute，{0=>2,1=>1,2=>0},{2,1,0}，得到新索引0
+  -- 然后再去取v(h)的索引0就得到了。
 
   def ps_mul {p o : ℕ+} -- 复合操作
   : PieceState p o → PieceState p o → PieceState p o
@@ -141,6 +155,8 @@ section RubiksSuperGroup
       permute := a2.permute * a1.permute -- *先映射右，再映射左。 -- 为什么呢？看例子testP1,testP2
       orient := (a2.orient ∘ a1.permute) + a1.orient -- 复合函数计算顺序:右→左
     }
+
+
 
 
   -- 将上面替换成下面的等价写法，好处：1.可以到处写*，来代替ps_mul，lean系统会自动匹配到这个*的类型用法。
@@ -172,10 +188,12 @@ section RubiksSuperGroup
   ps_mul (ps_mul a b) c = ps_mul a (ps_mul b c)
   := by
     intro a b c
-    simp only [ps_mul]
+    rw [ps_mul,ps_mul,ps_mul,ps_mul]
+    -- simp only [ps_mul]
     simp only [PieceState.mk.injEq] -- ***两同类型对象相等，等价于，各分量相等。
     apply And.intro
-    · simp only [Perm.mul_def]
+    · rw [Perm.mul_def,Perm.mul_def,Perm.mul_def,Perm.mul_def]
+      -- simp only [Perm.mul_def]
       ext i
       rw [trans_apply]
       rw [trans_apply]
@@ -214,6 +232,7 @@ section RubiksSuperGroup
     simp only [Pi.zero_comp, zero_add]
     done
 
+
   /-- PieceState乘法的普通元素的右逆 -/
   def ps_inv {p o : ℕ+}
   : PieceState p o → PieceState p o
@@ -229,8 +248,8 @@ section RubiksSuperGroup
       -- 只需要满足 ：(a2.orient ∘ A.permute)  = -A.orient
       -- 只需要满足 ：(a2.orient ∘ A.permute) x = (-A.orient) x
       -- 只需要满足 ：a2.orient (A.permute x) = (-A.orient) x
-      -- a2.orient y = (-A.orient) x ; y= (A.permute x)
-      -- A.permute⁻¹ y = A.permute⁻¹ (A.permute x) = x
+      -- 把这个整体(A.permute x)记成y，也就是 y= (A.permute x) ； a2.orient y = (-A.orient) x
+      -- 将x用y来表示： A.permute⁻¹ y = A.permute⁻¹ (A.permute x) = x
       -- 只需要满足 ：a2.orient (y) = (-A.orient) (A.permute⁻¹ y)
     }
 
@@ -258,7 +277,7 @@ section RubiksSuperGroup
     simp only [Fin.val_zero']
     done
 
-  -- 类似Mul， 右逆元素简写成符号“-”。
+  -- 类似Mul， 右逆元素简写成符号“-1”。
   instance {p o : ℕ+} : Neg (PieceState p o) where
     neg := fun
       | .mk permute orient => {
@@ -333,7 +352,11 @@ section RubiksSuperGroup
   ∀ (a b c : RubiksSuperType),
   a * b * c = a * (b * c)
   := by
-    simp only [Prod.forall, Prod.mk_mul_mk, PieceState.mul_def, ps_mul_assoc, forall_const]
+    simp only [Prod.forall]
+    simp only [Prod.mk_mul_mk]
+    simp only [PieceState.mul_def]
+    simp only [ps_mul_assoc]
+    simp only [forall_const]
     done
 
   instance RubiksSuperGroup -- 就是手写证明中的群H
@@ -417,9 +440,9 @@ section FACE_TURNS
   -- 为了方便定义每个操作的“位置变化”：排列permute,然后定义的这个东西：
 
   -- -- 只用formPerm可以办到，但是输入时要转一下脑筋：
-  def lista : List (Fin 8) := [0,3,2,1] -- 这样写得到的Perm意思是：
-  -- [0,3,2,1]表示：0=>3；3=>2；2=>1；1=>0
-  -- 整理后就是： [0=>3,1=>0,2=>1,3=>2]
+  -- def lista : List (Fin 8) := [0,3,2,1] -- 这样写得到的Perm意思是：
+  -- -- [0,3,2,1]表示：0=>3；3=>2；2=>1；1=>0
+  -- -- 整理后就是： [0=>3,1=>0,2=>1,3=>2]
   -- #eval List.formPerm lista
 
   /- These two functions (from kendfrey's repository) create a cycle permutation,
@@ -459,6 +482,7 @@ section FACE_TURNS
       {permute := cyclePieces [1,2,6,5], orient := Orient 8 3 [(1, 2), (2, 1), (5, 1), (6, 2)]},
       {permute := cyclePieces [1, 6, 9, 5], orient := Orient 12 2 [(1,1 ), (5,1 ), (6,1 ), (9,1 )]}
     ⟩
+  -- #eval Orient 8 3 [(1, 2), (2, 1), (5, 1), (6, 2)]
   def L : RubiksSuperType :=
     ⟨
       {permute := cyclePieces [0, 4, 7, 3], orient := Orient 8 3 [(0, 1), (3, 2), (4, 2), (7, 1)]},
@@ -476,6 +500,7 @@ section FACE_TURNS
     ⟩
 
   #eval F -- 索引位置0，新位置是索引位置1；1号位置的去了2号位置。
+  -- “2” 旧：索引位置0，初始状态绝对方向数0；新：绝对方向数0+2=2。
   #eval R
   #eval F*R
   -- 中层（U和D的中层）的顺时针90旋转。通常用于桥式还原法。
@@ -501,6 +526,7 @@ section FACE_TURNS
   def F' := F⁻¹
   def B' := B⁻¹
 
+--todo
 
   -- 举例：
   -- #eval 1*R
@@ -512,7 +538,7 @@ section FACE_TURNS
     -- 这里1=>2意思是：“索引位置1”去了“索引位置2”后，“索引位置2”的本地观察的方向数+2了。
   -- 方向数是指：逆时针“标记点”旋转了多少次。
   --
-  -- 所以目前要酸楚某个角块的"索引位置j"的方向数目前是多少，
+  -- 所以目前要算出某个角块的"索引位置j"的方向数目前是多少，
   -- 首先分析：还原状态操作了一个Action， 结果就是当前状态：1*Action
   -- 问题：当前状态的"索引位置j"从原来哪个索引位置来的呢？
     -- 答：可以由Action.1.permute知道每个索引位置分别到了哪一个新位置。比如：1=>2

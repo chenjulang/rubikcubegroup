@@ -1776,6 +1776,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       }
     }
 
+  -- def xx1: RubiksSuperType := sorry
+  -- #check xx1 * (F*R)
+
+
   lemma alternatingCornerPermute_eq_3Cycles_to_g_eq_3Cycles_mul_one
   (g: RubiksSuperType)
   (threeList: List (Perm (Fin 8)) )
