@@ -526,28 +526,18 @@ section FACE_TURNS
   def F' := F⁻¹
   def B' := B⁻¹
 
---todo
 
-  -- 举例：
-  -- #eval 1*R
-  --   ({ permute := ![0, 2, 6, 3, 4, 1, 5, 7], orient := ![0, 2, 1, 0, 0, 1, 2, 0] },
-  --  { permute := ![0, 6, 2, 3, 4, 1, 9, 7, 8, 5, 10, 11], orient := ![0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0] })
-  -- permute := [0, 1=>2, 2=>6, 3, 4, 5=>1, 6=>5, 7]意思是一个变化过程，那变化结果是什么呢？
-  -- 1=>2 表示“索引位置1”去了“索引位置2”。
-  -- orient := [0, 1=>2, 2=>1, 0, 0, 5=>1, 6=>2, 0] 则是这个变化过程的前提下才有意义的。
-    -- 这里1=>2意思是：“索引位置1”去了“索引位置2”后，“索引位置2”的本地观察的方向数+2了。
-  -- 方向数是指：逆时针“标记点”旋转了多少次。
-  --
-  -- 所以目前要算出某个角块的"索引位置j"的方向数目前是多少，
-  -- 首先分析：还原状态操作了一个Action， 结果就是当前状态：1*Action
-  -- 问题：当前状态的"索引位置j"从原来哪个索引位置来的呢？
-    -- 答：可以由Action.1.permute知道每个索引位置分别到了哪一个新位置。比如：1=>2
-    -- 如果用Action.1.permute的逆映射，比如：1=>2，反过来就是2=>1
-    -- 比如：如果j=2, 则通过(Action.1.permute j)就得到了从“索引位置1”来的。
-  -- 问题：当前状态的"索引位置j"方向数是多少？
-    -- 答：由Action.1.orient的定义，Action.1.orient记录了每一个索引位置到新的索引位置后，
-    -- 方向数的增加量。比如：“索引位置1”增加的量就是+2。
-    -- 而我们都知道原始位置全部方向数都是0，当前状态的"索引位置j"方向数就是0+2=2
+  -- 简单解释：
+  -- x.permute = {2,1,0}
+  -- {0=>2,1=>1,2=>0}
+  -- 当前索引位置2的绝对方向数是多少？
+  -- 那就要看索引位置2从哪里来，从索引位置0来的
+  -- x.orient 0 就表示了索引位置0到索引位置2增加了多少
+  -- 因为初始索引位置，无论是哪个，绝对方向数都是0
+  -- 所以索引位置2的绝对方向数是 0 + (x.orient 0) = (x.orient 0) = x.orient ( x.permute⁻¹ 2)
+  -- 一般化：当前索引位置N的绝对方向数是多少？
+  -- x.orient ( x.permute⁻¹ N)
+
 
   def Corner_Absolute_Orient
   : CornerType → Fin 8 → Fin 3
@@ -637,6 +627,12 @@ section FACE_TURNS
       else if c = B' then "B'"
       else s!"{repr c}" -- 如果都不匹配的话，直接打印出permute，orient的结构体。repr的作用。
 
+  -- #eval toString $ U
+  -- #eval toString $ U2
+  -- #eval toString $ U*F
+
+
+
   -- def aRubikSuperType : RubiksSuperType :=
   --   ⟨
   --     {permute := cyclePieces [0, 1, 2, 3], orient := 0},
@@ -658,8 +654,10 @@ def TPerm : RubiksSuperType
   := R * U * R' * U' * R' * F * R2 * U' * R' * U' * R * U * R' * F'
 def AlteredYPerm : RubiksSuperType
   := R * U' * R' * U' * R * U * R' * F' * R * U * R' * U' * R' * F * R
-def MyTestActions : RubiksSuperType
-  := R *U'* R* U* R* U* R* U'* R'* U'* R* R
+
+-- #eval TPerm
+-- #eval AlteredYPerm
+
 
 -- 以下两个定义，形容两个不可能的魔方状态：只旋转一次角块，还有只旋转一次棱块。
 -- 后文将会证明这两种状态不存在。
@@ -677,7 +675,7 @@ def EdgeFlip : RubiksSuperType
      )
 
 
--- #eval F
+-- #eval EdgeFlip
 
 section RubiksGroup
 
@@ -745,20 +743,20 @@ section RubiksGroup
     Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} (g * g2).1.orient = 0
     := by
       have temp: (g * g2).1.orient = (g.1 * g2.1).orient
-      :=by
-        simp only [RubiksSuperType_mul_assoc,
-          Prod.fst_mul, Prod.pow_fst, PieceState.mul_def]
+      :=by rfl
+        -- simp only [RubiksSuperType_mul_assoc,
+        --   Prod.fst_mul, Prod.pow_fst, PieceState.mul_def]
       rw [temp]
       clear temp
       have temp2 (a1:CornerType)(a2:CornerType): (a1 * a2).orient = (a2.orient ∘ a1.permute) + a1.orient
-        := by
-        rfl
+        := by rfl
       have h1:= temp2 g.1 g2.1
       rw [h1]
       clear h1 temp2
       simp only [Pi.add_apply] -- ***拆一个求和这么难写吗？
       simp only [Finset.sum_add_distrib]
       rw [gSumOrient,add_zero]
+      clear gSumOrient
       apply mul_mem'_permuteRemainsSum_2 g.1.permute _ g2SumOrient
 
     lemma psmul0orientAction_orientRemainsSum_2
@@ -770,9 +768,9 @@ section RubiksGroup
     Finset.sum {0, 1, 2, 3, 4, 5, 6, 7,8,9,10,11} (g * g2).2.orient = 0
     := by
       have temp: (g * g2).2.orient = (g.2 * g2.2).orient
-      :=by
-        simp only [RubiksSuperType_mul_assoc,
-          Prod.snd_mul, Prod.pow_fst, PieceState.mul_def]
+      :=by rfl
+        -- simp only [RubiksSuperType_mul_assoc,
+        --   Prod.snd_mul, Prod.pow_fst, PieceState.mul_def]
       rw [temp]
       clear temp
       have temp2 (a1:EdgeType)(a2:EdgeType): (a1 * a2).orient = (a2.orient ∘ a1.permute) + a1.orient
@@ -785,6 +783,8 @@ section RubiksGroup
       rw [gSumOrient,add_zero]
       apply mul_mem'_permuteRemainsSum g.2.permute _ g2SumOrient
 
+
+    -- 例子：moveAction = (F * G1Perm * F')
     -- 这个引理应该更加一般性一点，A+B=C
     lemma mulActon_CornerAbsoluteOrient_OneIndex_is0
     (g : RubiksSuperType)
@@ -938,6 +938,7 @@ section RubiksGroup
       exact _h2_1
       done
 
+
   -- -- sign映射是同态的，简单举例：
   -- def permtest1: Perm (Fin 8) := (swap 0 1)
   -- def permtest2: Perm (Fin 8) := (swap 2 3)
@@ -971,7 +972,7 @@ section RubiksGroup
       exact Mathlib.Tactic.LinearCombination.mul_pf h2 h1
     }
     apply And.intro
-    {-- 乘积的棱块方向数增加量orient各分量求和为0（mod 2）
+    {-- 乘积的角块方向数增加量orient各分量求和为0（mod 2）
       have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} a.1.orient = 0
         := by apply hav.right.left
       have h2 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} b.1.orient = 0
@@ -988,7 +989,7 @@ section RubiksGroup
       apply mul_mem'_permuteRemainsSum_2
       exact h2
     }
-    {-- 乘积的角块方向数增加量orient各分量求和为0（mod 3）
+    {-- 乘积的棱块方向数增加量orient各分量求和为0（mod 3）
       have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8,9,10,11} a.2.orient = 0
         := by apply hav.right.right
       have h2 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7, 8,9,10,11} b.2.orient = 0
@@ -1018,13 +1019,12 @@ section RubiksGroup
   := by
     simp only [ValidCube]
     apply And.intro
-    { apply Eq.refl }
-    { apply And.intro
-      { apply Eq.refl }
-      { apply Eq.refl }
-    }
+    { decide }
+    apply And.intro
+    { decide }
+    { decide }
 
-  -- -- -- sign映射是同态的，简单举例：
+  -- -- sign映射是同态的，简单举例：
   -- def permtest1: Perm (Fin 8) := (swap 0 1)
   -- #eval sign permtest1 -- -1
   -- #eval (sign permtest1⁻¹) -- -1
@@ -1049,8 +1049,8 @@ section RubiksGroup
     apply And.intro
     {
       simp only [map_inv] -- 举例
-      simp only [Int.units_inv_eq_self] -- 因为sign映射成整数{1,-1}, {1,-1}都满足逆是本身。
-      apply hxv.left
+      have h1:= hxv.1
+      rw [h1]
     }
     apply And.intro
     { have h1 : Finset.sum {0, 1, 2, 3, 4, 5, 6, 7} x.1.orient = 0

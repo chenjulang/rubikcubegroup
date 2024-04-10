@@ -100,6 +100,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   分别是UFR的方向数+2，DBL的方向数+1。 -/
   def G1Perm : RubiksSuperType -- R' D D R B' U U B R' D D R B' U U B
   := G1Perm_element^2
+  #eval (F * G1Perm * F').1
+  #eval (F * G1Perm * F').1.orient 7 -- 1
   -- #eval G1Perm
   --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 2, 0, 0, 0, 0, 0, 1] },
   --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
