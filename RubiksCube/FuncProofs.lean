@@ -203,7 +203,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     abbrev VarB := VariantFaceTurn_B_List
 
 
-    #eval toString $ VariantFaceTurn_R_List G2Perm_List
+    #eval VariantFaceTurn_R_List G2Perm_List
 
   def G5Perm_element1 : RubiksSuperType
   := R*U*R'*U'*R'*F*R*R*U'*R'
