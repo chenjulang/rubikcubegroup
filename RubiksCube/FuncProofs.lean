@@ -18,6 +18,7 @@ variable (α : Type*) [Fintype α] [DecidableEq α]
 
 section ValidityChecks
 
+  -- #eval U
   /-- 6个基本操作都符合非直觉定义。 -/
   @[simp]
   lemma ft_valid
@@ -100,8 +101,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   分别是UFR的方向数+2，DBL的方向数+1。 -/
   def G1Perm : RubiksSuperType -- R' D D R B' U U B R' D D R B' U U B
   := G1Perm_element^2
-  #eval (F * G1Perm * F').1
-  #eval (F * G1Perm * F').1.orient 7 -- 1
+  -- #eval (F * G1Perm * F').1
+  -- #eval (F * G1Perm * F').1.orient 7 -- 1
   -- #eval G1Perm
   --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 2, 0, 0, 0, 0, 0, 1] },
   --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
@@ -111,7 +112,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     := U^2*R*U*R*U'*R^2*U^2
   /-- 可以保持其他块的方向和位置，只改变UF和UR的方向，分别是UF的方向+1，UR的方向的方向+1。-/
   def G2Perm : RubiksSuperType -- L F R' F' L' U2 R U R U' R2 U2 R
+  --  L F R' F' L' U U R U R U' R R U U R
   := G2Perm_element1 * G2Perm_element2 * R
+  def G2Perm_List:List RubiksSuperType := [L,F,R',F',L',U,U,R,U,R,U',R,R,U,U,R]
   -- #eval G2Perm
   --   ({ permute := ![0, 1, 2, 3, 4, 5, 6, 7], orient := ![0, 0, 0, 0, 0, 0, 0, 0] },
   --  { permute := ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], orient := ![1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
@@ -184,7 +187,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       else if x = B' then F'
       else 1
 
-    -- def testG1Perm_L : List RubiksSuperType := [R' ,D ,D ,R ,B' ,U ,U ,B,R' ,D ,D ,R ,B' ,U ,U ,B]
+    def testG1Perm_L : List RubiksSuperType := [R' ,D ,D ,R ,B' ,U ,U ,B,R' ,D ,D ,R ,B' ,U ,U ,B]
     def VariantFaceTurn_L_List : (l:List RubiksSuperType) → RubiksSuperType
     := fun l => (l.map VariantFaceTurn_L).prod
     -- #eval VariantFaceTurn_L_List testG1Perm_L
@@ -200,6 +203,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     abbrev VarB := VariantFaceTurn_B_List
 
 
+    #eval toString $ VariantFaceTurn_R_List G2Perm_List
 
   def G5Perm_element1 : RubiksSuperType
   := R*U*R'*U'*R'*F*R*R*U'*R'
@@ -236,6 +240,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   abbrev conj := conjugate_formula
 
   end rubikCubeFormula
+
+  --  todo
 
   -- 说白了，只需要倒腾这20个块就能还原，不多也不少：
   -- 角块的排位：8个
@@ -275,18 +281,18 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       | _ =>
         simp only [ValidCube]
         all_goals decide
-    | mul x y hrx hry a_ih a_ih_1 =>
+    | mul a b hra hrb a_ih a_ih_1 =>
       -- 归纳证明：
       -- 对于某个项(x*y),假设Reachable (x*y),要推出（x*y） ∈ ValidCube
       -- 由于Reachable.mul的构造，Reachable (x*y)实际上还有2个前提的真命题：Reachable x , Reachable y
       -- 归纳证明提供了一个归纳假设：假设乘积项的长度小于(x*y)的都满足原命题；换句话说，对于x,y, 满足: x∈ ValidCube, y ∈ ValidCube
       -- 现在目标是：推出（x*y） ∈ ValidCube
-      have Rxy: Reachable (x*y) := Reachable.mul x y hrx hry
+      -- have Rxy: Reachable (a*b) := Reachable.mul a b hra hrb
       apply RubiksGroup.mul_mem' -- 反推一步，两个元素都是
       · exact a_ih
       · exact a_ih_1
     | inv c hc hc2 =>
-      -- hc2可以理解成：6个基本操作在上面FT都已经证明∈ ValidCube
+      -- hc2可以理解成：任意长度都已经证明∈ ValidCube
       simp only [ValidCube]
       simp only [Set.mem_setOf_eq]
       simp only [Prod.fst_inv]
@@ -297,10 +303,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       {
         simp only [ps_inv]
         simp only [map_inv]
-        simp only [Int.units_inv_eq_self]
-        simp only [ValidCube] at hc2
-        simp only [Set.mem_setOf_eq] at hc2
-        exact hc2.1
+        have h1 := hc2.1
+        rw [h1]
       }
       apply And.intro
       {
@@ -1198,7 +1202,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   lemma lemma2_003:(G2Perm).2.permute = 1 := by decide
 
-  lemma lemma2_010_UL_and_011_UF
+  lemma lemma2_011_UL_and_012_UF
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
   (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
   (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0
@@ -1258,7 +1262,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     done
 
 
-  lemma lemma2_009_FD
+  lemma lemma2_010_FD
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
   (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
   (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0
@@ -1277,7 +1281,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   Reachable h
   := by sorry --
 
-  lemma lemma2_008_FL
+  lemma lemma2_009_FL
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
   (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
   (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0
@@ -1295,7 +1299,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   Reachable h
   := by sorry --
 
-  lemma lemma2_007_LD
+  lemma lemma2_008_LD
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
   (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
   (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0
@@ -1312,7 +1316,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   Reachable h
   := by sorry --
 
-  lemma lemma2_006_LB
+  lemma lemma2_007_LB
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
   (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
   (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0
@@ -1328,7 +1332,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   Reachable h
   := by sorry --
 
-  lemma lemma2_005_BD
+  lemma lemma2_006_BD
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
   (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
   (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0
@@ -1344,7 +1348,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   Reachable h
   := by sorry --
 
-  lemma lemma2_004_UB
+  lemma lemma2_005_UB
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
   (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
   (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0
@@ -1360,7 +1364,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   Reachable h
   := by sorry--
 
-  lemma lemma2_003_RB
+  lemma lemma2_004_RB
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
   (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
   (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0 ∧ (Edge_Absolute_Orient g.2 RB_index) = 0)
@@ -1375,7 +1379,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   Reachable h
   := by sorry--
 
-  lemma lemma2_002_RD
+  lemma lemma2_003_RD
   (g : RubiksSuperType) -- RubiksSuperType即手写的H。
   (h1: Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.2.orient = 0)
   (h2: (Edge_Absolute_Orient g.2 UR_index) = 0 ∧ (Edge_Absolute_Orient g.2 FR_index) = 0 ∧ (Edge_Absolute_Orient g.2 RD_index) = 0)
@@ -2702,8 +2706,20 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 --   done
 
 
+-- 右推左部分的证明概要：
+-- valid_reachable = lemma1 + lemma2 + lemma12_condition1_restriction
+              -- + oddXoddToEvenXEven + EvenPermute_valid_isReachable
+-- 其中：
+-- lemma1←lemma1_001_UFL←lemma1_002_DFL←lemma1_003_DFR← ... ← lemma1_007_UFR_and008DBL
+-- lemma2←lemma2_001_UR←lemma2_002_FR←lemma2_003_RD← ... ← lemma2_011_UL_and_012_UF
+-- EvenPermute_valid_isReachable = lemma1 + lemma2 + lemma12_condition1_restriction
+                            --  + lemma16
+-- lemma16 = lemma14 + lemma15
+-- lemma14 = alternatingCornerPermute_eq_3Cycles_to_g_eq_3Cycles_mul_one + lemma31
+-- lemma15 = alternatingEdgePermute_eq_3Cycles_to_g_eq_3Cycles_mul_one + lemma32
 
--- 魔方第二基本定理的右推左部分：
+
+/-- 魔方第二基本定理的右推左部分：-/
 theorem valid_reachable
 : ∀x : RubiksSuperType, x ∈ ValidCube → Reachable x
 := by
