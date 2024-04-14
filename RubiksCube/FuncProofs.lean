@@ -433,40 +433,76 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         -- 这个在社区解决了等待写
         sorry
         -- done
-      by_cases ha0 : (Corner_Absolute_Orient g.1 DBL_index)=0
-      {
-        let moveAction1 : RubiksSuperType := 1
-        use moveAction1
-        simp only [moveAction1]
-        rw [mul_one]
+      -- method 1:
+      use 1
+      apply And.intro
+      {exact { left := rfl, right := { left := rfl, right := rfl } }}
+      apply And.intro
+      { simp only [mul_one]
         sorry
-        -- 这个在社区解决了等待写
-        -- done -- 很明显了,目标本身一堆rfl的，然后0那个就是展开即可
+        -- done
       }
-      { by_cases ha1: (Corner_Absolute_Orient g.1 DBL_index) = 1
-        {
-          -- 这时候要推出矛盾才行，换句话说，这种情况是不成立的；换句话说，不需要被讨论的。
-          -- 应该也是明显的，矛盾点在h1+h2可以推出Corner_Absolute_Orient g.1 DBL_index 只能= 0
-          -- Corner_Absolute_Orient g.1 DBL_index 只能= 0与ha1矛盾
-          exact (ha0 h_CAO_DBL_is0).elim
-        }
-        { have ha2: Corner_Absolute_Orient g.1 DBL_index = 2
-            := by
-            -- 怎么使用排除法呢？很明显是对的,非0，1,就是2
-            -- Kyle Miller: You can use the generalize tactic in your original goal to turn Corner_Absolute_Orient g.1 UFL_index into a, and then
-            -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
-            --   fin_cases a <;> simp at *
-            -- Kyle Miller: There's also this magic:
-            -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
-            --   match a with
-            --   | 2 => rfl
-            -- done
-            -- 这个在社区解决了等待写
-            sorry
-          -- 这里矛盾点在哪呢？一开始的分类讨论非0就能和0推出矛盾，所以不需要考虑当前情况。
-          exact (ha0 h_CAO_DBL_is0).elim
-        }
+      apply And.intro
+      {
+        simp only [mul_one]
       }
+      apply And.intro
+      apply And.intro
+      {
+        simp only [mul_one]
+      }
+      {
+        simp only [mul_one]
+      }
+      apply And.intro
+      {
+        exact h_CAO_DBL_is0
+      }
+      {
+        simp only [Solved_eq_1, solved_reachable]
+      }
+      done
+
+
+
+
+
+
+      -- method 2:
+      -- by_cases ha0 : (Corner_Absolute_Orient g.1 DBL_index)=0
+      -- {
+      --   let moveAction1 : RubiksSuperType := 1
+      --   use moveAction1
+      --   simp only [moveAction1]
+      --   rw [mul_one]
+      --   sorry
+      --   -- 这个在社区解决了等待写
+      --   -- done -- 很明显了,目标本身一堆rfl的，然后0那个就是展开即可
+      -- }
+      -- { by_cases ha1: (Corner_Absolute_Orient g.1 DBL_index) = 1
+      --   {
+      --     -- 这时候要推出矛盾才行，换句话说，这种情况是不成立的；换句话说，不需要被讨论的。
+      --     -- 应该也是明显的，矛盾点在h1+h2可以推出Corner_Absolute_Orient g.1 DBL_index 只能= 0
+      --     -- Corner_Absolute_Orient g.1 DBL_index 只能= 0与ha1矛盾
+      --     exact (ha0 h_CAO_DBL_is0).elim
+      --   }
+      --   { have ha2: Corner_Absolute_Orient g.1 DBL_index = 2
+      --       := by
+      --       -- 怎么使用排除法呢？很明显是对的,非0，1,就是2
+      --       -- Kyle Miller: You can use the generalize tactic in your original goal to turn Corner_Absolute_Orient g.1 UFL_index into a, and then
+      --       -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
+      --       --   fin_cases a <;> simp at *
+      --       -- Kyle Miller: There's also this magic:
+      --       -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
+      --       --   match a with
+      --       --   | 2 => rfl
+      --       -- done
+      --       -- 这个在社区解决了等待写
+      --       sorry
+      --     -- 这里矛盾点在哪呢？一开始的分类讨论非0就能和0推出矛盾，所以不需要考虑当前情况。
+      --     exact (ha0 h_CAO_DBL_is0).elim
+      --   }
+      -- }
       done
 
     lemma lemma1_006_DBR
@@ -882,10 +918,10 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   @[simp]
   lemma lemma1
   : ∀g : RubiksSuperType, -- RubiksSuperType即手写的H。
-  Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0 --角块方形数求和后，模3为0。
+  Finset.sum ({0,1,2,3,4,5,6,7}:Finset (Fin 8)) g.fst.orient = 0 --角块方向数求和后，模3为0。
   →
   ∃ h ∈ RubiksGroup ,
-  (g * h).fst.orient = 0 -- 棱块方向增加量归零
+  (g * h).fst.orient = 0 -- 角块方向增加量归零
   ∧
   (g).2.orient = (g * h).2.orient -- 不变
   ∧
@@ -935,15 +971,15 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
           exact h2_3_1
           done
         have h2_4 := lemma1_001_UFL (g * moveAction2) h2_3 h2
-        obtain ⟨h2_4_1,h2_4_2,h2_4_3,h2_4_4,h2_4_5,h2_4_6⟩ := h2_4
-        use (moveAction2 * h2_4_1)
+        obtain ⟨moveAction3,h2_4_2,h2_4_3,h2_4_4,h2_4_5,h2_4_6⟩ := h2_4
+        use (moveAction2 * moveAction3)
         apply And.intro
         { simp only
           -- 这个就是因为是reachable，也是validcube，所以也是属于rubiksgroup
-          have temp: Reachable (F * G1Perm * F' * h2_4_1) := by sorry
-          have temp2:(F * G1Perm * F' * h2_4_1) ∈ ValidCube
+          have temp: Reachable (F * G1Perm * F' * moveAction3) := by sorry
+          have temp2:(F * G1Perm * F' * moveAction3) ∈ ValidCube
             := by
-            apply reachable_valid (F * G1Perm * F' * h2_4_1) temp
+            apply reachable_valid (F * G1Perm * F' * moveAction3) temp
           exact temp2
         }
         apply And.intro
@@ -1231,34 +1267,65 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- 这个在社区解决了等待写
       sorry
       -- done
-    by_cases ha0 : Edge_Absolute_Orient g.2 UF_index = 0
+    use 1
+    apply And.intro
     {
-      let moveAction1 : RubiksSuperType := 1
-      use moveAction1
-      simp only [moveAction1]
-      rw [mul_one]
-      apply And.intro
-      · exact { left := rfl, right := { left := rfl, right := rfl } }
-      apply And.intro
-      · sorry
-      · sorry
-      -- done -- 很明显了,Goal很多rfl-- 这个在社区解决了等待写
+      simp only [← Solved_eq_1]
+      apply reachable_valid
+      simp only [Solved_eq_1, solved_reachable]
     }
-    { have ha2: Edge_Absolute_Orient g.2 UF_index = 1
-      := by
-        -- 怎么使用排除法呢？很明显是对的,非0，1,就是2
-        -- Kyle Miller: You can use the generalize tactic in your original goal to turn Corner_Absolute_Orient g.1 UFL_index into a, and then
-        -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
-        --   fin_cases a <;> simp at *
-        -- Kyle Miller: There's also this magic:
-        -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
-        --   match a with
-        --   | 2 => rfl
-        -- done
-        -- 这个在社区解决了等待写
-        sorry
-      exact (ha0 h_EAO_UF_is0).elim
+    apply And.intro
+    {
+      -- h2 , h_EAO_UF_is0
+      sorry
+      --done
     }
+    apply And.intro
+    {
+      simp only [mul_one]
+    }
+    apply And.intro
+    apply And.intro
+    {
+      simp only [mul_one]
+    }
+    {
+      simp only [mul_one]
+    }
+    apply And.intro
+    {exact h_EAO_UF_is0}
+    {simp only [Solved_eq_1, solved_reachable]}
+    done
+
+    -- method 2:
+    -- by_cases ha0 : Edge_Absolute_Orient g.2 UF_index = 0
+    -- {
+    --   let moveAction1 : RubiksSuperType := 1
+    --   use moveAction1
+    --   simp only [moveAction1]
+    --   rw [mul_one]
+    --   apply And.intro
+    --   · exact { left := rfl, right := { left := rfl, right := rfl } }
+    --   apply And.intro
+    --   · sorry
+    --   · sorry
+    --   -- done -- 很明显了,Goal很多rfl-- 这个在社区解决了等待写
+    -- }
+    -- { have ha2: Edge_Absolute_Orient g.2 UF_index = 1
+    --   := by
+    --     -- 怎么使用排除法呢？很明显是对的,非0，1,就是2
+    --     -- Kyle Miller: You can use the generalize tactic in your original goal to turn Corner_Absolute_Orient g.1 UFL_index into a, and then
+    --     -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
+    --     --   fin_cases a <;> simp at *
+    --     -- Kyle Miller: There's also this magic:
+    --     -- example (a : Fin 3) (h0 : ¬ a = 0) (h1 : ¬ a = 1) : a = 2 := by
+    --     --   match a with
+    --     --   | 2 => rfl
+    --     -- done
+    --     -- 这个在社区解决了等待写
+    --     sorry
+    --   exact (ha0 h_EAO_UF_is0).elim
+    -- }
     done
 
 
@@ -1593,7 +1660,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   lemma lemma2
   : ∀g : RubiksSuperType,
   Finset.sum ({0,1,2,3,4,5,6,7,8,9,10,11}:Finset (Fin 12)) g.snd.orient = 0
+
   →
+
   ∃ h ∈ RubiksGroup ,
   (g * h).snd.orient = 0
   ∧
@@ -2295,7 +2364,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   /-- 1.（奇X奇) 2.(偶X偶）-/
   lemma lemma12_condition1_restriction
   (x:RubiksSuperType)
-  (h1:x ∈ ValidCube)
+  -- (h1:x ∈ ValidCube)
   :sign x.1.permute = sign x.2.permute
   ↔
   (sign x.1.permute = -1 ∧ -1 = sign x.2.permute)
@@ -2358,14 +2427,30 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     use (rubiksList.prod)⁻¹
     have rubiksListElement_3items_is0or1 :∀b ∈ rubiksList, b.1.orient=0 ∧ b.2.permute=1 ∧ b.2.orient=0
       := by
-      simp only [Prod.forall,h3_6]
-      -- 很明显了。
-      sorry
+      simp only [Prod.forall]
+      simp only [h3_6]
+      intro i1 i2 i3
+      simp at i3
+      simp only [permFin8_to_RubiksSuperType] at i3
+      simp at i3
+      obtain ⟨i4,i5,i6,i7⟩ := i3
+      apply And.intro
+      { rw [← i6]}
+      apply And.intro
+      { rw [← i7]}
+      { rw [← i7]}
     have rubiksListElement_permuteIsThreeCycle :∀b ∈ rubiksList, IsThreeCycle b.1.permute
       := by
-      -- h2_2
-      -- 很明显了。
-      sorry
+      simp only [Prod.forall]
+      simp only [h3_6]
+      intro i1 i2 i3
+      simp at i3
+      simp only [permFin8_to_RubiksSuperType] at i3
+      simp at i3
+      obtain ⟨i4,i5,i6,i7⟩ := i3
+      rw [← i6]
+      simp
+      exact h2_2 i4 i5
     apply And.intro
     · have rubiksListElement_isReachable: ∀b ∈ rubiksList, Reachable b
         := by
@@ -2475,7 +2560,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     have cornerPermuteTo1 := lemma14 g h1
     obtain ⟨c1,c2,c3,c4,c5,c6⟩ := cornerPermuteTo1
     have EdgePermute_remains_in_aGroup: (g * c1).2.permute ∈ alternatingGroup (Fin 12)
-      := by sorry -- ???
+      := by
+      rw [c6]
+      exact h2
     have edgePermuteTo1 := lemma15 (g * c1) EdgePermute_remains_in_aGroup
     obtain ⟨e1,e2,e3,e4,e5,e6⟩ := edgePermuteTo1
     use (c1 * e1)
@@ -2485,11 +2572,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       {exact e2}
     apply And.intro
     · apply And.intro
-      · simp only [← mul_assoc,e6,c3]-- e6 c3
-      · simp only [← mul_assoc,e3] -- e3
+      · rw [← mul_assoc,e6,c3]-- e6 c3
+      · rw [← mul_assoc,e3] -- e3
     · exact
-      {left := by simp only [← mul_assoc,e4,c4]
-       right := by simp only [← mul_assoc,e5,c5]}
+      {left := by rw [← mul_assoc,e4,c4]
+       right := by rw [← mul_assoc,e5,c5]}
     done
 
   -- 化归思想，所有lemma12_condition1_restriction中的情况1可以通过魔方群操作变成情况2。
@@ -2501,7 +2588,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
   ∃ (g: RubiksSuperType), -- 要找到一个定理是permute作用一个2轮换后，奇偶性会变换1次的。,举例操作是g5
     Reachable g
     ∧
-    (sign (g * x).1.permute = 1 ∧ 1 = sign (g * x).2.permute)
+    (sign (x * g).1.permute = 1 ∧ 1 = sign (x * g).2.permute)
   := by
     obtain ⟨h3_1,h3_2⟩ := h3
     use (G5Perm)
@@ -2517,17 +2604,19 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       -- 就是这个：Equiv.Perm.sign (Equiv.swap x y) = -1
       -- G5Perm.1.permute 是一个swap
       -- G5Perm.2.permute 是一个swap
-      simp only [Prod.fst_mul, PieceState.mul_def, Prod.snd_mul]
+      simp only [Prod.fst_mul]
+      simp only [PieceState.mul_def]
+      simp only [Prod.snd_mul]
       apply And.intro
       · simp only [ps_mul] -- G5Perm.1.permute算出来。好像也不用。
         simp only [map_mul]
         rw [h3_1]
-        simp only [neg_mul, one_mul]
+        -- simp only [neg_mul, one_mul]
         decide
-      · simp only [ps_mul] -- G5Perm.1.permute算出来。好像也不用。
+      · simp only [PieceState.mul_def]
+        simp only [ps_mul] -- G5Perm.1.permute算出来。好像也不用。
         simp only [map_mul]
         rw [h3_2.symm]
-        simp only [neg_mul, one_mul]
         decide
     done
 
@@ -2620,24 +2709,11 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       apply And.intro
       {exact h3_2_7}
       {exact h3_2_8}
-    have h105 (y : RubiksSuperType):
-    (Reachable y) ∧ (x * y = Solved)
-    → Reachable x
-    := by
-      intro hs
-      have h105_1 : x = Solved * y⁻¹
-        := by
-        rw [hs.2.symm]
-        rw [mul_assoc]
-        simp only [mul_right_inv, mul_one]
-      rw [h105_1]
-      apply Reachable.mul
-      · exact Reachable.Solved
-      · apply Reachable.inv
-        exact hs.1
-    apply h105 y
-    exact { left := h101, right := h102 }
-    exact hvx
+    have Reachable_xy: Reachable (x*y)
+      := by
+      rw [h102]
+      exact Reachable.Solved
+    apply Reachable.split_fst x y Reachable_xy h101
     done
 
 -- -- 魔方第二基本定理的左推右部分：done
@@ -2738,7 +2814,7 @@ theorem valid_reachable
   rw [h1_5] at h2_2
   have h2 := lemma2 (x * lemma1Move) h2_2
   obtain ⟨lemma2Move,h2_4,h2_5,h2_6,h2_7,h2_8⟩ := h2
-  have h2_9 := h1_4
+  have h2_9 := currStat_satisfy
   rw [h2_6] at h2_9
   let currStat := x * lemma1Move * lemma2Move
   let currStat_satisfy: ((x * lemma1Move * lemma2Move).2.orient = 0) ∧ ((x * lemma1Move * lemma2Move).1.orient = 0)
@@ -2759,13 +2835,13 @@ theorem valid_reachable
     -- 新状态会属于新的状态集合(偶X偶），归化成inr
     have h3_1_1 := oddXoddToEvenXEven x h3_1
     obtain ⟨OddToEvenMove,od2,od3,od4⟩ := h3_1_1
-    have h3_1_2_1: OddToEvenMove * x ∈ ValidCube := by
+    have h3_1_2_1: x * OddToEvenMove  ∈ ValidCube := by
       apply RubiksGroup.mul_mem'
-      · exact reachable_valid OddToEvenMove od2
       · exact hvx
-    have h3_1_2 := EvenPermute_valid_isReachable (OddToEvenMove * x)
-      {left:=od3,right:=od4} h3_1_2_1
-    apply Reachable.split_snd
+      · exact reachable_valid OddToEvenMove od2
+    have h3_1_2: Reachable (x * OddToEvenMove) := EvenPermute_valid_isReachable (x * OddToEvenMove)
+      {left:= od3 ,right:=od4} h3_1_2_1
+    apply Reachable.split_fst
     · exact h3_1_2
     · exact od2
   | inr h3_2 =>
@@ -2773,7 +2849,6 @@ theorem valid_reachable
     · exact h3_2
     · exact hvx
     done
-  exact hvx
   done
 
 
