@@ -2007,13 +2007,26 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     simp only [VariantFaceTurn_B_List,VariantFaceTurn_B]
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul]
     decide
-  lemma lemma31_003 : Solved =  ({ permute := List.formPerm ([1,3,5]:(List (Fin 8))), orient := 0 }, { permute := 1, orient := 0 }) *
+  lemma lemma31_003' : Solved =  ({ permute := List.formPerm ([1,3,5]:(List (Fin 8))), orient := 0 }, { permute := 1, orient := 0 }) *
     (G4Perm*(conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹
     := by
     simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
     simp only [conjugate_formula,G4Perm]
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
     decide
+
+  #eval (G4Perm*(conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹ = (conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹
+
+  lemma lemma31_003 : Solved =  ({ permute := List.formPerm ([1,3,5]:(List (Fin 8))), orient := 0 }, { permute := 1, orient := 0 }) *
+    (conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹
+    := by
+    simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+    simp only [conjugate_formula,G4Perm]
+    simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
+    decide
+
+    -- conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹
+
 
 
   -- 思考：纯3循环就是偶置换说的全体3循环吗？是的，因为魔方还原到目前状态也具有方向数全0的属性，也是一个“纯”的偶置换。
@@ -2112,9 +2125,13 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         simp only [← h2,← h3,← h4]
         --很明显了
         sorry
-      let solution := (B*B*(VariantFaceTurn_B_List [R',F',F',F',R',B,B,R',R',R',F',R',B,B,R',R'])*B*B)⁻¹
+      let solution := (B*B*(VariantFaceTurn_B_List G4Perm_List)*B*B)⁻¹
+      -- (2,4,3)
+      -- (1,4,2)
+      -- (1,7,2)
       have Solution_mul_rubiksp2_isOne: rubiks_p2 * solution = 1
         := by
+        simp only [G4Perm_List]
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
         rw [← Solved_eq_1,lemma31_002]
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
@@ -2151,7 +2168,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         -- simp [ha0,p3,h2,h3,h4]
         --很明显了
         sorry
-      let solution := (G4Perm*(conjugate_formula (D'*L*L) G4Perm )⁻¹)⁻¹
+      let solution := (conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹
+      -- method1: (G4Perm*(conjugate_formula (D'*L*L) G4Perm )⁻¹)⁻¹
+      -- method2: (conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹
       have Solution_mul_rubiksp3_isOne: rubiks_p3 * solution = 1
         := by
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
@@ -2170,6 +2189,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     }
     sorry
 
+  -- #eval G4Perm*(conjugate_formula (D'*L*L) G4Perm)⁻¹ = conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹
+  -- #eval conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹
 
   -- 游戏演示
   -- #eval L2*F'*L2
@@ -2198,6 +2219,8 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
     decide
 
+#eval conjugate_formula (U*L2*U'*L2) (conjugate_formula (F') G3Perm)
+
 
   /-- 如果状态x的棱块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
   lemma lemma32
@@ -2211,7 +2234,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     -- 如何分类220种情况？
     -- G3Perm效果： σ(g3) =(1,2,4): 逆时针
     have x_eq_Solvedx : x = Solved * x := by exact self_eq_mul_left.mpr rfl
-    let p1 := List.formPerm ([0,3,1]:(List (Fin 12))) -- (1,4,2) == 这里的[0,3,1]
+    let p1 := List.formPerm ([0,3,1]:(List (Fin 12))) -- (1,4,2) == 这里的[0,3,1]  {0=>3,3=>1,1=>0}
     let p2 := List.formPerm ([0,1,5]:(List (Fin 12))) -- {1,2,6} == 这里的[0,1,5]
     let p3 := List.formPerm ([0,6,11]:(List (Fin 12))) -- {1,7,12} == 这里的[0,6,11]
     by_cases ha0:x.2.permute = p1
@@ -2239,19 +2262,29 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       let solution := (G3Perm)
       have Solution_mul_rubiksp1_isOne: rubiks_p1 * solution = 1
         := by
-        simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+        simp only [rubiks_p1]
+        simp only [List.formPerm_cons_cons]
+        -- [0,3,1] ↔ {0=>3,3=>1,1=>0} ↔  (a→c→b)
+        -- swap 0 3 ↔ {0=>3,3=>0} ↔ (a→ c→ a)
+        -- [3,1] ↔ {3=>1,1=>3,0=>0} ↔ (b→ c→ b)
+        simp only [List.formPerm_singleton]
+        simp only [mul_one]
         rw [← Solved_eq_1,lemma32_001]
-        simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
+        simp only [List.formPerm_cons_cons]
+        simp only [List.formPerm_singleton]
+        simp only [mul_one]
       rw [x_eq_Solvedx]
       apply Reachable.mul
       · exact Reachable.Solved
       · rw [x_eq_rubiks_p1]
         have R_rubiksp1_mul_Solution: Reachable (rubiks_p1 * solution) := by
-          rw [Solution_mul_rubiksp1_isOne];exact Reachable.Solved
+          rw [Solution_mul_rubiksp1_isOne];
+          exact Reachable.Solved
         have testaaa1 := Reachable.split_fst (rubiks_p1) (solution) R_rubiksp1_mul_Solution
         apply testaaa1
         sorry
-      --   -- -- 很明显了
+        --   -- -- 很明显了
+        -- done
     }
     by_cases ha2:x.2.permute = p2
       -- 执行：
@@ -2280,7 +2313,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
       --           σ(g3) =(1,2,4)
       -- 找一个替代解法，先搞一个(2,4,6): F' g3 F : F' R U' R U R U R U' R' U' R R F
       -- 舞台上必须站着1
-      -- 然后：:U L L U' L L (2,4,6) L L U L L U'
+      -- 然后：:U L L U' L L (2,4,6) L L U L L U' = (1,2,6)
       have Solution_mul_rubiksp2_isOne: rubiks_p2 * solution = 1
         := by
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
@@ -2295,7 +2328,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         have testaaa1 := Reachable.split_fst (rubiks_p2) (solution) R_rubiksp2_mul_Solution
         apply testaaa1
         sorry
-      --   -- -- 很明显了
+        --   -- -- 很明显了
     }
     by_cases ha3:x.2.permute = p3
       -- 执行：
@@ -2337,7 +2370,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         have testaaa1 := Reachable.split_fst (rubiks_p3) (solution) R_rubiksp3_mul_Solution
         apply testaaa1
         sorry
-      --   -- -- 很明显了
+        --   -- -- 很明显了
     }
     sorry
 
@@ -2458,7 +2491,7 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         have app1 := rubiksListElement_3items_is0or1 b binL
         have app2 := rubiksListElement_permuteIsThreeCycle b binL
         apply lemma31
-        · exact rubiksListElement_permuteIsThreeCycle b binL
+        · exact app2
         simp only [app1];simp only [app1];simp only [app1]
       apply Reachable.inv
       -- simp [Reachable.mul,rubiksListElement_isReachable]

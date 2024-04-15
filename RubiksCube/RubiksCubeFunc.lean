@@ -61,6 +61,7 @@ section RubiksSuperGroup
       -- 2.也无法处理相等的判断：if c = Solved then "Solved"： failed to synthesize instance Decidable (c = Solved)
     deriving Repr, DecidableEq
 
+  -- #eval ((swap 1 2):Perm (Fin 8)) -- ![0, 2, 1, 3, 4, 5, 6, 7]
   -- 举例：
   -- def testP1: Perm (Fin 8) := List.formPerm ([1,2,3])
   -- def testP2: Perm (Fin 8) := List.formPerm ([2,3,4])
