@@ -58,13 +58,13 @@ def solve_Edge_Permute :=
 * (conj (D'*L2) G3Perm)
 )⁻¹
 
--- #eval toString$
---   (
---   (conjList [U',L,L,U,B'] (V_L_List G3Perm_List))
---   ++ (conjList [F] G3Perm_List.invert)
---   ++ (conjList [F,F] (V_R_List G3Perm_List).invert)
---   ++ (conjList [D',L,L] G3Perm_List)
---   ).invert
+#eval toString$
+  (
+  (conjList [U',L,L,U,B'] (V_L_List G3Perm_List))
+  ++ (conjList [F] G3Perm_List.invert)
+  ++ (conjList [F,F] (V_R_List G3Perm_List).invert)
+  ++ (conjList [D',L,L] G3Perm_List)
+  ).invert
 
 
 def solve_Corner_Orient:=

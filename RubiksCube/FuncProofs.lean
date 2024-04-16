@@ -92,8 +92,14 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   section rubikCubeFormula
 
+
+
+  -- #eval R' * D * D * R -- 2↔8 5↔6
+  -- #eval B' * U * U * B -- 2↔8 1↔4
+
     def G1Perm_element : RubiksSuperType
     := R' * D * D * R * B' * U * U * B -- 仿佛是两个共轭的交换子，先不深究。
+    -- 1↔4 5↔6 2,3,7,8不变
   /-- g1:
   方向：UFR和DBL以外的块的方向不变。
   位置：UFR和DBL以外的块的位置不变。
@@ -2015,10 +2021,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
     decide
 
-  #eval (G4Perm*(conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹ = (conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹
+  -- #eval (G4Perm*(conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹ = (conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹
+
 
   lemma lemma31_003 : Solved =  ({ permute := List.formPerm ([1,3,5]:(List (Fin 8))), orient := 0 }, { permute := 1, orient := 0 }) *
-    (conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹
+    -- (conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹
+    (conj (D2*B2*D2*L2) G4Perm)⁻¹
     := by
     simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
     simp only [conjugate_formula,G4Perm]
@@ -2168,9 +2176,12 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         -- simp [ha0,p3,h2,h3,h4]
         --很明显了
         sorry
-      let solution := (conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹
+      let solution := (conj (D2*B2*D2*L2) G4Perm)⁻¹
       -- method1: (G4Perm*(conjugate_formula (D'*L*L) G4Perm )⁻¹)⁻¹
       -- method2: (conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹)⁻¹
+      -- method3: (conj (D2*B2*D2*L2) G4Perm)⁻¹
+      -- (2,4,3)
+      -- (2,4,6)
       have Solution_mul_rubiksp3_isOne: rubiks_p3 * solution = 1
         := by
         simp only [List.formPerm_cons_cons, List.formPerm_singleton, mul_one]
@@ -2191,6 +2202,9 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
 
   -- #eval G4Perm*(conjugate_formula (D'*L*L) G4Perm)⁻¹ = conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹
   -- #eval conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹
+
+  -- #eval conj (U*L2*U*L2*U') (conjugate_formula (D'*L*L) G4Perm)⁻¹ = conj (D2*B2*D2*L2) G4Perm
+  -- #eval conj (D2*B2*D2*L2) G4Perm
 
   -- 游戏演示
   -- #eval L2*F'*L2
@@ -2218,8 +2232,6 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
     simp only [G3Perm,conjugate_formula]
     simp only [Solved_iff, Prod.fst_mul, PieceState.mul_def, ps_mul_assoc, Prod.snd_mul, ps_one_mul] -- ***这一行很重要，使得decide成为了可能。
     decide
-
-#eval conjugate_formula (U*L2*U'*L2) (conjugate_formula (F') G3Perm)
 
 
   /-- 如果状态x的棱块的位置是一个三循环（全体方向数已还原,棱块位置已还原），则，存在G中复合操作g，使得（x*g）的位置是复原状态。 -/
@@ -2373,6 +2385,29 @@ but I am confident that this is the case (assuming no bugs in my concretely defi
         --   -- -- 很明显了
     }
     sorry
+
+    -- #eval (B*B*(VariantFaceTurn_B_List G4Perm_List)*B*B)⁻¹
+      -- (2,4,3)
+      -- (1,4,2)
+      -- (1,7,2)
+    -- #eval conj (D2*B2*D2*L2) G4Perm
+    -- method3: (conj (D2*B2*D2*L2) G4Perm)⁻¹
+        -- (2,4,3)
+        -- (2,4,6)
+    -- #eval conjugate_formula (U*L2*U'*L2) (conjugate_formula (F') G3Perm) = (conj (F*D'*L2*F') G3Perm)⁻¹  -- (1,6,2)
+    -- #eval (conj (F*D'*L2*F') G3Perm)⁻¹ --
+    -- conjugate_formula (U*L2*U'*L2) (conjugate_formula (F') G3Perm)
+        -- g3:R U' R U R U R U' R' U' R R
+        --           σ(g3) =(1,2,4)
+        -- 找一个替代解法，先搞一个(2,4,6): F' g3 F : F' R U' R U R U R U' R' U' R R F
+        -- 舞台上必须站着1
+        -- 然后：:U L L U' L L (2,4,6) L L U L L U' = (1,2,6)
+    -- #eval conj (U2*L2*U2) (conj B (VariantFaceTurn_R_List G3Perm_List))
+    -- (conjugate_formula (U2*L2*U2) (conjugate_formula B (VariantFaceTurn_R_List G3Perm_List)))
+        -- 换一种解法：现有(1,2,3) : G3Perm 的R变式。VariantFaceTurn_R_List G3Perm_List
+        -- 然后得到：(1,2,7): B (1,2,3) B' : B R R U' F F R R F F U U F F R R F F U' R R B'
+        -- 然后得到：（1，7，12）：U2 L2 U2 (1,2,7) U2 L2 U2 = (1,7,12) : 替换成功！
+
 
 
   -- -- 检验一下
