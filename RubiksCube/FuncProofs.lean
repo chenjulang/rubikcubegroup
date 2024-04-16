@@ -3018,163 +3018,163 @@ end RubikCube_BasicRule_2
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
--- section ThistlethwaiteAlgorithm
+section ThistlethwaiteAlgorithm
 
--- ------ 以下是TW算法部分，(因为新开一个文件有点问题，先写在同一个文件吧)：
--- ------ 每一个证明的右推左部分，其实就是还原的算法！！！
--- ------
--- ------
--- ------
--- -- 三个降群的充要条件的证明
--- -- 1.∀g∈ G,
--- -- g∈G1 (G1 = <L^2,R^2,F,B,U,D>)
--- -- ↔
--- -- wi(g)=0 , ∀i , 1<=i<=12
--- def TWGroup1 :
---   Set RubiksSuperType
---   :=
---   -- 这样的一个集合：所有满足后面这些条件的c
---   {
---     c |
---     c ∈ RubiksGroup
---     ∧
---     c.2.orient = 0
---   }
+------ 以下是TW算法部分，(因为新开一个文件有点问题，先写在同一个文件吧)：
+------ 每一个证明的右推左部分，其实就是还原的算法！！！
+------
+------
+------
+-- 三个降群的充要条件的证明
+-- 1.∀g∈ G,
+-- g∈G1 (G1 = <L^2,R^2,F,B,U,D>)
+-- ↔
+-- wi(g)=0 , ∀i , 1<=i<=12
+def TWGroup1 :
+  Set RubiksSuperType
+  :=
+  -- 这样的一个集合：所有满足后面这些条件的c
+  {
+    c |
+    c ∈ RubiksGroup
+    ∧
+    c.2.orient = 0
+  }
 
--- instance TWGroup1_instance : Subgroup RubiksSuperType := {
--- -- 如何写成这样的子群的子群呢 ? instance TWGroup1_instance : Subgroup RubiksGroup := {
---     carrier := TWGroup1
---     mul_mem' := sorry -- 封闭性质
---     one_mem' := sorry -- 单位1元素
---     inv_mem' := sorry -- 逆元素
---     -- 结合律不用证明，父群已经证明。
---     -- 左乘1=本身不用证明
---     -- 右乘1=本身不用证明
---     -- 左乘逆=1不用证明
---     -- 右乘逆=1不用证明
+instance TWGroup1_instance : Subgroup RubiksSuperType := {
+-- 如何写成这样的子群的子群呢 ? instance TWGroup1_instance : Subgroup RubiksGroup := {
+    carrier := TWGroup1
+    mul_mem' := sorry -- 封闭性质
+    one_mem' := sorry -- 单位1元素
+    inv_mem' := sorry -- 逆元素
+    -- 结合律不用证明，父群已经证明。
+    -- 左乘1=本身不用证明
+    -- 右乘1=本身不用证明
+    -- 左乘逆=1不用证明
+    -- 右乘逆=1不用证明
+}
+
+lemma TWGroup1_isSubGroupOf_RubiksGroup :
+TWGroup1 ⊂ RubiksGroup := by sorry
+
+theorem TWAlgorithm_TWGroup1_iff
+: ∀x : RubiksSuperType, Reachable_TWGroup1 x ↔ x ∈ TWGroup1
+:= by sorry
+  -- 左推右之前没用归纳法，用的是定义的cases就可以了，一样的意思。
+
+-- 2.∀g∈ G1,
+-- g∈G2 (G2 = <L^2,R^2,F^2,B^2,U,D>)
+-- ↔
+-- {
+--     1. vi(g)=0 , ∀i , 1<=i<=8
+--     2. 棱块有1个保持轨道:意思是，σ(g)作用到 {5,6,7,8}这4个棱块后，这4个棱块仍然全都在位置{5,6,7,8}上，
+--         换句话说，这4个棱块经过g变换后保持在（上下）中层里。
 -- }
+def remainsEdgeOrbit :RubiksSuperType → (List ℕ) → Prop := sorry
+def remainsCornerOrbit :RubiksSuperType → (List ℕ) → Prop := sorry
 
--- lemma TWGroup1_isSubGroupOf_RubiksGroup :
--- TWGroup1 ⊂ RubiksGroup := by sorry
-
--- theorem TWAlgorithm_TWGroup1_iff
--- : ∀x : RubiksSuperType, Reachable_TWGroup1 x ↔ x ∈ TWGroup1
--- := by sorry
---   -- 左推右之前没用归纳法，用的是定义的cases就可以了，一样的意思。
-
--- -- 2.∀g∈ G1,
--- -- g∈G2 (G2 = <L^2,R^2,F^2,B^2,U,D>)
--- -- ↔
--- -- {
--- --     1. vi(g)=0 , ∀i , 1<=i<=8
--- --     2. 棱块有1个保持轨道:意思是，σ(g)作用到 {5,6,7,8}这4个棱块后，这4个棱块仍然全都在位置{5,6,7,8}上，
--- --         换句话说，这4个棱块经过g变换后保持在（上下）中层里。
--- -- }
--- def remainsEdgeOrbit :RubiksSuperType → (List ℕ) → Prop := sorry
--- def remainsCornerOrbit :RubiksSuperType → (List ℕ) → Prop := sorry
-
--- /-- 这里先特指白色面中，和白色不一样的角块的（白色的）个数Count，Count是偶数个。
---     -- 集合{1-8}（根据c.1.permute来分析）中,位于前4个位置中，数一下1-4的个数，这个个数为Even。-/
--- def CornerUpWrongColorCountEven :RubiksSuperType → Prop := sorry
+/-- 这里先特指白色面中，和白色不一样的角块的（白色的）个数Count，Count是偶数个。
+    -- 集合{1-8}（根据c.1.permute来分析）中,位于前4个位置中，数一下1-4的个数，这个个数为Even。-/
+def CornerUpWrongColorCountEven :RubiksSuperType → Prop := sorry
 
 
--- def TWGroup2 :
---   Set RubiksSuperType
---   :=
---   -- 这样的一个集合：所有满足后面这些条件的c
---   {
---     c |
---     c ∈ RubiksGroup
---     ∧
---     c.2.orient = 0
---     ∧
---     c.1.orient = 0
---     ∧
---     remainsEdgeOrbit c {4,5,6,7}
---   }
+def TWGroup2 :
+  Set RubiksSuperType
+  :=
+  -- 这样的一个集合：所有满足后面这些条件的c
+  {
+    c |
+    c ∈ RubiksGroup
+    ∧
+    c.2.orient = 0
+    ∧
+    c.1.orient = 0
+    ∧
+    remainsEdgeOrbit c {4,5,6,7}
+  }
 
--- instance TWGroup2_instance : Subgroup RubiksSuperType := {
---     carrier := TWGroup2
---     mul_mem' := sorry -- 封闭性质
---     one_mem' := sorry -- 单位1元素
---     inv_mem' := sorry -- 逆元素
---     -- 结合律不用证明，父群已经证明。
---     -- 左乘1=本身不用证明
---     -- 右乘1=本身不用证明
---     -- 左乘逆=1不用证明
---     -- 右乘逆=1不用证明
+instance TWGroup2_instance : Subgroup RubiksSuperType := {
+    carrier := TWGroup2
+    mul_mem' := sorry -- 封闭性质
+    one_mem' := sorry -- 单位1元素
+    inv_mem' := sorry -- 逆元素
+    -- 结合律不用证明，父群已经证明。
+    -- 左乘1=本身不用证明
+    -- 右乘1=本身不用证明
+    -- 左乘逆=1不用证明
+    -- 右乘逆=1不用证明
+}
+
+lemma TWGroup2_isSubGroupOf_TWGroup1 :
+TWGroup2 ⊂ TWGroup1 := by sorry
+
+theorem TWAlgorithm_TWGroup2_iff
+: ∀x : RubiksSuperType, Reachable_TWGroup2 x ↔ x ∈ TWGroup2
+:= by sorry
+
+-- 3.∀g∈ G2,
+-- g∈ G3 (<L^2,R^2,F^2,B^2,U^2,D^2>)
+-- ↔
+-- {
+--     1.棱块有2个新的保持轨道：{1,3,9,11},{2,4,10,12}，当然也有G2就有的{5,6,7,8}
+--     2.角块有2个保持轨道：{1,3,6,8},{2,4,5,7}
+--     3.与这个白色面心块颜色不一样的角块的个数,记为Count,Count是偶数。这里先特指白色面中，和白色不一样的角块的（白色的）个数Count，Count是偶数个。
 -- }
+  -- 这个先忽略：有一个额外的左推右的可以证明：
+  --    (4.{1,3,6,8},{2,4,5,7}这两个角块的轨道中，不包含三轮换。
+  --     换句话说，g的效果不能产生这些轨道内的3循环。
+  --      换句话说，g不是单纯的棱块3循环（不变全体块的方向数，不变角块的位置）)
 
--- lemma TWGroup2_isSubGroupOf_TWGroup1 :
--- TWGroup2 ⊂ TWGroup1 := by sorry
+def TWGroup3 :
+  Set RubiksSuperType
+  :=
+  -- 这样的一个集合：所有满足后面这些条件的c
+  {
+    c |
+    c ∈ RubiksGroup
+    ∧
+    c.2.orient = 0
+    ∧
+    c.1.orient = 0
+    ∧
+    remainsEdgeOrbit c {4,5,6,7} ∧ remainsEdgeOrbit c {0,2,8,10} ∧ remainsEdgeOrbit c {1,3,9,11}
+    ∧
+    remainsCornerOrbit c {0,2,5,7} ∧ remainsCornerOrbit c {1,3,4,6}
+    ∧
+    CornerUpWrongColorCountEven c
+  }
 
--- theorem TWAlgorithm_TWGroup2_iff
--- : ∀x : RubiksSuperType, Reachable_TWGroup2 x ↔ x ∈ TWGroup2
--- := by sorry
+instance TWGroup3_instance : Subgroup RubiksSuperType := {
+    carrier := TWGroup3
+    mul_mem' := sorry -- 封闭性质
+    one_mem' := sorry -- 单位1元素
+    inv_mem' := sorry -- 逆元素
+    -- 结合律不用证明，父群已经证明。
+    -- 左乘1=本身不用证明
+    -- 右乘1=本身不用证明
+    -- 左乘逆=1不用证明
+    -- 右乘逆=1不用证明
+}
 
--- -- 3.∀g∈ G2,
--- -- g∈ G3 (<L^2,R^2,F^2,B^2,U^2,D^2>)
--- -- ↔
--- -- {
--- --     1.棱块有2个新的保持轨道：{1,3,9,11},{2,4,10,12}，当然也有G2就有的{5,6,7,8}
--- --     2.角块有2个保持轨道：{1,3,6,8},{2,4,5,7}
--- --     3.与这个白色面心块颜色不一样的角块的个数,记为Count,Count是偶数。这里先特指白色面中，和白色不一样的角块的（白色的）个数Count，Count是偶数个。
--- -- }
---   -- 这个先忽略：有一个额外的左推右的可以证明：
---   --    (4.{1,3,6,8},{2,4,5,7}这两个角块的轨道中，不包含三轮换。
---   --     换句话说，g的效果不能产生这些轨道内的3循环。
---   --      换句话说，g不是单纯的棱块3循环（不变全体块的方向数，不变角块的位置）)
+lemma TWGroup3_isSubGroupOf_TWGroup2 :
+TWGroup3 ⊂ TWGroup2 := by sorry
 
--- def TWGroup3 :
---   Set RubiksSuperType
---   :=
---   -- 这样的一个集合：所有满足后面这些条件的c
---   {
---     c |
---     c ∈ RubiksGroup
---     ∧
---     c.2.orient = 0
---     ∧
---     c.1.orient = 0
---     ∧
---     remainsEdgeOrbit c {4,5,6,7} ∧ remainsEdgeOrbit c {0,2,8,10} ∧ remainsEdgeOrbit c {1,3,9,11}
---     ∧
---     remainsCornerOrbit c {0,2,5,7} ∧ remainsCornerOrbit c {1,3,4,6}
---     ∧
---     CornerUpWrongColorCountEven c
---   }
+theorem TWAlgorithm_TWGroup3_iff
+: ∀x : RubiksSuperType, Reachable_TWGroup3 x ↔ x ∈ TWGroup3
+:= by sorry
 
--- instance TWGroup3_instance : Subgroup RubiksSuperType := {
---     carrier := TWGroup3
---     mul_mem' := sorry -- 封闭性质
---     one_mem' := sorry -- 单位1元素
---     inv_mem' := sorry -- 逆元素
---     -- 结合律不用证明，父群已经证明。
---     -- 左乘1=本身不用证明
---     -- 右乘1=本身不用证明
---     -- 左乘逆=1不用证明
---     -- 右乘逆=1不用证明
--- }
+def idSuperTypeFunc : RubiksSuperType → RubiksSuperType :=
+  fun x => x
 
--- lemma TWGroup3_isSubGroupOf_TWGroup2 :
--- TWGroup3 ⊂ TWGroup2 := by sorry
-
--- theorem TWAlgorithm_TWGroup3_iff
--- : ∀x : RubiksSuperType, Reachable_TWGroup3 x ↔ x ∈ TWGroup3
--- := by sorry
-
--- def idSuperTypeFunc : RubiksSuperType → RubiksSuperType :=
---   fun x => x
-
--- -- 存在一个算法（比如ThistlethwaiteAlgorithm）的步数小于等于52步。
--- theorem ActionsLessThan52 [CommMonoid RubiksSuperType]:
--- ∀ g :RubiksSuperType,
--- ∃ pset : (Finset RubiksSuperType) ,
--- -- pset.prod idSuperTypeFunc
--- -- (pset.1.map idSuperTypeFunc)
--- pset.prod idSuperTypeFunc = Solved
--- ∧ (Multiset.toList pset.1).length <= 52
--- := by sorry
+-- 存在一个算法（比如ThistlethwaiteAlgorithm）的步数小于等于52步。
+theorem ActionsLessThan52 [CommMonoid RubiksSuperType]:
+∀ g :RubiksSuperType,
+∃ pset : (Finset RubiksSuperType) ,
+-- pset.prod idSuperTypeFunc
+-- (pset.1.map idSuperTypeFunc)
+pset.prod idSuperTypeFunc = Solved
+∧ (Multiset.toList pset.1).length <= 52
+:= by sorry
 
 
--- end ThistlethwaiteAlgorithm
+end ThistlethwaiteAlgorithm
